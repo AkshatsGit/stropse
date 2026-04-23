@@ -1,122 +1,88 @@
 import React from 'react';
 import './PlayerCard.css';
 
-const GAME_CONFIGS = {
-  BGMI: {
-    color: '#FFD700',
-    bg: 'linear-gradient(135deg, rgba(20,15,0,1) 0%, rgba(5,5,5,1) 40%, rgba(40,30,0,1) 100%)',
-    accent: '#FFD700',
-    label: 'BATTLE ROYALE',
-    icon: '🔫',
-    style: 'aggressive',
-  },
-  'Free Fire': {
-    color: '#FF3300',
-    bg: 'linear-gradient(135deg, rgba(30,5,0,1) 0%, rgba(5,5,5,1) 40%, rgba(40,10,0,1) 100%)',
-    accent: '#FF3300',
-    label: 'SURVIVAL',
-    icon: '🔥',
-    style: 'aggressive',
-  },
-  Chess: {
-    color: '#00D0FF',
-    bg: 'linear-gradient(135deg, rgba(0,10,25,1) 0%, rgba(5,5,5,1) 40%, rgba(0,25,50,1) 100%)',
-    accent: '#00D0FF',
-    label: 'STRATEGY',
-    icon: '♟️',
-    style: 'elegant',
-  },
-  Sudoku: {
-    color: '#00FF66',
-    bg: 'linear-gradient(135deg, rgba(0,20,5,1) 0%, rgba(5,5,5,1) 40%, rgba(0,40,10,1) 100%)',
-    accent: '#00FF66',
-    label: 'PUZZLE',
-    icon: '🔢',
-    style: 'elegant',
-  },
-};
-
-export default function PlayerCard({ profile, compact = false }) {
-  const config = GAME_CONFIGS[profile.gameType] || GAME_CONFIGS.BGMI;
-  const isAggressive = config.style === 'aggressive';
-
+export function PlayerCard({ profile }) {
+  const gameKey = profile.gameType || 'BGMI';
+  
   return (
-    <div
-      className={`player-card player-card-${config.style} ${compact ? 'player-card-compact' : ''}`}
-      style={{
-        '--card-color': config.color,
-        '--card-accent': config.accent,
-        background: config.bg,
-      }}
-    >
-      {/* Scanline Effect */}
-      <div className="pc-scanlines" />
+    <div className="player-card">
+      <div className="pc-frame" />
+      <div className="pc-inner">
+        <div className="pc-header-title">{gameKey.toUpperCase()} PLAYER PROFILE</div>
+        
+        <div className="pc-id-section">
+          <div className="pc-id-label">PLAYER ID</div>
+          <div className="pc-id-val">{profile.playerId || '0000000000'}</div>
+        </div>
 
-      {/* Corner Decorations */}
-      <div className="pc-corner pc-corner-tl" />
-      <div className="pc-corner pc-corner-tr" />
-      <div className="pc-corner pc-corner-bl" />
-      <div className="pc-corner pc-corner-br" />
-
-      {/* Header */}
-      <div className="pc-header">
-        <div className="pc-game-info">
-          <span className="pc-icon" style={{ fontSize: 32 }}>{config.icon}</span>
-          <div>
-            <div className="pc-game-label">{config.label}</div>
-            <div className="pc-game-name">{profile.gameType}</div>
+        <div className="pc-mid">
+          <div className="pc-qr">
+            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=stropse_verify_${profile.playerId}`} alt="QR Code" />
+          </div>
+          <div className="pc-seal-container">
+            <div className={`pc-seal-hologram ${profile.status === 'verified' ? 'verified' : 'pending'}`}>
+              <span>OFFICIAL</span>
+              <span>STROPSE</span>
+              <span>SEAL</span>
+            </div>
+            <div className="pc-verified-text">
+              {profile.status === 'verified' ? 'VERIFIED BY STROPSE' : 'PENDING APPROVAL'}
+            </div>
           </div>
         </div>
-        <div className={`pc-status badge ${profile.status === 'verified' ? 'badge-success' : 'badge-grey'}`}>
-          {profile.status === 'verified' ? '✓ VERIFIED' : 'PENDING'}
+
+        <div className="pc-stats-row">
+          {(gameKey === 'BGMI' || gameKey === 'Free Fire') ? (
+            <>
+              <div className="pc-stat">
+                <div className="pc-stat-lbl">KD RATIO</div>
+                <div className="pc-stat-val">{profile.stats?.kd || '—'}</div>
+              </div>
+              <div className="pc-stat">
+                <div className="pc-stat-lbl">WIN RATE</div>
+                <div className="pc-stat-val">{profile.stats?.winRate ? `${profile.stats.winRate}%` : '—'}</div>
+              </div>
+              <div className="pc-stat">
+                <div className="pc-stat-lbl">MATCHES</div>
+                <div className="pc-stat-val">{profile.stats?.matches || '—'}</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="pc-stat">
+                <div className="pc-stat-lbl">ELO RATING</div>
+                <div className="pc-stat-val">{profile.stats?.elo || '—'}</div>
+              </div>
+              <div className="pc-stat">
+                <div className="pc-stat-lbl">WIN RATE</div>
+                <div className="pc-stat-val">{profile.stats?.winRate ? `${profile.stats.winRate}%` : '—'}</div>
+              </div>
+              <div className="pc-stat">
+                <div className="pc-stat-lbl">RANK</div>
+                <div className="pc-stat-val">{profile.stats?.rank || '—'}</div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="pc-footer-text">
+          THIS CARD IS OFFICIAL FOR {gameKey.toUpperCase()} EVENTS. CARD ID: 8651{profile.playerId?.substring(0,6) || 'XXXXXX'}
         </div>
       </div>
-
-      {/* Player ID */}
-      <div className="pc-player-id">
-        <div className="pc-id-label">PLAYER ID</div>
-        <div className="pc-id-value">{profile.playerId}</div>
-      </div>
-
-      {/* Divider */}
-      <div className="pc-divider" />
-
-      {/* Stats */}
-      <div className="pc-stats">
-        {profile.gameType === 'BGMI' || profile.gameType === 'Free Fire' ? (
-          <>
-            <StatItem label="K/D" value={profile.stats?.kd || '—'} color={config.color} />
-            <StatItem label="WIN%" value={profile.stats?.winRate ? `${profile.stats.winRate}%` : '—'} color={config.color} />
-            <StatItem label="MATCHES" value={profile.stats?.matches || '—'} color={config.color} />
-          </>
-        ) : (
-          <>
-            <StatItem label="ELO" value={profile.stats?.elo || '—'} color={config.color} />
-            <StatItem label="WIN%" value={profile.stats?.winRate ? `${profile.stats.winRate}%` : '—'} color={config.color} />
-            <StatItem label="RANK" value={profile.stats?.rank || '—'} color={config.color} />
-          </>
-        )}
-      </div>
-
-      {/* Logo Watermark (fills empty space) */}
-      <div className="pc-watermark">
-        <img src="https://www.nesabamedia.com/apps/wp-content/uploads/2025/05/BGMI-Logo.png" alt="BGMI" />
-      </div>
-
-      {/* STROPSE brand */}
-      <div className="pc-brand">
-        <span className="pc-brand-text">STROPSE</span>
-        <div className="pc-brand-line" />
-      </div>
     </div>
   );
 }
 
-function StatItem({ label, value, color }) {
+export function PlayerCardBack() {
   return (
-    <div className="pc-stat">
-      <div className="pc-stat-label">{label}</div>
-      <div className="pc-stat-value" style={{ color }}>{value}</div>
+    <div className="player-card pc-back">
+      <div className="pc-back-stripe">
+        STROPSE
+      </div>
+      <div className="pc-back-footer">EST. 2024 - COMPETITIVE ESPORTS</div>
     </div>
   );
 }
+
+// Keep default export for backwards compatibility
+export default PlayerCard;

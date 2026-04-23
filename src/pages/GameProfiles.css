@@ -23,28 +23,21 @@
 }
 
 .print-page { 
-  width: 320px; 
-  height: 480px; 
-  margin-bottom: 40px;
+  width: 85.6mm; 
+  height: 53.98mm; 
+  margin-bottom: 20px;
 }
-
-.print-back-cover {
-  background: linear-gradient(135deg, #111, #000);
-  border: 1px solid rgba(255,215,0,0.2);
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 20px;
-}
-
-.print-back-cover img { width: 60%; opacity: 0.8; filter: drop-shadow(0 0 20px rgba(255,215,0,0.3)); }
 
 @media print {
-  @page { margin: 0; size: 320px 480px; }
-  body { margin: 0; padding: 0; background: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .print-mode-container { display: block; padding: 0; position: absolute; }
+  @page { margin: 0; size: 85.6mm 53.98mm landscape; }
+  body { margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .print-mode-container { display: block; padding: 0; position: absolute; background: transparent; width: 100vw; height: auto; }
   .print-page { 
     margin: 0;
     page-break-after: always;
     box-shadow: none !important;
+    position: relative;
+    top: 0; left: 0;
   }
 }
 

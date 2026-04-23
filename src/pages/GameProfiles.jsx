@@ -5,7 +5,7 @@ import {
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import PlayerCard from '../components/PlayerCard';
+import PlayerCard, { PlayerCardBack } from '../components/PlayerCard';
 import './GameProfiles.css';
 
 const GAME_TYPES = ['BGMI', 'Free Fire', 'Chess', 'Sudoku'];
@@ -104,8 +104,8 @@ export default function GameProfiles() {
         <div className="print-page">
           <PlayerCard profile={p} />
         </div>
-        <div className="print-page print-back-cover">
-          <img src="https://www.nesabamedia.com/apps/wp-content/uploads/2025/05/BGMI-Logo.png" alt="Back Logo" />
+        <div className="print-page">
+          <PlayerCardBack />
         </div>
       </div>
     );

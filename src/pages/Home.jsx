@@ -2,12 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
-const STATS = [
-  { value: '10K+', label: 'Active Players' },
-  { value: '500+', label: 'Tournaments' },
-  { value: '100+', label: 'Communities' },
-  { value: '4', label: 'Game Titles' },
-];
+
 
 const GAMES = [
   { name: 'BGMI', tag: 'Battle Royale', img: '/bgmi.png', color: '#FFD700', desc: 'India\'s #1 Battle Royale' },
@@ -67,14 +62,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="hero-stats">
-            {STATS.map(s => (
-              <div key={s.label} className="hero-stat">
-                <span className="hero-stat-value">{s.value}</span>
-                <span className="hero-stat-label">{s.label}</span>
-              </div>
-            ))}
-          </div>
+
         </div>
 
         <div className="hero-scroll-indicator">
@@ -135,8 +123,8 @@ export default function Home() {
               <p className="section-tag">⚡ JOIN THE ELITE</p>
               <h2 className="cta-title">Ready to <span className="text-glow">Dominate?</span></h2>
               <p className="cta-desc">
-                10,000+ players can't be wrong. Create your account, build your player card,
-                and register for your first tournament today.
+                Your journey starts here. Create your account, build your verified player identity,
+                and step into our official tournaments today.
               </p>
               <Link to="/auth" className="btn btn-primary btn-lg">
                 Start Your Journey →

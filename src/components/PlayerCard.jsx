@@ -20,12 +20,20 @@ export function PlayerCard({ profile }) {
             <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=stropse_verify_${profile.playerId}`} alt="QR Code" />
           </div>
           <div className="pc-seal-container">
-            <div className={`pc-seal-hologram ${profile.status === 'verified' ? 'verified' : 'pending'}`}>
-              <img src="/stropse-seal.png" alt="Seal" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-            </div>
-            <div className="pc-verified-text">
-              {profile.status === 'verified' ? 'VERIFIED BY STROPSE' : 'PENDING APPROVAL'}
-            </div>
+            {profile.status === 'verified' ? (
+              <>
+                <div style={{ width: '42px', height: '42px', borderRadius: '50%', overflow: 'hidden' }}>
+                  <img src="/stropse-seal.png" alt="Seal" style={{ width: '100%', height: '100%', objectFit: 'cover', mixBlendMode: 'screen' }} />
+                </div>
+                <div className="pc-verified-text">
+                  VERIFIED BY STROPSE
+                </div>
+              </>
+            ) : (
+              <div className="pc-verified-text" style={{ background: '#333', color: '#aaa' }}>
+                PENDING APPROVAL
+              </div>
+            )}
           </div>
         </div>
 
@@ -74,8 +82,8 @@ export function PlayerCard({ profile }) {
 export function PlayerCardBack() {
   return (
     <div className="player-card pc-back">
-      <div className="pc-watermark" style={{ opacity: 0.1, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <img src="/stropse-seal.png" alt="STROPSE" style={{ width: '120%', filter: 'drop-shadow(0 0 100px rgba(255,215,0,0.5))' }} />
+      <div className="pc-watermark" style={{ opacity: 0.2, mixBlendMode: 'screen', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img src="/stropse-seal.png" alt="STROPSE" style={{ width: '120%', filter: 'drop-shadow(0 0 100px rgba(255,215,0,0.5))', mixBlendMode: 'screen' }} />
       </div>
       <div className="pc-back-stripe" style={{ position: 'relative', zIndex: 2 }}>
         STROPSE

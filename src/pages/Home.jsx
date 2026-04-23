@@ -27,14 +27,6 @@ export default function Home() {
       <section className="hero">
         <div className="hero-visual">
           <div className="cube-ambient-glow" />
-          <div className="wireframe-cube">
-            <div className="cube-face front"></div>
-            <div className="cube-face back"></div>
-            <div className="cube-face right"></div>
-            <div className="cube-face left"></div>
-            <div className="cube-face top"></div>
-            <div className="cube-face bottom"></div>
-          </div>
         </div>
 
         <div className="container hero-content">
@@ -131,8 +123,8 @@ export default function Home() {
               </Link>
             </div>
             <div className="cta-decoration">
-              <div className="cta-hex" style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: 220, height: 220, objectFit: 'contain', filter: 'drop-shadow(0 0 30px rgba(255,215,0,0.3))' }} />
+              <div className="cta-hex" style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '50%' }}>
+                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: 220, height: 220, objectFit: 'cover', mixBlendMode: 'screen', filter: 'drop-shadow(0 0 20px rgba(255,215,0,0.2))' }} />
               </div>
             </div>
           </div>

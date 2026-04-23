@@ -66,8 +66,6 @@ export default function Navbar() {
         {/* Right side */}
         <div className="navbar-right">
           {user ? (
-            <>
-              <NavLink to="/admin" className="nav-link nav-admin">Admin</NavLink>
               <div className="profile-menu-wrapper">
                 <button className="profile-btn" onClick={() => setProfileOpen(p => !p)}>
                   <div className="profile-avatar">
@@ -97,7 +95,6 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-            </>
           ) : (
             <Link to="/auth" className="btn btn-primary btn-sm">Join Now</Link>
           )}
@@ -127,7 +124,6 @@ export default function Navbar() {
           ))}
           {user ? (
             <>
-              <NavLink to="/admin" className="mobile-nav-link" onClick={() => setMenuOpen(false)}>Admin</NavLink>
               <NavLink to="/profile" className="mobile-nav-link" onClick={() => setMenuOpen(false)}>Profile</NavLink>
               <button className="mobile-nav-link mobile-logout" onClick={() => { handleLogout(); setMenuOpen(false); }}>Sign Out</button>
             </>

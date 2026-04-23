@@ -36,7 +36,6 @@ export default function Tournaments() {
         q = query(
           collection(db, 'tournaments'),
           where('gameType', '==', filter),
-          orderBy('createdAt', 'desc'),
           limit(PAGE_SIZE)
         );
       }
@@ -48,11 +47,11 @@ export default function Tournaments() {
       const snap = await getDocs(q);
       const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-      if (reset) {
-        setTournaments(docs);
-      } else {
-        setTournaments(prev => [...prev, ...docs]);
-      }
+      let newDocs = reset ? docs : [...prev, ...docs];
+      // Sort in JS to avoid missing composite index errors on filtered queries
+      newDocs.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+      
+      setTournaments(newDocs);
 
       setLastDoc(snap.docs[snap.docs.length - 1] || null);
       setHasMore(snap.docs.length === PAGE_SIZE);

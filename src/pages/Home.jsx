@@ -131,12 +131,8 @@ export default function Home() {
               </Link>
             </div>
             <div className="cta-decoration">
-              <div className="cta-hex">
-                <svg width="200" height="220" viewBox="0 0 200 220">
-                  <polygon points="100,10 190,55 190,165 100,210 10,165 10,55" fill="none" stroke="rgba(255,215,0,0.15)" strokeWidth="1"/>
-                  <polygon points="100,25 175,67 175,153 100,195 25,153 25,67" fill="none" stroke="rgba(255,215,0,0.1)" strokeWidth="1"/>
-                  <text x="100" y="118" textAnchor="middle" fontSize="64" fill="#FFD700" opacity="0.3" fontFamily="Orbitron">S</text>
-                </svg>
+              <div className="cta-hex" style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: 220, height: 220, objectFit: 'contain', filter: 'drop-shadow(0 0 30px rgba(255,215,0,0.3))' }} />
               </div>
             </div>
           </div>

@@ -21,9 +21,7 @@ export function PlayerCard({ profile }) {
           </div>
           <div className="pc-seal-container">
             <div className={`pc-seal-hologram ${profile.status === 'verified' ? 'verified' : 'pending'}`}>
-              <span>OFFICIAL</span>
-              <span>STROPSE</span>
-              <span>SEAL</span>
+              <img src="/stropse-seal.png" alt="Seal" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
             </div>
             <div className="pc-verified-text">
               {profile.status === 'verified' ? 'VERIFIED BY STROPSE' : 'PENDING APPROVAL'}
@@ -76,10 +74,13 @@ export function PlayerCard({ profile }) {
 export function PlayerCardBack() {
   return (
     <div className="player-card pc-back">
-      <div className="pc-back-stripe">
+      <div className="pc-watermark" style={{ opacity: 0.1, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img src="/stropse-seal.png" alt="STROPSE" style={{ width: '120%', filter: 'drop-shadow(0 0 100px rgba(255,215,0,0.5))' }} />
+      </div>
+      <div className="pc-back-stripe" style={{ position: 'relative', zIndex: 2 }}>
         STROPSE
       </div>
-      <div className="pc-back-footer">EST. 2024 - COMPETITIVE ESPORTS</div>
+      <div className="pc-back-footer" style={{ position: 'relative', zIndex: 2 }}>EST. 2026 - COMPETITIVE ESPORTS</div>
     </div>
   );
 }

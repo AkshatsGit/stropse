@@ -30,9 +30,17 @@ export default function Home() {
     <div className="home">
       {/* HERO */}
       <section className="hero">
-        <div className="hero-grid-bg" />
-        <div className="hero-scanline" />
-        <div className="hero-glow-orb" />
+        <div className="hero-visual">
+          <div className="cube-ambient-glow" />
+          <div className="wireframe-cube">
+            <div className="cube-face front"></div>
+            <div className="cube-face back"></div>
+            <div className="cube-face right"></div>
+            <div className="cube-face left"></div>
+            <div className="cube-face top"></div>
+            <div className="cube-face bottom"></div>
+          </div>
+        </div>
 
         <div className="container hero-content">
           <div className="hero-eyebrow">
@@ -147,21 +155,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-inner">
-            <div className="footer-brand">
-              <span className="logo-text text-glow" style={{ fontSize: 18 }}>STROPSE</span>
-              <p style={{ fontSize: 12, color: 'var(--grey-600)', marginTop: 6, fontFamily: 'Inter,sans-serif' }}>
-                India's Unified Esports Ecosystem
-              </p>
-            </div>
-            <div className="footer-tagline">
-              Play · Improve · Compete · Dominate
-            </div>
-            <p className="footer-copy">© 2026 STROPSE. All Rights Reserved.</p>
+      {/* Footer */}
+      <footer className="footer-elegant">
+        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '8px' }}>
+          <h2 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '24px', letterSpacing: '2px', margin: 0 }}>STROPSE</h2>
+          <p style={{ color: 'var(--grey-500)', fontSize: '14px', margin: 0 }}>India's Unified Esports Ecosystem</p>
+          <div style={{ marginTop: '16px' }}>
+            <a href="https://instagram.com/stropse.in" target="_blank" rel="noreferrer" className="footer-link">
+              Instagram: @stropse.in
+            </a>
           </div>
+          <p style={{ color: 'var(--grey-700)', fontSize: '12px', marginTop: '24px' }}>© {new Date().getFullYear()} STROPSE. All rights reserved.</p>
         </div>
       </footer>
     </div>

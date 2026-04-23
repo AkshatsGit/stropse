@@ -67,13 +67,15 @@ export default function Community() {
     if (unsubRef.current) unsubRef.current();
     const q = query(
       collection(db, 'chats'),
-      where('roomId', '==', roomId),
-      orderBy('createdAt', 'asc'),
-      limit(100)
+      where('roomId', '==', roomId)
     );
     unsubRef.current = onSnapshot(q, snap => {
-      setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      let msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      msgs.sort((a,b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
+      setMessages(msgs.slice(-100)); // Keep only latest 100
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    }, err => {
+      toast('Failed to load chat: ' + err.message, 'error');
     });
   }, []);
 

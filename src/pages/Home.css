@@ -183,17 +183,18 @@
 @media (max-width: 530px) { .games-grid { grid-template-columns: 1fr; } }
 
 .game-card {
+  position: relative;
+  border-radius: 32px;
+  overflow: hidden;
+  text-decoration: none;
   background: var(--bg-card);
   border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 8px;
   padding: 28px 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
 }
 
 .game-card::before {
@@ -283,10 +284,10 @@
 @media (max-width: 530px) { .features-grid { grid-template-columns: 1fr; } }
 
 .feature-card {
-  background: var(--bg-card);
+  background: var(--bg-hover);
   border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 8px;
-  padding: 32px 24px;
+  padding: 32px;
+  border-radius: 32px;
   transition: all 0.3s ease;
 }
 
@@ -315,26 +316,33 @@
 
 /* CTA */
 .cta-banner {
-  position: relative;
-  background: var(--bg-card);
+  background: linear-gradient(135deg, #111 0%, #000 100%);
   border: 1px solid rgba(255,215,0,0.2);
-  border-radius: 16px;
-  padding: 72px 64px;
+  border-radius: 40px;
+  padding: 64px;
+  position: relative;
   overflow: hidden;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 40px;
+  align-items: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
-.cta-banner-glow {
+.cube-ambient-glow {
   position: absolute;
-  top: -50%;
-  left: -10%;
-  width: 60%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,215,0,0.06) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0) 70%);
   pointer-events: none;
+  animation: pulse-glow 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
 }
 
 .cta-content { position: relative; z-index: 1; max-width: 560px; }
@@ -364,9 +372,24 @@
 }
 
 /* FOOTER */
-.footer {
-  border-top: 1px solid rgba(255,255,255,0.04);
-  padding: 40px 0;
+.footer-elegant {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 64px 0 32px;
+  background: #000;
+}
+
+.footer-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  transition: opacity 0.2s ease;
+}
+
+.footer-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .footer-inner {

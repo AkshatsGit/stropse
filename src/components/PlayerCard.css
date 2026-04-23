@@ -1,0 +1,187 @@
+.player-card {
+  position: relative;
+  border-radius: 12px;
+  padding: 24px;
+  overflow: hidden;
+  width: 320px;
+  min-height: 200px;
+  border: 1px solid rgba(var(--card-color), 0.3);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 8px 32px rgba(0,0,0,0.8),
+    0 0 30px rgba(0,0,0,0.5),
+    inset 0 0 60px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+  font-family: 'Orbitron', sans-serif;
+  cursor: default;
+}
+
+.player-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 0 0 1px var(--card-color),
+    0 16px 48px rgba(0,0,0,0.8),
+    0 0 40px color-mix(in srgb, var(--card-color) 30%, transparent);
+}
+
+/* Aggressive style */
+.player-card-aggressive {
+  border-color: rgba(255, 215, 0, 0.25);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+
+/* Elegant style */
+.player-card-elegant {
+  border-radius: 4px;
+}
+
+/* Compact */
+.player-card-compact {
+  width: 100%;
+  max-width: 360px;
+}
+
+/* Scanlines */
+.pc-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.1) 2px,
+    rgba(0,0,0,0.1) 4px
+  );
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Corners */
+.pc-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.pc-corner-tl { top: 8px; left: 8px; border-top: 2px solid var(--card-color); border-left: 2px solid var(--card-color); }
+.pc-corner-tr { top: 8px; right: 8px; border-top: 2px solid var(--card-color); border-right: 2px solid var(--card-color); }
+.pc-corner-bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--card-color); border-left: 2px solid var(--card-color); }
+.pc-corner-br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--card-color); border-right: 2px solid var(--card-color); }
+
+/* Header */
+.pc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.pc-game-info { display: flex; align-items: center; gap: 10px; }
+
+.pc-icon {
+  font-size: 28px;
+  filter: drop-shadow(0 0 8px var(--card-color));
+}
+
+.pc-game-label {
+  font-size: 8px;
+  letter-spacing: 0.25em;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+}
+
+.pc-game-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--card-color);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--card-color) 60%, transparent);
+}
+
+.pc-status { font-size: 9px !important; }
+
+/* Player ID */
+.pc-player-id { margin-bottom: 16px; }
+
+.pc-id-label {
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.pc-id-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 20px rgba(255,255,255,0.2);
+  word-break: break-all;
+}
+
+/* Divider */
+.pc-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--card-color), transparent);
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+/* Stats */
+.pc-stats {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+.pc-stat {
+  flex: 1;
+  text-align: center;
+  padding: 0 8px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.pc-stat:last-child { border-right: none; }
+
+.pc-stat-label {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.pc-stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  text-shadow: 0 0 15px currentColor;
+}
+
+/* Brand */
+.pc-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.pc-brand-text {
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.pc-brand-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+}
+
+/* Elegant specific overrides */
+.player-card-elegant .pc-game-name { font-weight: 500; letter-spacing: 0.2em; }
+.player-card-elegant .pc-id-value { font-weight: 600; letter-spacing: 0.15em; font-size: 18px; }
+.player-card-elegant .pc-stat-value { font-weight: 600; font-size: 16px; }

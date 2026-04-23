@@ -1,0 +1,127 @@
+.profile-page { padding: 40px 0 80px; }
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 768px) { .profile-layout { grid-template-columns: 1fr; } }
+
+.profile-card {
+  background: var(--bg-card);
+  border: var(--border-primary);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-glow);
+}
+
+.profile-avatar-large {
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #FFD700, #b8860b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2px solid rgba(255,215,0,0.4);
+  box-shadow: 0 0 24px rgba(255,215,0,0.3);
+}
+
+.profile-avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+
+.avatar-initials {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #000;
+}
+
+.profile-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.profile-username {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  color: var(--primary);
+}
+
+.profile-email {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--grey-600);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-bio {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--grey-400);
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* Mini Stats */
+.profile-mini-stats {
+  display: flex;
+  justify-content: space-around;
+}
+
+.profile-mini-stat { text-align: center; }
+
+.mini-stat-val {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.mini-stat-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--grey-600);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Detail Row */
+.profile-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.profile-detail-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+.profile-detail-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--grey-600);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.profile-detail-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--grey-200);
+  text-align: right;
+}

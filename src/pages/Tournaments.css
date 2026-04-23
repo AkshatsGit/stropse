@@ -1,0 +1,153 @@
+.tournaments-page { padding: 40px 0 80px; }
+
+.page-header-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--grey-400);
+  margin-top: 8px;
+}
+
+/* Filters */
+.tournament-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: var(--bg-card);
+  border: var(--border-dim);
+  border-radius: 4px;
+  color: var(--grey-400);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.filter-btn:hover { color: var(--white); border-color: rgba(255,255,255,0.15); }
+
+.filter-btn-active {
+  background: rgba(255,215,0,0.1);
+  border-color: rgba(255,215,0,0.4);
+  color: var(--primary);
+  box-shadow: 0 0 15px rgba(255,215,0,0.1);
+}
+
+/* Grid */
+.tournaments-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1024px) { .tournaments-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .tournaments-grid { grid-template-columns: 1fr; } }
+
+/* Card */
+.t-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.t-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--t-color, var(--primary));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.t-card:hover {
+  border-color: rgba(255,215,0,0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+
+.t-card:hover::after { transform: scaleX(1); }
+
+.t-card-top { display: flex; align-items: center; justify-content: space-between; }
+
+.t-card-game { display: flex; align-items: center; gap: 8px; }
+
+.t-card-icon { font-size: 20px; }
+
+.t-card-type {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--grey-600);
+  text-transform: uppercase;
+}
+
+.t-card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.03em;
+  line-height: 1.4;
+}
+
+.t-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 6px;
+}
+
+.t-meta-item { display: flex; align-items: center; justify-content: space-between; }
+
+.t-meta-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--grey-600);
+  text-transform: uppercase;
+}
+
+.t-meta-value {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--grey-200);
+}
+
+.t-card-footer { margin-top: auto; padding-top: 8px; }
+
+.t-card-cta {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--grey-600);
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.t-card:hover .t-card-cta { color: var(--primary); }
+
+/* Load More */
+.load-more-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+}

@@ -1,0 +1,150 @@
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+}
+
+.admin-login-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+}
+
+.admin-login-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: var(--shadow-glow);
+  text-align: center;
+}
+
+.admin-login-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.admin-login-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 0.2em;
+  margin-bottom: 8px;
+}
+
+.admin-page { padding: 40px 0 80px; }
+
+/* Tabs */
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+/* Section */
+.admin-section { }
+
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.admin-section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+/* Form Grid */
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) { .admin-form-grid { grid-template-columns: 1fr; } }
+
+/* Table */
+.admin-table-wrapper {
+  overflow-x: auto;
+  border: var(--border-dim);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+}
+
+.admin-table th {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--grey-600);
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: var(--bg-elevated);
+}
+
+.admin-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--grey-200);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+
+.admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.t-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white) !important;
+}
+
+/* Room List */
+.rooms-admin-list { display: flex; flex-direction: column; gap: 12px; }
+
+.room-admin-item {
+  background: var(--bg-card);
+  border: var(--border-dim);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.room-admin-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.room-admin-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--grey-600);
+  margin-top: 4px;
+}

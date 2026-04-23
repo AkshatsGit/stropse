@@ -1,0 +1,28 @@
+.gp-page { padding: 40px 0 80px; }
+
+.gp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 32px;
+  justify-items: center;
+}
+
+.gp-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.gp-delete-btn { opacity: 0.4; transition: opacity 0.2s; }
+.gp-card-wrapper:hover .gp-delete-btn { opacity: 1; }
+
+.gp-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 480px) { .gp-stats-grid { grid-template-columns: 1fr; } }

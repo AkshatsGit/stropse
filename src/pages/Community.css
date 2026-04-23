@@ -1,0 +1,172 @@
+.community-page { padding: 40px 0 80px; }
+
+.community-nav { display: flex; gap: 10px; margin-bottom: 32px; }
+
+/* Rooms Grid */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.room-card {
+  background: var(--bg-card);
+  border: var(--border-dim);
+  border-radius: 8px;
+  padding: 24px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.room-card:hover {
+  border-color: rgba(255,215,0,0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.room-card-header { display: flex; align-items: center; justify-content: space-between; }
+
+.room-card-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.room-card-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--grey-400);
+  line-height: 1.5;
+}
+
+.room-card-join {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--grey-600);
+  text-transform: uppercase;
+  margin-top: 4px;
+  transition: color 0.2s;
+}
+
+.room-card:hover .room-card-join { color: var(--primary); }
+
+/* Chat */
+.chat-view {
+  background: var(--bg-card);
+  border: var(--border-dim);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 280px);
+  min-height: 400px;
+}
+
+.chat-header {
+  padding: 16px 24px;
+  border-bottom: var(--border-dim);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-elevated);
+}
+
+.chat-room-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 70%;
+}
+
+.chat-msg-me {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.chat-msg-other {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.chat-msg-author {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.chat-bubble {
+  background: var(--bg-elevated);
+  border: var(--border-dim);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--grey-100);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.chat-msg-me .chat-bubble {
+  background: rgba(255,215,0,0.1);
+  border-color: rgba(255,215,0,0.2);
+  color: var(--white);
+}
+
+.chat-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--grey-700);
+}
+
+.chat-input-form {
+  padding: 16px 24px;
+  border-top: var(--border-dim);
+  display: flex;
+  gap: 12px;
+  background: var(--bg-elevated);
+}
+
+.chat-input { flex: 1; }
+
+/* Friends */
+.friends-view { display: flex; flex-direction: column; }
+
+.friends-list { display: flex; flex-direction: column; gap: 8px; }
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: var(--border-dim);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--grey-200);
+}

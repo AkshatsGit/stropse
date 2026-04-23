@@ -1,0 +1,169 @@
+import React, { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import './Home.css';
+
+const STATS = [
+  { value: '10K+', label: 'Active Players' },
+  { value: '500+', label: 'Tournaments' },
+  { value: '100+', label: 'Communities' },
+  { value: '4', label: 'Game Titles' },
+];
+
+const GAMES = [
+  { name: 'BGMI', tag: 'Battle Royale', img: '/bgmi.png', color: '#FFD700', desc: 'India\'s #1 Battle Royale' },
+  { name: 'Free Fire', tag: 'Survival', img: '/freefire.png', color: '#FF6B35', desc: 'Fast-Paced Shooter' },
+  { name: 'Chess', tag: 'Strategy', img: '/chess.png', color: '#A8D8EA', desc: 'Mind Over Matter' },
+  { name: 'Sudoku', tag: 'Puzzle', img: '/sudoku.png', color: '#C7F2A4', desc: 'Speed & Precision' },
+];
+
+const FEATURES = [
+  { icon: '🏆', title: 'Tournament System', desc: 'Register for live tournaments. Track your progress. Claim your prize.' },
+  { icon: '🪪', title: 'Player Cards', desc: 'Premium digital IDs showcasing your stats, rank, and identity.' },
+  { icon: '💬', title: 'Community Hub', desc: 'Real-time rooms, private chats, and a friend network.' },
+  { icon: '📊', title: 'Stat Tracking', desc: 'KD ratio, win rate, Elo — all in one place.' },
+];
+
+export default function Home() {
+  const glitchRef = useRef(null);
+
+  return (
+    <div className="home">
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-grid-bg" />
+        <div className="hero-scanline" />
+        <div className="hero-glow-orb" />
+
+        <div className="container hero-content">
+          <div className="hero-eyebrow">
+            <span className="hero-badge">⚡ INDIA'S UNIFIED ESPORTS ECOSYSTEM</span>
+          </div>
+
+          <h1 className="hero-title" ref={glitchRef}>
+            <span className="hero-title-line1">WHERE</span>
+            <span className="hero-title-main text-glow">GAMERS</span>
+            <span className="hero-title-line3">BECOME COMPETITORS</span>
+          </h1>
+
+          <p className="hero-subtitle">
+            Play. Improve. Compete. Dominate.<br />
+            <span style={{ color: 'var(--grey-600)' }}>One platform. Every game. Infinite glory.</span>
+          </p>
+
+          <div className="hero-cta">
+            <Link to="/tournaments" className="btn btn-primary btn-lg">
+              ⚡ Explore Tournaments
+            </Link>
+            <Link to="/auth" className="btn btn-outline btn-lg">
+              Create Account
+            </Link>
+          </div>
+
+          <div className="hero-stats">
+            {STATS.map(s => (
+              <div key={s.label} className="hero-stat">
+                <span className="hero-stat-value">{s.value}</span>
+                <span className="hero-stat-label">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="hero-scroll-indicator">
+          <div className="scroll-line" />
+          <span>SCROLL</span>
+        </div>
+      </section>
+
+      {/* GAMES */}
+      <section className="section">
+        <div className="container">
+          <div className="section-header">
+            <p className="section-tag">⚡ GAME TITLES</p>
+            <h2 className="section-title">Every Arena. <span className="text-glow">One Platform.</span></h2>
+            <p className="section-subtitle">From battle royales to strategy masters — compete in your domain.</p>
+          </div>
+          <div className="games-grid">
+            {GAMES.map(g => (
+              <Link key={g.name} to="/tournaments" className="game-card">
+                <div className="game-card-img-wrapper" style={{ '--game-color': g.color }}>
+                  <img src={g.img} alt={g.name} className="game-card-img" />
+                </div>
+                <div className="game-card-tag">{g.tag}</div>
+                <h3 className="game-card-name">{g.name}</h3>
+                <p className="game-card-desc">{g.desc}</p>
+                <div className="game-card-arrow">→ VIEW TOURNAMENTS</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="section features-section">
+        <div className="container">
+          <div className="section-header">
+            <p className="section-tag">⚡ PLATFORM FEATURES</p>
+            <h2 className="section-title">Built for <span className="text-glow">Champions</span></h2>
+          </div>
+          <div className="features-grid">
+            {FEATURES.map(f => (
+              <div key={f.title} className="feature-card">
+                <div className="feature-icon">{f.icon}</div>
+                <h3 className="feature-title">{f.title}</h3>
+                <p className="feature-desc">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA BANNER */}
+      <section className="section cta-section">
+        <div className="container">
+          <div className="cta-banner">
+            <div className="cta-banner-glow" />
+            <div className="cta-content">
+              <p className="section-tag">⚡ JOIN THE ELITE</p>
+              <h2 className="cta-title">Ready to <span className="text-glow">Dominate?</span></h2>
+              <p className="cta-desc">
+                10,000+ players can't be wrong. Create your account, build your player card,
+                and register for your first tournament today.
+              </p>
+              <Link to="/auth" className="btn btn-primary btn-lg">
+                Start Your Journey →
+              </Link>
+            </div>
+            <div className="cta-decoration">
+              <div className="cta-hex">
+                <svg width="200" height="220" viewBox="0 0 200 220">
+                  <polygon points="100,10 190,55 190,165 100,210 10,165 10,55" fill="none" stroke="rgba(255,215,0,0.15)" strokeWidth="1"/>
+                  <polygon points="100,25 175,67 175,153 100,195 25,153 25,67" fill="none" stroke="rgba(255,215,0,0.1)" strokeWidth="1"/>
+                  <text x="100" y="118" textAnchor="middle" fontSize="64" fill="#FFD700" opacity="0.3" fontFamily="Orbitron">S</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="footer">
+        <div className="container">
+          <div className="footer-inner">
+            <div className="footer-brand">
+              <span className="logo-text text-glow" style={{ fontSize: 18 }}>STROPSE</span>
+              <p style={{ fontSize: 12, color: 'var(--grey-600)', marginTop: 6, fontFamily: 'Inter,sans-serif' }}>
+                India's Unified Esports Ecosystem
+              </p>
+            </div>
+            <div className="footer-tagline">
+              Play · Improve · Compete · Dominate
+            </div>
+            <p className="footer-copy">© 2026 STROPSE. All Rights Reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

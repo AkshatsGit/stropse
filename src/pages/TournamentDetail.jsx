@@ -51,6 +51,14 @@ export default function TournamentDetail() {
     load();
   }, [id, user, navigate]);
 
+  async function handleRegisterClick() {
+    if (tournament.googleFormLink) {
+      window.open(tournament.googleFormLink, '_blank');
+    } else {
+      toast('Registration link not available.', 'error');
+    }
+  }
+
   async function handleRegister() {
     if (!user) { navigate('/auth'); return; }
     if (!selectedProfile) { toast('Please select a game profile', 'error'); return; }
@@ -83,6 +91,7 @@ export default function TournamentDetail() {
 
   const tDate = tournament.date?.toDate ? tournament.date.toDate() : new Date(tournament.date);
   const color = GAME_COLORS[tournament.gameType] || '#FFD700';
+  const isPast = tDate < new Date();
   const relevantProfiles = gameProfiles.filter(p =>
     p.gameType === tournament.gameType || gameProfiles.length > 0
   );
@@ -138,7 +147,9 @@ export default function TournamentDetail() {
               <div className="td-info-items">
                 {[
                   { label: '📅 Date & Time', value: tDate.toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' }) },
-                  { label: '🎮 Game', value: tournament.gameType, highlight: true },
+                  { label: '💰 Prize Pool', value: tournament.prizePool || 'TBA', highlight: true },
+                  { label: '🎫 Entry Fee', value: tournament.entryFee || 'Free' },
+                  { label: '🎮 Game', value: tournament.gameType },
                 ].map(item => (
                   <div key={item.label} className="td-info-item">
                     <span className="td-info-label">{item.label}</span>
@@ -152,13 +163,15 @@ export default function TournamentDetail() {
                   <div className="registered-badge">
                     <span>✅ You are registered!</span>
                   </div>
-                ) : (
-                  <button
-                    className="btn btn-primary btn-full btn-lg"
-                    onClick={() => user ? setShowRegModal(true) : navigate('/auth')}
-                  >
-                    ⚡ Register Now
-                  </button>
+                ) : !isPast && (
+                  <div style={{ marginTop: 32 }}>
+                    <button className="btn btn-primary btn-full btn-lg" onClick={handleRegisterClick}>
+                      Register Now (Google Form)
+                    </button>
+                    <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--grey-600)', marginTop: 12 }}>
+                      Registration is securely handled via Google Forms.
+                    </p>
+                  </div>
                 )}
                 {!user && (
                   <p style={{ textAlign: 'center', marginTop: 12, fontSize: 13, color: 'var(--grey-600)', fontFamily: 'Inter,sans-serif' }}>

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { doc, updateDoc } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { Link } from 'react-router-dom';
+import PlayerCard from '../components/PlayerCard';
 import './Profile.css';
 
 export default function Profile() {
@@ -10,11 +12,26 @@ export default function Profile() {
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [verifiedCards, setVerifiedCards] = useState([]);
   const [form, setForm] = useState({
     name: userProfile?.name || '',
     username: userProfile?.username || '',
     bio: userProfile?.bio || '',
   });
+
+  useEffect(() => {
+    async function loadCards() {
+      if (!user) return;
+      try {
+        const q = query(collection(db, 'gameProfiles'), where('userId', '==', user.uid), where('status', '==', 'verified'));
+        const snap = await getDocs(q);
+        setVerifiedCards(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (err) {
+        console.error("Failed to load cards", err);
+      }
+    }
+    loadCards();
+  }, [user]);
 
   function handleChange(e) {
     setForm(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -85,7 +102,7 @@ export default function Profile() {
                   <span className="mini-stat-label">Tournaments</span>
                 </div>
                 <div className="profile-mini-stat">
-                  <span className="mini-stat-val">—</span>
+                  <span className="mini-stat-val">{verifiedCards.length}</span>
                   <span className="mini-stat-label">Cards</span>
                 </div>
               </div>
@@ -141,12 +158,27 @@ export default function Profile() {
                   </div>
                 </div>
 
+                <div className="card" style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontFamily: 'Orbitron,sans-serif', fontSize: 14, marginBottom: 16 }}>Verified Player Cards</h3>
+                  {verifiedCards.length > 0 ? (
+                    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                      {verifiedCards.map(card => (
+                        <div key={card.id} style={{ width: 280 }}>
+                          <PlayerCard profile={card} compact />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 13, color: 'var(--grey-600)' }}>No verified cards yet. Create one and wait for admin approval.</p>
+                  )}
+                </div>
+
                 <div className="card">
                   <h3 style={{ fontFamily: 'Orbitron,sans-serif', fontSize: 14, marginBottom: 16 }}>Quick Links</h3>
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                    <a href="/game-profiles" className="btn btn-outline btn-sm">🪪 My Player Cards</a>
-                    <a href="/tournaments" className="btn btn-outline btn-sm">🏆 Browse Tournaments</a>
-                    <a href="/community" className="btn btn-outline btn-sm">💬 Community</a>
+                    <Link to="/game-profiles" className="btn btn-outline btn-sm">🪪 Manage Player Cards</Link>
+                    <Link to="/tournaments" className="btn btn-outline btn-sm">🏆 Browse Tournaments</Link>
+                    <Link to="/community" className="btn btn-outline btn-sm">💬 Community</Link>
                   </div>
                 </div>
               </div>

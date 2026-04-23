@@ -158,10 +158,18 @@ function TournamentCard({ tournament: t }) {
 
       <div className="t-card-meta">
         <div className="t-meta-item">
-          <span className="t-meta-label">📅 DATE & TIME</span>
+          <span className="t-meta-label">📅 DATE</span>
           <span className="t-meta-value">
-            {tDate.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            {tDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
           </span>
+        </div>
+        <div className="t-meta-item">
+          <span className="t-meta-label">💰 PRIZE</span>
+          <span className="t-meta-value" style={{ color }}>{t.prizePool || '—'}</span>
+        </div>
+        <div className="t-meta-item">
+          <span className="t-meta-label">🎫 ENTRY</span>
+          <span className="t-meta-value">{t.entryFee || 'Free'}</span>
         </div>
       </div>
 

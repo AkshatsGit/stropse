@@ -114,7 +114,7 @@ function TournamentManager({ toast }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    title: '', gameType: 'BGMI', date: '', description: '', rules: ''
+    title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: ''
   });
 
   async function fetchTournaments() {
@@ -139,7 +139,7 @@ function TournamentManager({ toast }) {
       });
       toast('Tournament created! 🏆', 'success');
       setShowForm(false);
-      setForm({ title: '', gameType: 'BGMI', date: '', description: '', rules: '' });
+      setForm({ title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: '' });
       fetchTournaments();
     } catch (e) { toast(e.message, 'error'); }
     finally { setSaving(false); }
@@ -181,6 +181,21 @@ function TournamentManager({ toast }) {
               <label className="form-label">Date & Time</label>
               <input type="datetime-local" className="form-input" value={form.date}
                 onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Entry Fee</label>
+              <input className="form-input" placeholder="₹99 / Free" value={form.entryFee}
+                onChange={e => setForm(p => ({ ...p, entryFee: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Prize Pool</label>
+              <input className="form-input" placeholder="₹10,000" value={form.prizePool}
+                onChange={e => setForm(p => ({ ...p, prizePool: e.target.value }))} />
+            </div>
+            <div className="form-group" style={{ gridColumn: '1/-1' }}>
+              <label className="form-label">Google Form Reg. Link</label>
+              <input className="form-input" placeholder="https://forms.gle/..." value={form.googleFormLink}
+                onChange={e => setForm(p => ({ ...p, googleFormLink: e.target.value }))} required />
             </div>
 
             <div className="form-group" style={{ gridColumn: '1/-1' }}>

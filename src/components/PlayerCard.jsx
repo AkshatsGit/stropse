@@ -98,6 +98,11 @@ export default function PlayerCard({ profile, compact = false }) {
         )}
       </div>
 
+      {/* Logo Watermark (fills empty space) */}
+      <div className="pc-watermark">
+        <img src="https://www.nesabamedia.com/apps/wp-content/uploads/2025/05/BGMI-Logo.png" alt="BGMI" />
+      </div>
+
       {/* STROPSE brand */}
       <div className="pc-brand">
         <span className="pc-brand-text">STROPSE</span>

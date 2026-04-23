@@ -6,7 +6,6 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import PlayerCard from '../components/PlayerCard';
-import html2canvas from 'html2canvas';
 import './GameProfiles.css';
 
 const GAME_TYPES = ['BGMI', 'Free Fire', 'Chess', 'Sudoku'];
@@ -18,6 +17,7 @@ export default function GameProfiles() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [printingId, setPrintingId] = useState(null);
   const [form, setForm] = useState({
     playerId: '', gameType: 'BGMI',
     kd: '', winRate: '', matches: '', elo: '', rank: ''
@@ -34,6 +34,16 @@ export default function GameProfiles() {
   }
 
   useEffect(() => { if (user) fetchProfiles(); }, [user]);
+
+  useEffect(() => {
+    if (printingId) {
+      const timer = setTimeout(() => {
+        window.print();
+        setPrintingId(null);
+      }, 500); // Allow images to load
+      return () => clearTimeout(timer);
+    }
+  }, [printingId]);
 
   function handleChange(e) {
     setForm(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -80,22 +90,26 @@ export default function GameProfiles() {
   }
 
   async function downloadCard(id, playerName) {
-    const el = document.getElementById(`card-${id}`);
-    if (!el) return;
-    try {
-      const canvas = await html2canvas(el, { backgroundColor: null, useCORS: true });
-      const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `stropse_${playerName}_card.png`;
-      a.click();
-      toast('Card downloaded! 🪪', 'success');
-    } catch (e) {
-      toast('Failed to download card', 'error');
-    }
+    setPrintingId(id);
+    toast('Preparing high-resolution print...', 'info');
   }
 
   const isShooter = form.gameType === 'BGMI' || form.gameType === 'Free Fire';
+
+  if (printingId) {
+    const p = profiles.find(x => x.id === printingId);
+    if (!p) return null;
+    return (
+      <div className="print-mode-container">
+        <div className="print-page">
+          <PlayerCard profile={p} />
+        </div>
+        <div className="print-page print-back-cover">
+          <img src="https://www.nesabamedia.com/apps/wp-content/uploads/2025/05/BGMI-Logo.png" alt="Back Logo" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="gp-page">

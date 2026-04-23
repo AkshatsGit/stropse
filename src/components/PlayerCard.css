@@ -149,9 +149,23 @@
 }
 
 .pc-stat-value {
-  font-size: 18px;
-  font-weight: 800;
-  text-shadow: 0 0 15px currentColor;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pc-watermark {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.15;
+  margin-top: 16px;
+}
+
+.pc-watermark img {
+  width: 80%;
+  object-fit: contain;
 }
 
 /* Brand */

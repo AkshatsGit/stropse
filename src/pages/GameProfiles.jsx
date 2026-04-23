@@ -19,7 +19,7 @@ export default function GameProfiles() {
   const [creating, setCreating] = useState(false);
   const [printingId, setPrintingId] = useState(null);
   const [form, setForm] = useState({
-    playerId: '', gameType: 'BGMI',
+    playerName: '', playerId: '', gameType: 'BGMI', authKey: '',
     kd: '', winRate: '', matches: '', elo: '', rank: ''
   });
 
@@ -51,18 +51,23 @@ export default function GameProfiles() {
 
   async function handleCreate(e) {
     e.preventDefault();
-    if (!form.playerId) { toast('Player ID is required', 'error'); return; }
-    setCreating(true);
-    try {
-      const isShooter = form.gameType === 'BGMI' || form.gameType === 'Free Fire';
-      const stats = isShooter
-        ? { kd: form.kd, winRate: form.winRate, matches: form.matches }
-        : { elo: form.elo, winRate: form.winRate, rank: form.rank };
+      if (!form.playerId || !form.playerName || form.authKey.length !== 8) { 
+        toast('Name, ID, and 8-Character Key required', 'error'); 
+        return; 
+      }
+      setCreating(true);
+      try {
+        const isShooter = form.gameType === 'BGMI' || form.gameType === 'Free Fire';
+        const stats = isShooter
+          ? { kd: form.kd, winRate: form.winRate, matches: form.matches }
+          : { elo: form.elo, winRate: form.winRate, rank: form.rank };
 
-      await addDoc(collection(db, 'gameProfiles'), {
-        userId: user.uid,
-        playerId: form.playerId,
-        gameType: form.gameType,
+        await addDoc(collection(db, 'gameProfiles'), {
+          userId: user.uid,
+          playerName: form.playerName.trim(),
+          playerId: form.playerId,
+          gameType: form.gameType,
+          authKey: form.authKey.toUpperCase(),
         stats,
         status: 'pending',
         createdAt: serverTimestamp(),
@@ -180,8 +185,19 @@ export default function GameProfiles() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Player ID / IGN</label>
-                <input name="playerId" className="form-input" placeholder="YourInGameName" value={form.playerId} onChange={handleChange} required />
+                <label className="form-label">Admin Auth Key (8-Digit)</label>
+                <input className="form-input" name="authKey" placeholder="XXXXXXXX" value={form.authKey} maxLength={8} onChange={handleChange} required />
+                <p style={{ fontSize: 11, color: 'var(--primary)', marginTop: 4 }}>Contact Stropse Team to get your processing key.</p>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Player Name / Alias</label>
+                <input className="form-input" name="playerName" placeholder="John Doe" value={form.playerName} onChange={handleChange} required />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Game Player ID</label>
+                <input name="playerId" className="form-input" placeholder="5123456789" value={form.playerId} onChange={handleChange} required />
               </div>
 
               {isShooter ? (

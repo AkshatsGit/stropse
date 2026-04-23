@@ -297,9 +297,14 @@ function CardManager({ toast }) {
                 <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--grey-600)', padding: 32 }}>No game profiles yet</td></tr>
               ) : profiles.map(p => (
                 <tr key={p.id}>
-                  <td className="t-name">{p.playerId}</td>
+                  <td className="t-name">
+                    {p.playerName || 'GAMER'}<br/>
+                    <span style={{ fontSize: 10, color: 'var(--grey-400)', fontFamily: 'Rajdhani, sans-serif' }}>ID: {p.playerId}</span>
+                  </td>
                   <td><span className="badge badge-primary">{p.gameType}</span></td>
-                  <td style={{ color: 'var(--grey-400)', fontSize: 12 }}>{p.userId?.slice(0, 12)}...</td>
+                  <td style={{ color: 'var(--grey-400)', fontSize: 12 }}>
+                    Key: <span style={{ color: '#FFD700', letterSpacing: 1, fontFamily: 'Orbitron, sans-serif' }}>{p.authKey || 'MISSING'}</span>
+                  </td>
                   <td>
                     <span className={`badge ${p.status === 'verified' ? 'badge-success' : 'badge-grey'}`}>
                       {p.status}

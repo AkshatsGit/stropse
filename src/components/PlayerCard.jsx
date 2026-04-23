@@ -13,6 +13,7 @@ export function PlayerCard({ profile }) {
         <div className="pc-id-section">
           <div className="pc-id-label">PLAYER ID</div>
           <div className="pc-id-val">{profile.playerId || '0000000000'}</div>
+          <div className="pc-player-name">{profile.playerName || 'GAMER'}</div>
         </div>
 
         <div className="pc-mid">

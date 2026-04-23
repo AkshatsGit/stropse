@@ -79,6 +79,16 @@
   line-height: 1.1;
 }
 
+.pc-player-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: -2px;
+}
+
 .pc-mid {
   display: flex;
   justify-content: center;

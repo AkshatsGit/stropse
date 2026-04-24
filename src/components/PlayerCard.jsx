@@ -138,7 +138,7 @@ export function PlayerCard({ profile }) {
                   <img
                     src="/stropse-seal.png"
                     alt="Seal"
-                    style={{ width: 30, height: 30, objectFit: 'contain', display: 'block' }}
+                    style={{ width: 30, height: 30, objectFit: 'contain', display: 'block', mixBlendMode: 'screen' }}
                   />
                   <div className="pc-verified-text">✓ VERIFIED</div>
                 </>

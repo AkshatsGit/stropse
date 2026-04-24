@@ -18,54 +18,45 @@ const CONTROLLERS = [
 
 function ControllerSVG({ size, rotate, opacity }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{
-        transform: `rotate(${rotate}deg)`,
-        opacity,
-        filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.7))',
-        display: 'block',
-      }}
-    >
-      <path
-        d="M4 13 C4 10 6 8 9 8 L23 8 C26 8 28 10 28 13 L28 17 C28 21 25 24 22 24 L21 24 C20 24 19 23 18 22 L14 22 C13 23 12 24 11 24 L10 24 C7 24 4 21 4 17 Z"
-        fill="#FFD700" opacity="0.85"
-      />
-      <rect x="9" y="12" width="2.2" height="6" rx="0.6" fill="#1a1200"/>
-      <rect x="7" y="14" width="6" height="2.2" rx="0.6" fill="#1a1200"/>
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none"
+      style={{ transform: `rotate(${rotate}deg)`, opacity, filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.7))', display: 'block' }}>
+      <path d="M4 13 C4 10 6 8 9 8 L23 8 C26 8 28 10 28 13 L28 17 C28 21 25 24 22 24 L21 24 C20 24 19 23 18 22 L14 22 C13 23 12 24 11 24 L10 24 C7 24 4 21 4 17 Z" fill="#FFD700" opacity="0.85"/>
+      <rect x="9"  y="12" width="2.2" height="6"   rx="0.6" fill="#1a1200"/>
+      <rect x="7"  y="14" width="6"   height="2.2" rx="0.6" fill="#1a1200"/>
       <circle cx="22" cy="13" r="1.5" fill="#1a1200" opacity="0.7"/>
       <circle cx="25" cy="16" r="1.5" fill="#1a1200" opacity="0.7"/>
       <circle cx="22" cy="19" r="1.5" fill="#1a1200" opacity="0.7"/>
       <circle cx="19" cy="16" r="1.5" fill="#1a1200" opacity="0.7"/>
-      <ellipse cx="9" cy="22" rx="4" ry="3" fill="#FFD700" opacity="0.7"/>
+      <ellipse cx="9"  cy="22" rx="4" ry="3" fill="#FFD700" opacity="0.7"/>
       <ellipse cx="23" cy="22" rx="4" ry="3" fill="#FFD700" opacity="0.7"/>
     </svg>
   );
 }
 
+/** True AABB overlap check — both X and Y must intersect */
+function overlaps(a, b) {
+  return (
+    a.right  > b.left  &&
+    a.left   < b.right &&
+    a.bottom > b.top   &&
+    a.top    < b.bottom
+  );
+}
+
 export default function NeonLines() {
   const ctrlRefs = useRef([]);
-  const rafRef = useRef(null);
+  const rafRef   = useRef(null);
 
   useEffect(() => {
-    // Inject CSS
     const style = document.createElement('style');
     style.id = 'falling-ctrl-css';
     style.textContent = `
       .falling-ctrl-wrap {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        overflow: hidden;
+        position: fixed; inset: 0;
+        pointer-events: none; z-index: 0; overflow: hidden;
       }
       .falling-ctrl {
-        position: absolute;
-        top: -60px;
+        position: absolute; top: -60px;
         animation: ctrlFall linear infinite;
       }
       @keyframes ctrlFall {
@@ -73,58 +64,70 @@ export default function NeonLines() {
         100% { transform: translateY(calc(100vh + 100px)); }
       }
 
-      /* ── Hero text glow when controller passes through ── */
-      .hero-title-main.hero-lit .neon-letter {
+      /* Individual letter lights up when controller physically touches IT */
+      .neon-letter.letter-lit {
         animation: none !important;
         color: #fffde0 !important;
         text-shadow:
-          0 0 8px  rgba(255,245,80,1),
-          0 0 24px rgba(255,215,0,0.85),
-          0 0 60px rgba(255,200,0,0.4) !important;
-        transition: color 0.12s ease, text-shadow 0.12s ease;
+          0 0 6px  rgba(255,245,80,1),
+          0 0 20px rgba(255,215,0,0.9),
+          0 0 52px rgba(255,200,0,0.45) !important;
+        transition: color 0.1s ease, text-shadow 0.1s ease;
       }
 
-      /* Container gentle glow */
+      /* Subtle container ambient pulse */
       @keyframes containerCtrlGlow {
-        0%, 80%   { box-shadow: none; }
-        40%       { box-shadow: 0 0 0 1px rgba(255,215,0,0.2), 0 0 16px rgba(255,215,0,0.08); }
-        100%      { box-shadow: none; }
+        0%, 80%  { box-shadow: none; }
+        40%      { box-shadow: 0 0 0 1px rgba(255,215,0,0.2), 0 0 16px rgba(255,215,0,0.08); }
       }
       .card, .t-card, .feature-card, .game-card, .gp-card-wrapper, .cta-banner {
         animation: containerCtrlGlow 8s ease-in-out infinite;
       }
-      .t-card        { animation-delay: 1s; }
-      .feature-card  { animation-delay: 2s; }
-      .game-card     { animation-delay: 0.5s; }
+      .t-card       { animation-delay: 1s; }
+      .feature-card { animation-delay: 2s; }
+      .game-card    { animation-delay: 0.5s; }
     `;
     if (!document.getElementById('falling-ctrl-css')) {
       document.head.appendChild(style);
     }
 
-    // rAF loop — check if any controller overlaps the hero text
-    let lastLit = false;
     function tick() {
-      const textEl = document.querySelector('.hero-title-main');
-      if (textEl) {
-        const textRect = textEl.getBoundingClientRect();
-        // Expand by 20px padding so glow starts slightly before contact
-        const pad = 20;
-        let anyOverlap = false;
+      // Grab all individual letter spans fresh each frame
+      const letters = document.querySelectorAll('.hero-title-main .neon-letter');
+      if (!letters.length) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
 
-        ctrlRefs.current.forEach((el) => {
-          if (!el) return;
-          const cr = el.getBoundingClientRect();
-          // Check vertical overlap
-          if (cr.bottom + pad > textRect.top && cr.top - pad < textRect.bottom) {
-            anyOverlap = true;
+      // Pre-compute rects for all letters
+      const letterRects = Array.from(letters).map(el => ({
+        el,
+        rect: el.getBoundingClientRect(),
+      }));
+
+      // For every letter, default to unlit
+      const litSet = new Set();
+
+      ctrlRefs.current.forEach((ctrlEl) => {
+        if (!ctrlEl) return;
+        const cr = ctrlEl.getBoundingClientRect();
+
+        letterRects.forEach(({ el, rect }, idx) => {
+          if (overlaps(cr, rect)) {
+            litSet.add(idx);
           }
         });
+      });
 
-        if (anyOverlap !== lastLit) {
-          lastLit = anyOverlap;
-          textEl.classList.toggle('hero-lit', anyOverlap);
+      // Apply .letter-lit class only to colliding letters
+      letterRects.forEach(({ el }, idx) => {
+        if (litSet.has(idx)) {
+          el.classList.add('letter-lit');
+        } else {
+          el.classList.remove('letter-lit');
         }
-      }
+      });
+
       rafRef.current = requestAnimationFrame(tick);
     }
 
@@ -146,7 +149,7 @@ export default function NeonLines() {
           style={{
             left: c.left,
             animationDuration: `${c.duration}s`,
-            animationDelay: `-${c.delay}s`, // negative delay = start mid-cycle so screen isn't empty on load
+            animationDelay: `-${c.delay}s`,
           }}
         >
           <ControllerSVG size={c.size} rotate={c.rotate} opacity={c.opacity} />

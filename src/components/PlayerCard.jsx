@@ -134,7 +134,7 @@ export function PlayerCard({ profile }) {
             {profile.status === 'verified' ? (
               <>
                 <div style={{ width: '48px', height: '48px' }}>
-                  <img src="/stropse-seal.png" alt="Seal" style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'screen' }} />
+                  <img src="/stropse-seal.png" alt="Seal" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
                 <div className="pc-verified-text">VERIFIED BY STROPSE</div>
               </>
@@ -189,8 +189,8 @@ export function PlayerCard({ profile }) {
 export function PlayerCardBack() {
   return (
     <div className="player-card pc-back">
-      <div className="pc-watermark" style={{ opacity: 0.2, mixBlendMode: 'screen', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <img src="/stropse-seal.png" alt="STROPSE" style={{ width: '120%', filter: 'drop-shadow(0 0 100px rgba(255,215,0,0.5))', mixBlendMode: 'screen' }} />
+      <div className="pc-watermark" style={{ opacity: 0.15, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img src="/stropse-seal.png" alt="STROPSE" style={{ width: '110%', filter: 'drop-shadow(0 0 40px rgba(255,215,0,0.3))' }} />
       </div>
       <div className="pc-back-stripe" style={{ position: 'relative', zIndex: 2 }}>STROPSE</div>
       <div className="pc-back-footer" style={{ position: 'relative', zIndex: 2 }}>EST. 2026 - COMPETITIVE ESPORTS</div>

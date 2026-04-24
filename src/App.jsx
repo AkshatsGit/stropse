@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -25,9 +25,42 @@ function AdminRoute({ children }) {
   return children; // Admin has its own login
 }
 
+function ScrollObserver() {
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+
+    const mutObserver = new MutationObserver(() => {
+      document.querySelectorAll('.scroll-reveal:not(.observed)').forEach(el => {
+        el.classList.add('observed');
+        observer.observe(el);
+      });
+    });
+
+    document.querySelectorAll('.scroll-reveal:not(.observed)').forEach(el => {
+      el.classList.add('observed');
+      observer.observe(el);
+    });
+
+    mutObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutObserver.disconnect();
+    };
+  }, []);
+  return null;
+}
+
 function AppRoutes() {
   return (
     <>
+      <ScrollObserver />
       <NeonLines />
       <Navbar />
       <main style={{ paddingTop: '72px', minHeight: '100vh', position: 'relative', zIndex: 1 }}>

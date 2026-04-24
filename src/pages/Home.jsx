@@ -127,8 +127,8 @@ export default function Home() {
               </Link>
             </div>
             <div className="cta-decoration">
-              <div className="cta-hex" style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '50%' }}>
-                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: 220, height: 220, objectFit: 'cover', mixBlendMode: 'screen', filter: 'drop-shadow(0 0 20px rgba(255,215,0,0.2))' }} />
+              <div style={{ width: 220, height: 220, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, boxShadow: '0 0 40px rgba(255,215,0,0.15)' }}>
+                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </div>
             </div>
           </div>

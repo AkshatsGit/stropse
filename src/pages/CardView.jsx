@@ -44,7 +44,7 @@ export default function CardView() {
       padding: '40px 20px',
     }}>
       <div style={{ marginBottom: 32, textAlign: 'center' }}>
-        <img src="/stropse-seal.png" alt="STROPSE" style={{ width: 72, height: 72, objectFit: 'contain', mixBlendMode: 'screen', marginBottom: 12 }} />
+        <img src="/stropse-seal.png" alt="STROPSE" style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: '50%', display: 'block', marginBottom: 12, boxShadow: '0 0 20px rgba(255,215,0,0.2)' }} />
         <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 22, fontWeight: 900, letterSpacing: 4, color: '#FFD700' }}>STROPSE</div>
         <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 12, color: '#666', letterSpacing: 2 }}>GLOBAL ESPORTS FEDERATION</div>
       </div>

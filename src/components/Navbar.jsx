@@ -34,11 +34,11 @@ export default function Navbar() {
       <div className="navbar-inner">
         {/* Logo */}
         <Link to="/" className="navbar-logo" onClick={() => setMenuOpen(false)}>
-          <div className="logo-icon" style={{ background: 'none', border: 'none', padding: 0, width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+          <div className="logo-icon" style={{ background: 'none', border: 'none', padding: 0, width: 34, height: 34, flexShrink: 0 }}>
             <img
               src="/stropse-seal.png"
               alt="STROPSE"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.4))' }}
             />
           </div>
           <span className="logo-text">

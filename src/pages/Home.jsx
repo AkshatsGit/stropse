@@ -127,8 +127,8 @@ export default function Home() {
               </Link>
             </div>
             <div className="cta-decoration">
-              <div style={{ width: 220, height: 220, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, boxShadow: '0 0 40px rgba(255,215,0,0.15)' }}>
-                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <div style={{ width: 220, height: 220, flexShrink: 0 }}>
+                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 0 20px rgba(255,215,0,0.25))' }} />
               </div>
             </div>
           </div>

@@ -466,13 +466,13 @@ a { color: inherit; text-decoration: none; }
 
 .neon-letter {
   display: inline-block;
-  animation: neonLetterWave 3.6s ease-in-out infinite;
-  /* stagger handled by inline animationDelay */
+  color: var(--primary);
+  /* Lit state applied by JS collision in NeonLines.jsx */
 }
 
 .neon-letter-logo {
   display: inline-block;
-  animation: neonLetterWaveLogo 3s ease-in-out infinite;
+  color: var(--primary);
 }
 
 .animate-fadeIn { animation: fadeIn 0.5s ease; }

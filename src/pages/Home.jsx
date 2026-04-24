@@ -38,7 +38,7 @@ export default function Home() {
             <span className="hero-title-line1">WHERE</span>
             <span className="hero-title-main">
               {'GAMERS'.split('').map((ch, i) => (
-                <span key={i} className="neon-letter" style={{ animationDelay: `${i * 0.18}s` }}>{ch}</span>
+                <span key={i} className="neon-letter">{ch}</span>
               ))}
             </span>
             <span className="hero-title-line3">BECOME COMPETITORS</span>

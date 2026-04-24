@@ -128,7 +128,7 @@ export default function Home() {
             </div>
             <div className="cta-decoration">
               <div style={{ width: 220, height: 220, flexShrink: 0 }}>
-                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 0 24px rgba(255,215,0,0.3))' }} />
+                <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', mixBlendMode: 'screen', filter: 'drop-shadow(0 0 18px rgba(255,215,0,0.35))' }} />
               </div>
             </div>
           </div>

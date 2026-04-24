@@ -467,12 +467,13 @@ a { color: inherit; text-decoration: none; }
 .neon-letter {
   display: inline-block;
   color: var(--primary);
-  /* Lit state applied by JS collision in NeonLines.jsx */
+  /* Lit state applied by JS collision in NeonLines.jsx — no default animation */
 }
 
 .neon-letter-logo {
   display: inline-block;
   color: var(--primary);
+  animation: neonLetterWaveLogo 3s ease-in-out infinite;
 }
 
 .animate-fadeIn { animation: fadeIn 0.5s ease; }

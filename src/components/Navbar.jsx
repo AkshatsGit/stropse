@@ -34,21 +34,16 @@ export default function Navbar() {
       <div className="navbar-inner">
         {/* Logo */}
         <Link to="/" className="navbar-logo" onClick={() => setMenuOpen(false)}>
-          <div className="logo-icon">
-            <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="50" r="46" stroke="#FFD700" strokeWidth="3" opacity="0.7"/>
-              <path d="M30 75 L50 20 L62 50 L50 45 L70 75" fill="#FFD700" filter="url(#glow)"/>
-              <defs>
-                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3" result="blur"/>
-                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-              </defs>
-            </svg>
+          <div className="logo-icon" style={{ background: 'none', border: 'none', padding: 0 }}>
+            <img
+              src="/stropse-seal.png"
+              alt="STROPSE"
+              style={{ width: 32, height: 32, objectFit: 'contain', mixBlendMode: 'screen', filter: 'drop-shadow(0 0 4px rgba(255,215,0,0.5))' }}
+            />
           </div>
           <span className="logo-text">
             {'STROPSE'.split('').map((ch, i) => (
-              <span key={i} className="neon-letter neon-letter-logo">{ch}</span>
+              <span key={i} className="neon-letter neon-letter-logo" style={{ animationDelay: `${i * 0.14}s` }}>{ch}</span>
             ))}
           </span>
         </Link>

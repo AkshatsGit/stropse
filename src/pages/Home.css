@@ -83,14 +83,7 @@
   font-weight: 900;
   line-height: 0.9;
   letter-spacing: -0.02em;
-  color: var(--primary);
-  animation: textNeonPulse 3s ease-in-out infinite;
-  /* No background, no border, text-shadow only */
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  -webkit-background-clip: unset;
-  background-clip: unset;
+  /* Animation is per-letter via .neon-letter spans */
 }
 
 .hero-title-line3 {

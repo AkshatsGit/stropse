@@ -46,7 +46,11 @@ export default function Navbar() {
               </defs>
             </svg>
           </div>
-          <span className="logo-text">STROPSE</span>
+          <span className="logo-text">
+            {'STROPSE'.split('').map((ch, i) => (
+              <span key={i} className="neon-letter neon-letter-logo" style={{ animationDelay: `${i * 0.14}s` }}>{ch}</span>
+            ))}
+          </span>
         </Link>
 
         {/* Desktop Nav */}

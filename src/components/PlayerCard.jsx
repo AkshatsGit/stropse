@@ -18,7 +18,10 @@ export function PlayerCard({ profile }) {
 
         <div className="pc-mid">
           <div className="pc-qr">
-            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=stropse_verify_${profile.playerId}`} alt="QR Code" />
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://stropse.vercel.app/card/${encodeURIComponent(profile.playerId)}&bgcolor=ffffff&color=000000`}
+              alt="QR Code"
+            />
           </div>
           <div className="pc-seal-container">
             {profile.status === 'verified' ? (

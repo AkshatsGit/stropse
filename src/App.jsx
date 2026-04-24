@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import Navbar from './components/Navbar';
+import NeonLines from './components/NeonLines';
 import LoadingScreen from './components/LoadingScreen';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -13,6 +14,7 @@ const Community = lazy(() => import('./pages/Community'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Auth = lazy(() => import('./pages/Auth'));
 const Admin = lazy(() => import('./pages/Admin'));
+const CardView = lazy(() => import('./pages/CardView'));
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -26,8 +28,9 @@ function AdminRoute({ children }) {
 function AppRoutes() {
   return (
     <>
+      <NeonLines />
       <Navbar />
-      <main style={{ paddingTop: '72px', minHeight: '100vh' }}>
+      <main style={{ paddingTop: '72px', minHeight: '100vh', position: 'relative', zIndex: 1 }}>
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -38,6 +41,7 @@ function AppRoutes() {
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+            <Route path="/card/:profileId" element={<CardView />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

@@ -84,6 +84,7 @@ export function PlayerCard({ profile }) {
             <div className="pc-id-val">{profile.playerId || '0000000000'}</div>
             <div className="pc-id-divider" />
             <div className="pc-player-name" style={{ color: accentColor }}>{profile.playerName || 'GAMER'}</div>
+            <div className="pc-player-fullname">{profile.fullName || 'AKSHAT SRIVASTAVA'}</div>
           </div>
 
           {/* Right: QR & Seal */}
@@ -115,30 +116,42 @@ export function PlayerCard({ profile }) {
           {(gameKey === 'BGMI' || gameKey === 'Free Fire') ? (
             <>
               <div className="pc-stat-col">
-                <div className="pc-stat-title"><IconCrosshair /> K/D RATIO</div>
+                <div className="pc-stat-title">
+                  <div className="pc-stat-icon"><IconCrosshair /></div> K/D RATIO
+                </div>
                 <div className="pc-stat-num">{profile.stats?.kd || '—'}</div>
               </div>
               <div className="pc-stat-col">
-                <div className="pc-stat-title"><IconStar /> WIN RATE</div>
+                <div className="pc-stat-title">
+                  <div className="pc-stat-icon"><IconStar /></div> WIN RATE
+                </div>
                 <div className="pc-stat-num">{profile.stats?.winRate ? `${profile.stats.winRate}%` : '—'}</div>
               </div>
               <div className="pc-stat-col">
-                <div className="pc-stat-title"><IconGamepad /> GAMES PLAYED</div>
+                <div className="pc-stat-title">
+                  <div className="pc-stat-icon"><IconGamepad /></div> GAMES PLAYED
+                </div>
                 <div className="pc-stat-num">{profile.stats?.matches || '—'}</div>
               </div>
             </>
           ) : (
             <>
               <div className="pc-stat-col">
-                <div className="pc-stat-title"><IconStar /> ELO</div>
+                <div className="pc-stat-title">
+                  <div className="pc-stat-icon"><IconStar /></div> ELO
+                </div>
                 <div className="pc-stat-num">{profile.stats?.elo || '—'}</div>
               </div>
               <div className="pc-stat-col">
-                <div className="pc-stat-title"><IconStar /> WIN RATE</div>
+                <div className="pc-stat-title">
+                  <div className="pc-stat-icon"><IconStar /></div> WIN RATE
+                </div>
                 <div className="pc-stat-num">{profile.stats?.winRate ? `${profile.stats.winRate}%` : '—'}</div>
               </div>
               <div className="pc-stat-col">
-                <div className="pc-stat-title"><IconStar /> RANK</div>
+                <div className="pc-stat-title">
+                  <div className="pc-stat-icon"><IconStar /></div> RANK
+                </div>
                 <div className="pc-stat-num">{profile.stats?.rank || '—'}</div>
               </div>
             </>

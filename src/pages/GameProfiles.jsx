@@ -191,8 +191,13 @@ export default function GameProfiles() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Player Name / Alias</label>
-                <input className="form-input" name="playerName" placeholder="John Doe" value={form.playerName} onChange={handleChange} required />
+                <label className="form-label">In-Game Name / Alias</label>
+                <input className="form-input" name="playerName" placeholder="GAMER123" value={form.playerName} onChange={handleChange} required />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Real Full Name</label>
+                <input className="form-input" name="fullName" placeholder="John Doe" value={form.fullName} onChange={handleChange} required />
               </div>
 
               <div className="form-group">
@@ -237,6 +242,8 @@ export default function GameProfiles() {
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
                   <PlayerCard profile={{
                     playerId: form.playerId,
+                    playerName: form.playerName,
+                    fullName: form.fullName,
                     gameType: form.gameType,
                     status: 'pending',
                     stats: isShooter

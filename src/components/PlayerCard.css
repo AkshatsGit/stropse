@@ -7,23 +7,26 @@
   width: 85.6mm;
   height: 53.98mm;
   box-sizing: border-box;
-  border-radius: 4.5mm;
   background: #0d1115;
   color: #fff;
   font-family: 'Rajdhani', sans-serif;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,215,0,0.25);
+  border-radius: 4.5mm;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,215,0,0.3);
   margin: 0 auto;
+  -webkit-print-color-adjust: exact !important;
+  color-adjust: exact !important;
+  print-color-adjust: exact !important;
 }
 
 /* Background Character */
 .pc-hero-bg {
   position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  top: 0; right: -5mm; bottom: 0; left: 0;
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
-  opacity: 0.55;
+  opacity: 0.7;
   mix-blend-mode: luminosity;
   pointer-events: none;
   z-index: 1;
@@ -32,15 +35,15 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, #0d1115 35%, transparent 70%),
+  background: linear-gradient(to right, #0d1115 45%, transparent 80%),
               linear-gradient(to top, #0d1115 5%, transparent 20%);
 }
 
 /* Outer Gold Frame */
 .pc-frame-outer {
   position: absolute;
-  top: 2mm; left: 2mm; right: 2mm; bottom: 2mm;
-  border: 1px solid rgba(255,215,0, 0.35);
+  top: 1.5mm; left: 1.5mm; right: 1.5mm; bottom: 1.5mm;
+  border: 1px solid rgba(255,215,0, 0.4);
   border-radius: 3.5mm;
   z-index: 2;
   pointer-events: none;
@@ -48,9 +51,8 @@
 /* Corner accents */
 .pc-frame-outer::before, .pc-frame-outer::after {
   content: ''; position: absolute;
-  width: 12px; height: 12px;
+  width: 10px; height: 10px;
   border: 1.5px solid #FFD700;
-  box-shadow: 0 0 6px rgba(255,215,0,0.6);
 }
 .pc-frame-outer::before { top: -1px; left: -1px; border-right: none; border-bottom: none; border-top-left-radius: 3.5mm; }
 .pc-frame-outer::after { bottom: -1px; right: -1px; border-left: none; border-top: none; border-bottom-right-radius: 3.5mm; }
@@ -60,10 +62,9 @@
   position: absolute;
   top: -1px; left: 50%;
   transform: translateX(-50%);
-  width: 45px; height: 4.5px;
+  width: 35px; height: 4px;
   background: linear-gradient(to bottom, #FFD700, #b28639);
   clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%);
-  box-shadow: 0 0 10px rgba(255,215,0,0.5);
 }
 
 /* Inner Layout */
@@ -73,7 +74,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 4mm 5mm 3mm;
+  padding: 3mm 4.5mm 2.5mm;
   box-sizing: border-box;
 }
 
@@ -83,22 +84,23 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 7px;
+  font-size: 6px;
   letter-spacing: 3px;
   color: #FFD700;
   text-transform: uppercase;
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   margin-top: 0.5mm;
-  text-shadow: 0 0 6px rgba(255,215,0,0.4);
+}
+.pc-header-title svg {
+  width: 8px; height: 8px; fill: #FFD700; stroke: none;
 }
 
-/* Left & Right Container */
+/* Body Content */
 .pc-body-wrap {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-top: 3.5mm;
+  margin-top: 2.5mm;
   flex: 1;
 }
 
@@ -106,44 +108,52 @@
 .pc-left-col {
   display: flex;
   flex-direction: column;
+  width: 60%;
 }
 .pc-id-label {
-  font-size: 5.5px;
+  font-size: 5px;
   color: #8c959d;
   letter-spacing: 1.5px;
-  font-weight: 600;
-  margin-bottom: 1px;
+  font-weight: 700;
+  margin-bottom: 0px;
 }
 .pc-id-val {
   font-family: 'Orbitron', sans-serif;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 900;
   color: #fff;
   letter-spacing: 1px;
-  line-height: 1.1;
-  text-shadow: 0 0 10px rgba(255,255,255,0.4);
+  line-height: 1.15;
 }
 .pc-id-divider {
   width: 100%; height: 1px;
   background: linear-gradient(90deg, #FFD700 0%, transparent 100%);
-  margin: 3px 0 4px;
+  margin: 2px 0 3px;
   position: relative;
 }
 .pc-id-divider::after {
   content: ''; position: absolute;
-  top: -1.5px; left: 14px;
-  width: 4px; height: 4px;
+  top: -1px; left: 12px;
+  width: 3px; height: 3px;
   background: #FFD700;
   transform: rotate(45deg);
 }
 .pc-player-name {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   color: var(--card-accent, #FFD700);
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(255,215,0,0.5);
+  text-shadow: 0 0 10px rgba(255,215,0,0.4);
+  line-height: 1.1;
+}
+.pc-player-fullname {
+  font-size: 7px;
+  color: #aeb9c4;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-top: 1.5px;
 }
 
 /* Right column */
@@ -151,50 +161,50 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 24mm;
+  width: 22mm;
+  margin-top: -1mm;
 }
 .pc-qr-box {
-  width: 19mm; height: 19mm;
+  width: 17mm; height: 17mm;
   background: #fff;
-  border: 1.5px solid rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.5);
   border-radius: 2px;
-  padding: 1.5px;
-  box-shadow: 0 0 12px rgba(255,255,255,0.25);
+  padding: 1mm;
 }
 .pc-qr-box img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .pc-seal-img {
-  width: 12mm; height: 12mm;
+  width: 11mm; height: 11mm;
   object-fit: contain;
-  margin-top: 3px;
-  filter: drop-shadow(0 0 15px rgba(255,215,0,0.5));
+  margin-top: 1.5mm;
+  filter: drop-shadow(0 0 4px rgba(255,215,0,0.3));
 }
 .pc-verified-badge {
-  margin-top: 2.5px;
+  margin-top: 1.5mm;
   border: 0.5px solid #00f260;
-  border-radius: 3mm;
-  padding: 2px 7px;
-  font-size: 5px;
-  font-family: 'Rajdhani', sans-serif;
+  border-radius: 2mm;
+  padding: 1.5px 6px;
+  font-size: 4px;
   font-weight: 700;
   color: #00f260;
   background: rgba(0,242,96,0.1);
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
-  gap: 2.5px;
-  box-shadow: 0 0 6px rgba(0,242,96,0.3);
+  gap: 2px;
+}
+.pc-verified-badge svg {
+  width: 4px; height: 4px; fill: #00f260;
 }
 
 /* Stats Panel */
 .pc-stats-panel {
   width: 100%;
-  height: 10mm;
+  height: 9mm;
   border: 0.5px solid rgba(255,215,0,0.25);
-  border-radius: 2mm;
-  background: linear-gradient(180deg, rgba(20,20,20,0.8) 0%, rgba(5,5,5,0.95) 100%);
+  border-radius: 1.5mm;
+  background: linear-gradient(180deg, rgba(20,20,20,0.85) 0%, rgba(5,5,5,0.95) 100%);
   display: flex;
-  margin-bottom: 2mm;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
+  margin-bottom: 1.5mm;
   position: relative;
   z-index: 4;
 }
@@ -210,47 +220,54 @@
 .pc-stat-title {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   color: #a7b2bd;
-  font-size: 5px;
-  letter-spacing: 1px;
+  font-size: 4px;
+  letter-spacing: 0.5px;
 }
-.pc-stat-title svg { stroke: #FFD700; fill: none; width: 7px; height: 7px; }
+.pc-stat-icon {
+  width: 5px; height: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* IMPORTANT: Explicit sizes for inline SVGs */
+.pc-stat-icon svg { width: 100% !important; height: 100% !important; display: block; }
+
 .pc-stat-num {
   color: #FFD700;
   font-family: 'Orbitron', sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   line-height: 1;
-  margin-top: 2px;
-  text-shadow: 0 0 8px rgba(255,215,0,0.4);
+  margin-top: 1px;
 }
 
 /* Footer Section */
 .pc-footer {
   text-align: center;
-  margin-top: -0.5mm;
+  margin-top: 0;
   position: relative;
   z-index: 4;
 }
 .pc-footer-title {
   color: #5d6771;
-  font-size: 4.5px;
+  font-size: 4px;
   letter-spacing: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
 }
-.pc-footer-title span { color: #3a4248; font-size: 4px; display: inline-block; transform: translateY(-0.5px); }
+.pc-footer-title span { color: #3a4248; font-size: 3.5px; }
 .pc-footer-id {
   color: #404850;
-  font-size: 4px;
+  font-size: 3.5px;
   letter-spacing: 1.5px;
-  margin-top: 1px;
+  margin-top: 0.5px;
 }
 
-/* ── Card Back ─────────────────────────────────────── */
+/* Card Back */
 .pc-back {
   background: linear-gradient(135deg, #0f1115 0%, #0a0a0a 100%);
   display: flex;
@@ -282,5 +299,6 @@
 
 /* Print */
 @media print {
-  .player-card { box-shadow: none !important; }
+  .player-card { box-shadow: none !important; margin: 0; }
+  .scroll-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
 }

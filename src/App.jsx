@@ -63,7 +63,7 @@ function AppRoutes() {
       <ScrollObserver />
       <NeonLines />
       <Navbar />
-      <main style={{ paddingTop: '72px', minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+      <main style={{ paddingTop: '72px', minHeight: '100vh', position: 'relative' }}>
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/" element={<Home />} />

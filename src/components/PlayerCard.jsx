@@ -133,8 +133,8 @@ export function PlayerCard({ profile }) {
           <div className="pc-seal-container">
             {profile.status === 'verified' ? (
               <>
-                <div style={{ width: '42px', height: '42px', borderRadius: '50%', overflow: 'hidden' }}>
-                  <img src="/stropse-seal.png" alt="Seal" style={{ width: '100%', height: '100%', objectFit: 'cover', mixBlendMode: 'screen' }} />
+                <div style={{ width: '48px', height: '48px' }}>
+                  <img src="/stropse-seal.png" alt="Seal" style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'screen' }} />
                 </div>
                 <div className="pc-verified-text">VERIFIED BY STROPSE</div>
               </>

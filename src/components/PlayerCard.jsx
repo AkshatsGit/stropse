@@ -117,30 +117,35 @@ export function PlayerCard({ profile }) {
           <div style={{ width: 14, height: 14 }}><Icon /></div>
         </div>
 
-        <div className="pc-id-section">
-          <div className="pc-id-label">PLAYER ID</div>
-          <div className="pc-id-val">{profile.playerId || '0000000000'}</div>
-          <div className="pc-player-name" style={{ color: accentColor }}>{profile.playerName || 'GAMER'}</div>
-        </div>
-
-        <div className="pc-mid">
-          <div className="pc-qr">
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://stropse.vercel.app/card/${encodeURIComponent(profile.playerId)}&bgcolor=ffffff&color=000000`}
-              alt="QR Code"
-            />
+        {/* Body: ID info left, QR + Seal right */}
+        <div className="pc-body-row">
+          <div className="pc-id-section">
+            <div className="pc-id-label">PLAYER ID</div>
+            <div className="pc-id-val">{profile.playerId || '0000000000'}</div>
+            <div className="pc-player-name" style={{ color: accentColor }}>{profile.playerName || 'GAMER'}</div>
           </div>
-          <div className="pc-seal-container">
-            {profile.status === 'verified' ? (
-              <>
-                <div style={{ width: '48px', height: '48px' }}>
-                  <img src="/stropse-seal.png" alt="Seal" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                </div>
-                <div className="pc-verified-text">VERIFIED BY STROPSE</div>
-              </>
-            ) : (
-              <div className="pc-verified-text" style={{ background: '#333', color: '#aaa' }}>PENDING APPROVAL</div>
-            )}
+
+          <div className="pc-mid">
+            <div className="pc-qr">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://stropse.vercel.app/card/${encodeURIComponent(profile.playerId)}&bgcolor=ffffff&color=000000`}
+                alt="QR"
+              />
+            </div>
+            <div className="pc-seal-container">
+              {profile.status === 'verified' ? (
+                <>
+                  <img
+                    src="/stropse-seal.png"
+                    alt="Seal"
+                    style={{ width: 30, height: 30, objectFit: 'contain', display: 'block' }}
+                  />
+                  <div className="pc-verified-text">✓ VERIFIED</div>
+                </>
+              ) : (
+                <div className="pc-verified-text" style={{ background: 'rgba(100,100,100,0.2)', color: '#888', borderColor: 'rgba(150,150,150,0.3)' }}>PENDING</div>
+              )}
+            </div>
           </div>
         </div>
 

@@ -38,7 +38,7 @@ export default function Navbar() {
             <img
               src="/stropse-seal.png"
               alt="STROPSE"
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', mixBlendMode: 'screen' }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.4))' }}
             />
           </div>
           <span className="logo-text">

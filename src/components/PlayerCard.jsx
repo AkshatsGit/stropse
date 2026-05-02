@@ -80,12 +80,17 @@ export function PlayerCard({ profile }) {
         <div className="pc-body-wrap">
           {/* Left: ID & Name */}
           <div className="pc-left-col">
-            <div className="pc-id-label">PLAYER ID</div>
-            <div className="pc-id-val">{profile?.playerId || '0000000000'}</div>
-            <div className="pc-id-divider" />
-            <div className="pc-id-label" style={{ marginTop: '2px' }}>IN-GAME ALIAS</div>
+            <div className="pc-id-label">Player username:</div>
             <div className="pc-player-name" style={{ color: accentColor }}>{profile?.playerName || 'GAMER'}</div>
-            <div className="pc-id-label" style={{ marginTop: '2px' }}>FULL NAME</div>
+            
+            <div className="pc-id-divider" />
+            
+            <div className="pc-id-label" style={{ marginTop: '2px' }}>Player UID :</div>
+            <div className="pc-id-val">{profile?.playerId || '0000000000'}</div>
+            
+            <div className="pc-id-divider" />
+            
+            <div className="pc-id-label" style={{ marginTop: '2px' }}>Player Name:</div>
             <div className="pc-player-fullname">{profile?.fullName || 'AKSHAT SRIVASTAVA'}</div>
           </div>
 

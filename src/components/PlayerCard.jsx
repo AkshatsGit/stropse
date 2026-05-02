@@ -85,7 +85,7 @@ export function PlayerCard({ profile }) {
             
             <div className="pc-id-divider" />
             
-            <div className="pc-id-label" style={{ marginTop: '2px' }}>Player UID :</div>
+            <div className="pc-id-label" style={{ marginTop: '2px' }}>player uid:</div>
             <div className="pc-id-val">{profile?.playerId || '0000000000'}</div>
             
             <div className="pc-id-divider" />

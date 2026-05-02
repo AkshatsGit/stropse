@@ -146,40 +146,50 @@ export default function TournamentDetail() {
 
           {/* Sidebar */}
           <div className="td-sidebar">
-            <div className="card-glow td-info-card">
-              <h3 className="td-info-title">Tournament Info</h3>
+            <div className="td-info-card-custom">
+              
+              <div className="td-info-header-custom">
+                <svg className="td-info-star" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <h3 className="td-info-title-custom">TOURNAMENT INFO</h3>
+              </div>
 
-              <div className="td-info-items">
+              <div className="td-info-items-custom">
                 {[
-                  { label: '📅 Date & Time', value: tDate.toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' }) },
-                  { label: '💰 Prize Pool', value: tournament.prizePool || 'TBA', highlight: true },
-                  { label: '🎫 Entry Fee', value: tournament.entryFee || 'Free' },
-                  { label: '🎮 Game', value: tournament.gameType },
+                  { id: 'date', icon: <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>, label: 'DATE & TIME', value: tDate.toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' }) },
+                  { id: 'prize', icon: <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C8.69 2 6 4.69 6 8v2H5c-1.11 0-2 .89-2 2v8c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-8c0-1.1-.89-2-2-2h-1V8c0-3.31-2.69-6-6-6zm0 2c2.21 0 4 1.79 4 4v2H8V8c0-2.21 1.79-4 4-4zm0 10c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/></svg>, label: 'PRIZE POOL', value: tournament.prizePool || 'TBA' },
+                  { id: 'entry', icon: <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-1.99.89-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-2-1.46c-1.19.69-2 1.99-2 3.46s.81 2.77 2 3.46V18H4v-2.54c1.19-.69 2-1.99 2-3.46s-.81-2.77-2-3.46V6h16v2.54zM11 15h2v2h-2zm0-4h2v2h-2zm0-4h2v2h-2z"/></svg>, label: 'ENTRY FEE', value: tournament.entryFee || 'Free' },
+                  { id: 'game', icon: <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 8 18.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>, label: 'GAME', value: tournament.gameType },
                 ].map(item => (
-                  <div key={item.label} className="td-info-item">
-                    <span className="td-info-label">{item.label}</span>
-                    <span className={`td-info-value ${item.highlight ? 'text-glow' : ''}`}>{item.value}</span>
+                  <div key={item.id} className="td-info-row-custom">
+                    <div className="td-info-icon-custom">
+                      {item.icon}
+                    </div>
+                    <div className="td-info-text-custom">
+                      <span className="td-info-label-custom">{item.label}</span>
+                      <span className="td-info-value-custom">{item.value}</span>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              <div style={{ marginTop: 24 }}>
+              <div className="td-info-action-custom">
                 {alreadyRegistered ? (
-                  <div className="registered-badge">
-                    <span>✅ You are registered!</span>
+                  <div className="td-info-btn-registered">
+                    ✅ YOU ARE REGISTERED
                   </div>
                 ) : !isPast && (
-                  <div style={{ marginTop: 32 }}>
-                    <button className="btn btn-primary btn-full btn-lg" onClick={handleRegisterClick}>
-                      Register Now (Google Form)
-                    </button>
-                    <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--grey-600)', marginTop: 12 }}>
-                      Registration is securely handled via Google Forms.
-                    </p>
-                  </div>
+                  <button className="td-info-btn-custom" onClick={handleRegisterClick}>
+                    <span className="btn-main-text">REGISTER NOW</span>
+                    <span className="btn-sub-text">(GOOGLE FORM)</span>
+                  </button>
                 )}
+                
+                <div className="td-security-note">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                  <span>Registration is securely handled via Google Forms.</span>
+                </div>
                 {!user && (
-                  <p style={{ textAlign: 'center', marginTop: 12, fontSize: 13, color: 'var(--grey-600)', fontFamily: 'Inter,sans-serif' }}>
+                  <p style={{ textAlign: 'center', marginTop: 8, fontSize: 13, color: 'var(--grey-600)', fontFamily: 'Inter,sans-serif' }}>
                     Sign in required to register
                   </p>
                 )}

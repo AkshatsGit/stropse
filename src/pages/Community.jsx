@@ -1,23 +1,50 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import {
   collection, query, orderBy, limit, onSnapshot,
-  addDoc, serverTimestamp, getDocs, where
+  addDoc, serverTimestamp, getDocs, where, deleteDoc, doc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import './Community.css';
 
-const ChatMessage = memo(({ msg, myUid }) => {
+const ChatMessage = memo(({ msg, myUid, onDelete }) => {
   const isMe = msg.userId === myUid;
   const time = msg.createdAt?.toDate
     ? msg.createdAt.toDate().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
     : '';
 
+  const [showOptions, setShowOptions] = useState(false);
+  const pressTimer = useRef(null);
+
+  const handleTouchStart = () => {
+    pressTimer.current = setTimeout(() => {
+      setShowOptions(true);
+    }, 500); // 500ms long press
+  };
+
+  const handleTouchEnd = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+  };
+
   return (
-    <div className={`chat-msg ${isMe ? 'chat-msg-me' : 'chat-msg-other'}`}>
-      {!isMe && <div className="chat-msg-author">{msg.userName || 'Anonymous'}</div>}
-      <div className="chat-bubble">{msg.text}</div>
+    <div 
+      className={`chat-msg ${isMe ? 'chat-msg-me' : 'chat-msg-other'}`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchEnd}
+      onMouseEnter={() => setShowOptions(true)}
+      onMouseLeave={() => setShowOptions(false)}
+    >
+      <div className="chat-msg-author">{msg.userName || 'Anonymous'}</div>
+      <div className="chat-bubble-wrapper">
+        <div className="chat-bubble">{msg.text}</div>
+        {isMe && showOptions && (
+          <button className="chat-msg-delete" onClick={() => onDelete(msg.id)} title="Delete Message">
+            🗑️
+          </button>
+        )}
+      </div>
       <div className="chat-time">{time}</div>
     </div>
   );
@@ -113,6 +140,16 @@ export default function Community() {
     }
   }
 
+  async function deleteMessage(msgId) {
+    if (!confirm('Delete this message?')) return;
+    try {
+      await deleteDoc(doc(db, 'chats', msgId));
+      toast('Message deleted', 'success');
+    } catch (err) {
+      toast('Failed to delete: ' + err.message, 'error');
+    }
+  }
+
   async function sendFriendRequest() {
     if (!friendUsername.trim()) return;
     try {
@@ -177,7 +214,7 @@ export default function Community() {
                 </div>
               )}
               {messages.map(msg => (
-                <ChatMessage key={msg.id} msg={msg} myUid={user.uid} />
+                <ChatMessage key={msg.id} msg={msg} myUid={user.uid} onDelete={deleteMessage} />
               ))}
               <div ref={messagesEndRef} />
             </div>
@@ -190,8 +227,8 @@ export default function Community() {
                 onChange={e => setInput(e.target.value)}
                 disabled={sending}
               />
-              <button type="submit" className="btn btn-primary" disabled={sending || !input.trim()}>
-                {sending ? '...' : '▶'}
+              <button type="submit" className="btn btn-primary" disabled={sending || !input.trim()} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {sending ? '...' : <>Send <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></>}
               </button>
             </form>
           </div>

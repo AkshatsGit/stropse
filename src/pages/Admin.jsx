@@ -114,6 +114,7 @@ function TournamentManager({ toast }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: '', bannerUrl: ''
   });
@@ -128,18 +129,57 @@ function TournamentManager({ toast }) {
 
   useEffect(() => { fetchTournaments(); }, []);
 
-  async function handleCreate(e) {
+  function handleNew() {
+    setForm({ title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: '', bannerUrl: '' });
+    setEditingId(null);
+    setShowForm(s => !s);
+  }
+
+  function handleEdit(t) {
+    let dateStr = t.date;
+    if (t.date?.toDate) {
+      const d = t.date.toDate();
+      const tzoffset = d.getTimezoneOffset() * 60000;
+      dateStr = new Date(d - tzoffset).toISOString().slice(0, 16);
+    }
+    
+    setForm({
+      title: t.title || '',
+      gameType: t.gameType || 'BGMI',
+      date: dateStr || '',
+      entryFee: t.entryFee || '',
+      prizePool: t.prizePool || '',
+      googleFormLink: t.googleFormLink || '',
+      description: t.description || '',
+      rules: t.rules || '',
+      bannerUrl: t.bannerUrl || ''
+    });
+    setEditingId(t.id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function handleSave(e) {
     e.preventDefault();
     if (!form.title || !form.date) { toast('Title and date required', 'error'); return; }
     setSaving(true);
     try {
-      await addDoc(collection(db, 'tournaments'), {
-        ...form,
-        date: new Date(form.date),
-        createdAt: serverTimestamp(),
-      });
-      toast('Tournament created! 🏆', 'success');
+      if (editingId) {
+        await updateDoc(doc(db, 'tournaments', editingId), {
+          ...form,
+          date: new Date(form.date)
+        });
+        toast('Tournament updated! 🏆', 'success');
+      } else {
+        await addDoc(collection(db, 'tournaments'), {
+          ...form,
+          date: new Date(form.date),
+          createdAt: serverTimestamp(),
+        });
+        toast('Tournament created! 🏆', 'success');
+      }
       setShowForm(false);
+      setEditingId(null);
       setForm({ title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: '', bannerUrl: '' });
       fetchTournaments();
     } catch (e) { toast(e.message, 'error'); }
@@ -202,15 +242,15 @@ function TournamentManager({ toast }) {
     <div className="admin-section">
       <div className="admin-section-header">
         <h2 className="admin-section-title">Tournament Manager</h2>
-        <button className="btn btn-primary" onClick={() => setShowForm(s => !s)}>
+        <button className="btn btn-primary" onClick={handleNew}>
           {showForm ? '✕ Cancel' : '+ New Tournament'}
         </button>
       </div>
 
       {showForm && (
         <div className="card" style={{ marginBottom: 32 }}>
-          <h3 style={{ fontFamily: 'Orbitron,sans-serif', fontSize: 14, marginBottom: 20 }}>Create Tournament Post</h3>
-          <form onSubmit={handleCreate} className="admin-form-grid">
+          <h3 style={{ fontFamily: 'Orbitron,sans-serif', fontSize: 14, marginBottom: 20 }}>{editingId ? 'Edit Tournament' : 'Create Tournament Post'}</h3>
+          <form onSubmit={handleSave} className="admin-form-grid">
             <div className="form-group" style={{ gridColumn: '1/-1' }}>
               <label className="form-label">Tournament Title</label>
               <input className="form-input" placeholder="BGMI Pro League Season 5" value={form.title}
@@ -283,7 +323,7 @@ function TournamentManager({ toast }) {
             </div>
             <div style={{ gridColumn: '1/-1' }}>
               <button type="submit" className="btn btn-primary" disabled={saving}>
-                {saving ? 'Publishing...' : '📢 Publish Tournament'}
+                {saving ? 'Publishing...' : (editingId ? '💾 Save Changes' : '📢 Publish Tournament')}
               </button>
             </div>
           </form>
@@ -312,7 +352,10 @@ function TournamentManager({ toast }) {
                     {t.date?.toDate ? t.date.toDate().toLocaleDateString('en-IN') : t.date}
                   </td>
                   <td>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(t.id)}>Delete</button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="btn btn-outline btn-sm" onClick={() => handleEdit(t)}>Edit</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(t.id)}>Delete</button>
+                    </div>
                   </td>
                 </tr>
               ))}

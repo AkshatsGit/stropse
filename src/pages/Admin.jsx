@@ -3,7 +3,8 @@ import {
   collection, addDoc, getDocs, deleteDoc, doc, updateDoc,
   query, orderBy, serverTimestamp
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../firebase';
 import { useToast } from '../contexts/ToastContext';
 import './Admin.css';
 
@@ -113,8 +114,9 @@ function TournamentManager({ toast }) {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [form, setForm] = useState({
-    title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: ''
+    title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: '', bannerUrl: ''
   });
 
   async function fetchTournaments() {
@@ -139,10 +141,28 @@ function TournamentManager({ toast }) {
       });
       toast('Tournament created! 🏆', 'success');
       setShowForm(false);
-      setForm({ title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: '' });
+      setForm({ title: '', gameType: 'BGMI', date: '', entryFee: '', prizePool: '', googleFormLink: '', description: '', rules: '', bannerUrl: '' });
       fetchTournaments();
     } catch (e) { toast(e.message, 'error'); }
     finally { setSaving(false); }
+  }
+
+  async function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setUploadingImage(true);
+    try {
+      const storageRef = ref(storage, `tournaments/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setForm(p => ({ ...p, bannerUrl: url }));
+      toast('Image uploaded successfully! 📸', 'success');
+    } catch (err) {
+      toast('Failed to upload image: ' + err.message, 'error');
+    } finally {
+      setUploadingImage(false);
+    }
   }
 
   async function handleDelete(id) {
@@ -207,6 +227,33 @@ function TournamentManager({ toast }) {
               <label className="form-label">Rules (one per line)</label>
               <textarea className="form-textarea" placeholder="Each line = one rule" value={form.rules}
                 onChange={e => setForm(p => ({ ...p, rules: e.target.value }))} rows={4} />
+            </div>
+            <div className="form-group" style={{ gridColumn: '1/-1' }}>
+              <label className="form-label">Banner Image</label>
+              <input type="file" accept="image/*" className="form-input" 
+                onChange={handleImageUpload} disabled={uploadingImage} />
+              {uploadingImage && <p style={{ fontSize: 12, color: 'var(--primary)', marginTop: 4 }}>Uploading image... please wait</p>}
+              {!uploadingImage && form.bannerUrl && <p style={{ fontSize: 12, color: 'var(--success)', marginTop: 4 }}>✓ Image uploaded and ready</p>}
+            </div>
+            {/* Banner Preview */}
+            <div className="form-group" style={{ gridColumn: '1/-1', marginBottom: 16 }}>
+              <label className="form-label">Card Preview</label>
+              <div style={{ maxWidth: 350, margin: '0 auto', pointerEvents: 'none' }}>
+                <div className="t-card" style={{ '--t-color': '#FFD700', margin: 0 }}>
+                  {form.bannerUrl && (
+                    <div className="t-card-banner">
+                      <img src={form.bannerUrl} alt="Banner Preview" />
+                    </div>
+                  )}
+                  <div className="t-card-top">
+                    <div className="t-card-game">
+                      <span className="t-card-type">{form.gameType}</span>
+                    </div>
+                    <span className="badge badge-primary">UPCOMING</span>
+                  </div>
+                  <h3 className="t-card-title">{form.title || 'Tournament Title'}</h3>
+                </div>
+              </div>
             </div>
             <div style={{ gridColumn: '1/-1' }}>
               <button type="submit" className="btn btn-primary" disabled={saving}>

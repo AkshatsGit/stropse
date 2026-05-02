@@ -296,6 +296,31 @@ a { color: inherit; text-decoration: none; }
 .badge-info { background: rgba(0,212,255,0.1); color: var(--info); border: 1px solid rgba(0,212,255,0.3); }
 .badge-grey { background: rgba(255,255,255,0.05); color: var(--grey-400); border: var(--border-dim); }
 
+/* ======== FILTER/TAB BUTTONS ======== */
+.filter-btn {
+  background: var(--bg-card);
+  border: var(--border-dim);
+  border-radius: 4px;
+  color: var(--grey-400);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+.filter-btn:hover { color: var(--white); border-color: rgba(255,255,255,0.15); }
+
+.filter-btn-active {
+  background: rgba(255,215,0,0.1);
+  border-color: rgba(255,215,0,0.4);
+  color: var(--primary);
+  box-shadow: 0 0 15px rgba(255,215,0,0.1);
+}
+
 /* ======== LOADING ======== */
 .spinner {
   width: 40px;
@@ -592,4 +617,35 @@ a { color: inherit; text-decoration: none; }
   .section { padding: 60px 0; }
   .modal { padding: 24px; }
   .btn-lg { padding: 12px 24px; font-size: 13px; }
+}
+
+/* ======== PRINT STYLES ======== */
+@media print {
+  body, html {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  /* Hide all generic app UI during print to prevent overlapping */
+  nav, .page-header, .tournament-filters, .modal-overlay, #neon-canvas {
+    display: none !important;
+  }
+
+  .print-mode-container {
+    background: #ffffff !important;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 20px;
+  }
+  
+  .print-page {
+    page-break-after: always;
+    margin-bottom: 20px;
+  }
 }

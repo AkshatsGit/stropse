@@ -140,7 +140,12 @@ function TournamentCard({ tournament: t }) {
   const isPast = tDate < now && !isLive;
 
   return (
-    <Link to={`/tournaments/${t.id}`} className="t-card" style={{ '--t-color': color }}>
+    <Link to={`/tournaments/${t.id}`} className="t-card scroll-reveal" style={{ '--t-color': color }}>
+      {t.bannerUrl && (
+        <div className="t-card-banner">
+          <img src={t.bannerUrl} alt={`${t.title} banner`} loading="lazy" />
+        </div>
+      )}
       <div className="t-card-top">
         <div className="t-card-game">
           {GAME_IMGS[t.gameType] ? (

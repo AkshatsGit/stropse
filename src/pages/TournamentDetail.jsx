@@ -107,6 +107,11 @@ export default function TournamentDetail() {
         <div className="td-layout">
           {/* Main */}
           <div className="td-main">
+            {tournament.bannerUrl && (
+              <div className="td-banner-wrapper">
+                <img src={tournament.bannerUrl} alt={`${tournament.title} Banner`} className="td-banner-img" />
+              </div>
+            )}
             <div className="td-header" style={{ '--t-color': color }}>
               <div className="td-top">
                 <div className="td-game">

@@ -187,7 +187,7 @@
   border-radius: 32px;
   overflow: hidden;
   text-decoration: none;
-  background: var(--bg-card);
+  background: #000000;
   border: 1px solid rgba(255,255,255,0.06);
   padding: 28px 20px;
   display: flex;
@@ -195,6 +195,26 @@
   gap: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
+}
+
+.game-card::after, .feature-card::after, .cta-banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: skewX(-25deg);
+  animation: homeCardShine 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes homeCardShine {
+  0% { left: -150%; }
+  15% { left: 150%; }
+  100% { left: 150%; }
 }
 
 .game-card::before {
@@ -284,11 +304,13 @@
 @media (max-width: 530px) { .features-grid { grid-template-columns: 1fr; } }
 
 .feature-card {
-  background: var(--bg-hover);
+  background: #000000;
   border: 1px solid rgba(255,255,255,0.05);
   padding: 32px;
   border-radius: 32px;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .feature-card:hover {
@@ -316,7 +338,7 @@
 
 /* CTA */
 .cta-banner {
-  background: linear-gradient(135deg, #111 0%, #000 100%);
+  background: #000000;
   border: 1px solid rgba(255,215,0,0.2);
   border-radius: 40px;
   padding: 64px;

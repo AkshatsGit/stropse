@@ -297,15 +297,18 @@
   justify-content: center;
 }
 .pc-back-stripe {
-  background: var(--card-accent);
-  color: #000;
+  background: transparent;
+  color: var(--card-accent);
   width: 100%;
   padding: 6mm 0;
   text-align: center;
   font-family: 'Orbitron', sans-serif;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 900;
-  letter-spacing: 6px;
+  letter-spacing: 8px;
+  text-shadow: 0 0 15px color-mix(in srgb, var(--card-accent) 60%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
 }
 .pc-back-footer {
   position: absolute;

@@ -7,7 +7,7 @@
   width: 85.6mm;
   height: 53.98mm;
   box-sizing: border-box;
-  background: #0d1115;
+  background: #000000;
   color: #fff;
   font-family: 'Rajdhani', sans-serif;
   overflow: hidden;
@@ -35,8 +35,29 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, #0d1115 45%, transparent 80%),
-              linear-gradient(to top, #0d1115 5%, transparent 20%);
+  background: linear-gradient(to right, #000000 45%, transparent 80%),
+              linear-gradient(to top, #000000 5%, transparent 20%);
+}
+
+/* Premium Shine Effect */
+.player-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transform: skewX(-25deg);
+  animation: cardShine 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes cardShine {
+  0% { left: -150%; }
+  15% { left: 150%; }
+  100% { left: 150%; }
 }
 
 /* Outer Gold Frame */
@@ -269,7 +290,7 @@
 
 /* Card Back */
 .pc-back {
-  background: linear-gradient(135deg, #0f1115 0%, #0a0a0a 100%);
+  background: linear-gradient(135deg, #050505 0%, #000000 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -300,5 +321,6 @@
 /* Print */
 @media print {
   .player-card { box-shadow: none !important; margin: 0; }
+  .player-card::after { display: none !important; }
   .scroll-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
 }

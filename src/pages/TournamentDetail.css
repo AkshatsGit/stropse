@@ -125,31 +125,46 @@
   margin-bottom: 24px;
 }
 
-.td-info-items { display: flex; flex-direction: column; gap: 16px; }
+.td-info-items { display: flex; flex-direction: column; gap: 12px; }
 
 .td-info-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  gap: 6px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.4));
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.td-info-item:last-child { border-bottom: none; padding-bottom: 0; }
+.td-info-item:hover {
+  border-color: rgba(255,215,0,0.3);
+  transform: translateX(4px);
+  box-shadow: -4px 0 15px rgba(255,215,0,0.1);
+}
 
 .td-info-label {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--grey-600);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--grey-400);
   text-transform: uppercase;
 }
 
 .td-info-value {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--white);
+  letter-spacing: 0.05em;
+}
+
+.td-info-value.text-glow {
+  color: #00f260;
+  text-shadow: 0 0 12px rgba(0, 242, 96, 0.4);
+  font-size: 24px;
 }
 
 .registered-badge {

@@ -87,17 +87,19 @@ export default function Home() {
       {featured.length > 0 && (
         <section className="section" style={{ paddingBottom: 0 }}>
           <div className="container">
-            <div className="section-header">
+            <div className="section-header scroll-reveal">
               <p className="section-tag">⚡ LIVE & UPCOMING</p>
               <h2 className="section-title">Featured <span className="text-glow">Tournaments</span></h2>
               <p className="section-subtitle">Jump straight into the most anticipated esports events of the season.</p>
             </div>
             <div className="tournaments-grid">
               {featured.map(t => (
-                <TournamentCard key={t.id} tournament={t} />
+                <div key={t.id} style={{ transitionDelay: '0.1s' }} className="scroll-reveal">
+                  <TournamentCard tournament={t} />
+                </div>
               ))}
             </div>
-            <div style={{ textAlign: 'center', marginTop: 40 }}>
+            <div style={{ textAlign: 'center', marginTop: 40 }} className="scroll-reveal">
               <Link to="/tournaments" className="btn btn-outline">
                 View All Tournaments →
               </Link>
@@ -109,14 +111,14 @@ export default function Home() {
       {/* GAMES */}
       <section className="section">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header scroll-reveal">
             <p className="section-tag">⚡ GAME TITLES</p>
             <h2 className="section-title">Every Arena. <span className="text-glow">One Platform.</span></h2>
             <p className="section-subtitle">From battle royales to strategy masters — compete in your domain.</p>
           </div>
           <div className="games-grid">
-            {GAMES.map(g => (
-              <Link key={g.name} to="/tournaments" className="game-card">
+            {GAMES.map((g, i) => (
+              <Link key={g.name} to="/tournaments" className="game-card scroll-reveal" style={{ transitionDelay: `${i * 0.1}s` }}>
                 <div className="game-card-img-wrapper" style={{ '--game-color': g.color }}>
                   <img src={g.img} alt={g.name} className="game-card-img" />
                 </div>
@@ -133,13 +135,13 @@ export default function Home() {
       {/* FEATURES */}
       <section className="section features-section">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header scroll-reveal">
             <p className="section-tag">⚡ PLATFORM FEATURES</p>
             <h2 className="section-title">Built for <span className="text-glow">Champions</span></h2>
           </div>
           <div className="features-grid">
-            {FEATURES.map(f => (
-              <div key={f.title} className="feature-card">
+            {FEATURES.map((f, i) => (
+              <div key={f.title} className="feature-card scroll-reveal" style={{ transitionDelay: `${i * 0.1}s` }}>
                 <div className="feature-icon">{f.icon}</div>
                 <h3 className="feature-title">{f.title}</h3>
                 <p className="feature-desc">{f.desc}</p>
@@ -152,7 +154,7 @@ export default function Home() {
       {/* CTA BANNER */}
       <section className="section cta-section">
         <div className="container">
-          <div className="cta-banner">
+          <div className="cta-banner scroll-reveal">
             <div className="cta-banner-glow" />
             <div className="cta-content">
               <p className="section-tag">⚡ JOIN THE ELITE</p>

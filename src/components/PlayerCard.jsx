@@ -4,17 +4,17 @@ import './PlayerCard.css';
 /* ── Inline SVG icons per game type ─────────────────── */
 function IconCrosshair() {
   return (
-    <svg viewBox="0 0 24 24" style={{ width: '100%', height: '100%', fill: 'none', stroke: '#FFD700', strokeWidth: 1.5 }}>
+    <svg viewBox="0 0 24 24" style={{ width: '100%', height: '100%', fill: 'none', stroke: 'var(--card-accent)', strokeWidth: 1.5 }}>
       <circle cx="12" cy="12" r="6" />
       <path d="M12 2v4M12 18v4M2 12h4M18 12h4" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="1" fill="#FFD700" stroke="none" />
+      <circle cx="12" cy="12" r="1" fill="var(--card-accent)" stroke="none" />
     </svg>
   );
 }
 
 function IconStar() {
   return (
-    <svg viewBox="0 0 24 24" style={{ width: '100%', height: '100%', fill: 'none', stroke: '#FFD700', strokeWidth: 1.5, strokeLinejoin: 'round' }}>
+    <svg viewBox="0 0 24 24" style={{ width: '100%', height: '100%', fill: 'none', stroke: 'var(--card-accent)', strokeWidth: 1.5, strokeLinejoin: 'round' }}>
       <path d="M12 2l3 6.5 7 1-5 5 1.5 7-6.5-3.5-6.5 3.5 1.5-7-5-5 7-1z" />
     </svg>
   );
@@ -22,7 +22,7 @@ function IconStar() {
 
 function IconGamepad() {
   return (
-    <svg viewBox="0 0 24 24" style={{ width: '100%', height: '100%', fill: '#FFD700' }}>
+    <svg viewBox="0 0 24 24" style={{ width: '100%', height: '100%', fill: 'var(--card-accent)' }}>
       <path d="M21.5 9.5c-1-4.5-3-6.5-9.5-6.5S3.5 5 2.5 9.5C2 12 1.5 15.5 1.5 17c0 1.5 1 2 2.5 1s2.5-3 5.5-3h5c3 0 4 2 5.5 3s2.5-.5 2.5-2c0-1.5-.5-5-1-7.5zM7.5 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm9 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
       <circle cx="16.5" cy="10" r="1" fill="#111"/>
       <circle cx="7.5" cy="10" r="1" fill="#111"/>
@@ -47,7 +47,7 @@ const BG_IMAGES = {
 function TopSparkle() {
   return (
     <svg viewBox="0 0 16 16" style={{ width: '9px', height: '9px' }}>
-      <path d="M8 0 Q8 6 14 8 Q8 10 8 16 Q8 10 2 8 Q8 6 8 0Z" fill="#FFD700" />
+      <path d="M8 0 Q8 6 14 8 Q8 10 8 16 Q8 10 2 8 Q8 6 8 0Z" fill="var(--card-accent)" />
       <circle cx="8" cy="8" r="3" fill="#fff" />
     </svg>
   );
@@ -80,17 +80,17 @@ export function PlayerCard({ profile }) {
         <div className="pc-body-wrap">
           {/* Left: ID & Name */}
           <div className="pc-left-col">
-            <div className="pc-id-label">Player username:</div>
+            <div className="pc-id-label">PLAYER USERNAME</div>
             <div className="pc-player-name" style={{ color: accentColor }}>{profile?.playerName || 'GAMER'}</div>
             
             <div className="pc-id-divider" />
             
-            <div className="pc-id-label" style={{ marginTop: '2px' }}>player uid:</div>
+            <div className="pc-id-label" style={{ marginTop: '2px' }}>PLAYER UID</div>
             <div className="pc-id-val">{profile?.playerId || '0000000000'}</div>
             
             <div className="pc-id-divider" />
             
-            <div className="pc-id-label" style={{ marginTop: '2px' }}>Player Name:</div>
+            <div className="pc-id-label" style={{ marginTop: '2px' }}>PLAYER NAME</div>
             <div className="pc-player-fullname">{profile?.fullName || 'AKSHAT SRIVASTAVA'}</div>
           </div>
 

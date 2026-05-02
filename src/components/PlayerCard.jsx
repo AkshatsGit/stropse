@@ -168,7 +168,7 @@ export function PlayerCard({ profile }) {
         {/* Footer */}
         <div className="pc-footer">
           <div className="pc-footer-title">
-            <span>✦</span> OFFICIAL {gameKey.toUpperCase()} CARD <span>✦</span>
+            <span>✦</span> Officially maintained by Stropse Association <span>✦</span>
           </div>
           <div className="pc-footer-id">
             ID: 8651{profile.playerId?.substring(0, 6) || 'XXXXXX'}

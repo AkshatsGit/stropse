@@ -51,16 +51,15 @@
 
 /* Card */
 .t-card {
-  background: var(--bg-card);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 8px;
-  padding: 24px;
+  background: #050505;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  text-decoration: none;
 }
 
 .t-card::after {
@@ -85,11 +84,9 @@
 .t-card-banner {
   width: 100%;
   aspect-ratio: 4/3;
-  border-radius: 6px;
   overflow: hidden;
-  margin-bottom: 8px;
   background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,66 +95,104 @@
 .t-card-banner img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Prevents image from being cut/cropped */
+  object-fit: contain;
+}
+
+.t-card-content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
 }
 
 .t-card-top { display: flex; align-items: center; justify-content: space-between; }
 
-.t-card-game { display: flex; align-items: center; gap: 8px; }
+.t-card-game { display: flex; align-items: center; gap: 12px; }
 
-.t-card-icon { font-size: 20px; }
+.t-card-icon { font-size: 24px; }
 
 .t-card-type {
   font-family: 'Orbitron', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--grey-600);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--grey-500);
   text-transform: uppercase;
 }
 
+.t-card-status {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--t-color, #FFD700);
+  color: var(--t-color, #FFD700);
+  background: rgba(255,215,0,0.05);
+}
+
+.status-live { border-color: #ff3333; color: #ff3333; background: rgba(255,51,51,0.05); }
+.status-ended { border-color: var(--grey-600); color: var(--grey-500); background: rgba(255,255,255,0.05); }
+
 .t-card-title {
   font-family: 'Orbitron', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   color: var(--white);
-  letter-spacing: 0.03em;
-  line-height: 1.4;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
 .t-card-meta {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 16px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 6px;
+  gap: 16px;
+  padding: 20px;
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  margin-top: 8px;
 }
 
 .t-meta-item { display: flex; align-items: center; justify-content: space-between; }
 
+.t-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .t-meta-label {
   font-family: 'Orbitron', sans-serif;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.2em;
-  color: var(--grey-600);
+  color: var(--grey-500);
   text-transform: uppercase;
+  margin-top: 2px;
 }
 
 .t-meta-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.t-meta-highlight {
+  font-weight: 900;
+}
+
+.t-card-footer { margin-top: auto; padding-top: 12px; }
+
+.t-card-cta {
   font-family: 'Rajdhani', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: var(--grey-200);
-}
-
-.t-card-footer { margin-top: auto; padding-top: 8px; }
-
-.t-card-cta {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--grey-600);
+  letter-spacing: 1px;
+  color: var(--grey-500);
   text-transform: uppercase;
   transition: color 0.2s ease;
 }

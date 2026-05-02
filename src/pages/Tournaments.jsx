@@ -146,39 +146,50 @@ function TournamentCard({ tournament: t }) {
           <img src={t.bannerUrl} alt={`${t.title} banner`} loading="lazy" />
         </div>
       )}
-      <div className="t-card-top">
-        <div className="t-card-game">
-          {GAME_IMGS[t.gameType] ? (
-             <img src={GAME_IMGS[t.gameType]} alt="" className="t-card-icon-img" style={{width: 24, height: 24, objectFit: 'cover', borderRadius: 4, filter: `drop-shadow(0 0 4px ${color})`}} />
-          ) : <span className="t-card-icon">🎮</span>}
-          <span className="t-card-type">{t.gameType}</span>
+      <div className="t-card-content">
+        <div className="t-card-top">
+          <div className="t-card-game">
+            {GAME_IMGS[t.gameType] ? (
+               <img src={GAME_IMGS[t.gameType]} alt="" className="t-card-icon-img" style={{width: 28, height: 28, objectFit: 'cover', borderRadius: 4, filter: `drop-shadow(0 0 8px ${color})`}} />
+            ) : <span className="t-card-icon">🎮</span>}
+            <span className="t-card-type">{t.gameType}</span>
+          </div>
+          <div className={`t-card-status ${isLive ? 'status-live' : isPast ? 'status-ended' : 'status-upcoming'}`}>
+            {isLive ? 'LIVE' : isPast ? 'ENDED' : 'UPCOMING'}
+          </div>
         </div>
-        <span className={`badge ${isLive ? 'badge-success' : isPast ? 'badge-grey' : 'badge-primary'}`}>
-          {isLive ? '🔴 LIVE' : isPast ? 'ENDED' : 'UPCOMING'}
-        </span>
-      </div>
 
-      <h3 className="t-card-title">{t.title}</h3>
+        <h3 className="t-card-title">{t.title}</h3>
 
-      <div className="t-card-meta">
-        <div className="t-meta-item">
-          <span className="t-meta-label">📅 DATE</span>
-          <span className="t-meta-value">
-            {tDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </span>
+        <div className="t-card-meta">
+          <div className="t-meta-item">
+            <div className="t-meta-left">
+              <span style={{ fontSize: 14 }}>🗓️</span>
+              <span className="t-meta-label">DATE</span>
+            </div>
+            <span className="t-meta-value">
+              {tDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
+          </div>
+          <div className="t-meta-item">
+            <div className="t-meta-left">
+              <span style={{ fontSize: 14 }}>💰</span>
+              <span className="t-meta-label">PRIZE</span>
+            </div>
+            <span className="t-meta-value t-meta-highlight" style={{ color }}>{t.prizePool || '—'}</span>
+          </div>
+          <div className="t-meta-item">
+            <div className="t-meta-left">
+              <span style={{ fontSize: 14 }}>🎫</span>
+              <span className="t-meta-label">ENTRY</span>
+            </div>
+            <span className="t-meta-value">{t.entryFee || 'Free'}</span>
+          </div>
         </div>
-        <div className="t-meta-item">
-          <span className="t-meta-label">💰 PRIZE</span>
-          <span className="t-meta-value" style={{ color }}>{t.prizePool || '—'}</span>
-        </div>
-        <div className="t-meta-item">
-          <span className="t-meta-label">🎫 ENTRY</span>
-          <span className="t-meta-value">{t.entryFee || 'Free'}</span>
-        </div>
-      </div>
 
-      <div className="t-card-footer">
-        <span className="t-card-cta">View Details →</span>
+        <div className="t-card-footer">
+          <span className="t-card-cta">VIEW DETAILS →</span>
+        </div>
       </div>
     </Link>
   );

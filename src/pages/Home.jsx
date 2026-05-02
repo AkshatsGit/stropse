@@ -1,5 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
+import { TournamentCard } from './Tournaments';
+import './Tournaments.css'; // Make sure card styles are loaded
 import './Home.css';
 
 
@@ -20,6 +24,18 @@ const FEATURES = [
 
 export default function Home() {
   const glitchRef = useRef(null);
+  const [featured, setFeatured] = useState([]);
+
+  useEffect(() => {
+    async function loadFeatured() {
+      try {
+        const q = query(collection(db, 'tournaments'), orderBy('createdAt', 'desc'), limit(3));
+        const snap = await getDocs(q);
+        setFeatured(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (e) { console.error(e); }
+    }
+    loadFeatured();
+  }, []);
 
   return (
     <div className="home">
@@ -66,6 +82,29 @@ export default function Home() {
           <span>SCROLL</span>
         </div>
       </section>
+
+      {/* FEATURED TOURNAMENTS */}
+      {featured.length > 0 && (
+        <section className="section" style={{ paddingBottom: 0 }}>
+          <div className="container">
+            <div className="section-header">
+              <p className="section-tag">⚡ LIVE & UPCOMING</p>
+              <h2 className="section-title">Featured <span className="text-glow">Tournaments</span></h2>
+              <p className="section-subtitle">Jump straight into the most anticipated esports events of the season.</p>
+            </div>
+            <div className="tournaments-grid">
+              {featured.map(t => (
+                <TournamentCard key={t.id} tournament={t} />
+              ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: 40 }}>
+              <Link to="/tournaments" className="btn btn-outline">
+                View All Tournaments →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* GAMES */}
       <section className="section">

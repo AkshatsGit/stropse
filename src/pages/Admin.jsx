@@ -3,8 +3,7 @@ import {
   collection, addDoc, getDocs, deleteDoc, doc, updateDoc,
   query, orderBy, serverTimestamp
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db } from '../firebase';
 import { useToast } from '../contexts/ToastContext';
 import './Admin.css';
 
@@ -147,22 +146,49 @@ function TournamentManager({ toast }) {
     finally { setSaving(false); }
   }
 
-  async function handleImageUpload(e) {
+  function handleImageUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
     
     setUploadingImage(true);
-    try {
-      const storageRef = ref(storage, `tournaments/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      setForm(p => ({ ...p, bannerUrl: url }));
-      toast('Image uploaded successfully! 📸', 'success');
-    } catch (err) {
-      toast('Failed to upload image: ' + err.message, 'error');
-    } finally {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Compress image to max 800px width
+        const MAX_WIDTH = 800;
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to lightweight base64 JPEG
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        
+        setForm(p => ({ ...p, bannerUrl: compressedBase64 }));
+        setUploadingImage(false);
+        toast('Image processed and ready! 📸', 'success');
+      };
+      img.onerror = () => {
+        setUploadingImage(false);
+        toast('Failed to read image file', 'error');
+      };
+      img.src = event.target.result;
+    };
+    reader.onerror = () => {
       setUploadingImage(false);
-    }
+      toast('Failed to read file', 'error');
+    };
+    reader.readAsDataURL(file);
   }
 
   async function handleDelete(id) {

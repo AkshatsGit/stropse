@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { doc, updateDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -398,8 +398,8 @@ export default function TypeGame() {
   }, [gameDoc?.status, certDataUrl]);
 
   return (
-    <div className="chess-page">
-      <div className="container" style={{ maxWidth: 800 }}>
+    <div style={{ minHeight: '80vh', padding: '40px 24px 80px' }}>
+      <div style={{ maxWidth: 820, margin: '0 auto' }}>
 
         {/* Header */}
         <div className="flex-between" style={{ marginBottom: 24 }}>

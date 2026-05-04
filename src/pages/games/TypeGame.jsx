@@ -190,7 +190,7 @@ export default function TypeGame() {
             <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Start a Race</h2>
             <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
               <button className="btn btn-primary btn-lg" onClick={handleCreateGame} disabled={creating || !user}>
-                {creating ? 'Creating...' : (user ? 'âš¡ Create 1v1 Race' : 'Log in to Play')}
+                {creating ? 'Creating...' : (user ? 'Create 1v1 Race' : 'Log in to Play')}
               </button>
               <button className="btn btn-outline btn-lg" style={{ borderColor: '#00ffff', color: '#00ffff' }} onClick={handleCreateSoloGame} disabled={creating || !user}>
                 {creating ? '...' : 'Solo Speed Test'}

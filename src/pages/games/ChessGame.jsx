@@ -235,14 +235,25 @@ export default function ChessGame() {
         setOptionSquares({});
         setMoveFrom('');
 
-        updateDoc(doc(db, 'chessGames', gameId), {
+        let matchWinner = null;
+        if (optimisticGame.isCheckmate()) {
+          matchWinner = optimisticGame.turn() === 'w' ? 'black' : 'white';
+        } else if (optimisticGame.isDraw()) {
+          matchWinner = 'draw';
+        }
+
+        const updates = {
           fen: newFen,
           history: newHistory,
           status: optimisticGame.isGameOver() ? 'completed' : 'playing',
           whiteTime: newWhiteTime,
           blackTime: newBlackTime,
           lastMoveAt: now
-        });
+        };
+        
+        if (matchWinner) updates.winner = matchWinner;
+
+        updateDoc(doc(db, 'chessGames', gameId), updates);
         
         return true;
       }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc,
+  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, getDoc,
   query, orderBy, serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -885,6 +885,133 @@ function ChessTournamentManager({ toast }) {
     toast('Bracket generated and matches live!', 'success');
   }
 
+  async function syncResults(tid, tData) {
+    if (!tData.matches) return;
+    const updatedMatches = [...tData.matches];
+    let changed = false;
+    for (let m of updatedMatches) {
+      if (!m.winner && m.boardId) {
+        const boardSnap = await getDoc(doc(db, 'chessGames', m.boardId));
+        if (boardSnap.exists()) {
+          const bData = boardSnap.data();
+          if (bData.status === 'completed') {
+            if (bData.winner === 'white') m.winner = bData.whitePlayer;
+            else if (bData.winner === 'black') m.winner = bData.blackPlayer;
+            else m.winner = bData.whitePlayer; // fallback draw to white for MVP
+            changed = true;
+          }
+        }
+      }
+    }
+    if (changed) {
+      await updateDoc(doc(db, 'chessTournaments', tid), { matches: updatedMatches });
+      toast('Synced latest match results!', 'success');
+    } else {
+      toast('No new results available.', 'info');
+    }
+  }
+
+  async function generateNextRound(tid, tData) {
+    if (!tData.matches || tData.matches.length === 0) return;
+    const currentRound = Math.max(...tData.matches.map(m => m.round));
+    const currentRoundMatches = tData.matches.filter(m => m.round === currentRound);
+    
+    if (currentRoundMatches.some(m => !m.winner)) {
+      toast('Not all matches in this round are completed!', 'error');
+      return;
+    }
+
+    const winners = currentRoundMatches.map(m => {
+       if (m.winner === m.player1?.uid) return m.player1;
+       if (m.winner === m.player2?.uid) return m.player2;
+       return null;
+    }).filter(Boolean);
+
+    if (winners.length === 1) {
+      await updateDoc(doc(db, 'chessTournaments', tid), {
+        status: 'completed',
+        tournamentWinner: winners[0]
+      });
+      toast(`Tournament Complete! Winner: ${winners[0].name}`, 'success');
+      return;
+    }
+
+    const newMatches = [...tData.matches];
+    for (let i = 0; i < winners.length; i += 2) {
+      const p1 = winners[i];
+      const p2 = winners[i+1];
+      
+      if (!p2) {
+        newMatches.push({ matchId: `R${currentRound+1}-M${i}`, round: currentRound + 1, player1: p1, player2: null, boardId: null, winner: p1.uid });
+        continue;
+      }
+
+      const boardId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      await setDoc(doc(db, 'chessGames', boardId), {
+        fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        history: [],
+        whitePlayer: p1.uid,
+        blackPlayer: p2.uid,
+        status: 'playing',
+        mode: 'rapid', 
+        whiteTime: 600,
+        blackTime: 600,
+        lastMoveAt: Date.now(),
+        createdAt: serverTimestamp()
+      });
+      
+      newMatches.push({ matchId: `R${currentRound+1}-M${i}`, round: currentRound + 1, player1: p1, player2: p2, boardId, winner: null });
+    }
+
+    await updateDoc(doc(db, 'chessTournaments', tid), { matches: newMatches });
+    toast(`Round ${currentRound + 1} generated!`, 'success');
+  }
+
+  function renderBracket(t) {
+    if (!t.matches) return null;
+    const rounds = {};
+    t.matches.forEach(m => {
+      if (!rounds[m.round]) rounds[m.round] = [];
+      rounds[m.round].push(m);
+    });
+
+    return (
+      <div style={{ display: 'flex', gap: 40, overflowX: 'auto', padding: '24px 0' }}>
+        {Object.entries(rounds).map(([roundNum, matches]) => (
+          <div key={roundNum} style={{ display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center' }}>
+            <h4 style={{ color: '#FFD700', fontFamily: 'Orbitron', textAlign: 'center', marginBottom: 16 }}>Round {roundNum}</h4>
+            {matches.map(m => (
+              <div key={m.matchId} style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 8, padding: 12, minWidth: 200, position: 'relative' }}>
+                <div style={{ padding: 4, borderBottom: '1px solid rgba(255,255,255,0.05)', color: m.winner === m.player1?.uid ? '#00f260' : '#fff' }}>
+                  {m.player1?.name || 'TBD'}
+                </div>
+                <div style={{ padding: 4, color: m.winner === m.player2?.uid ? '#00f260' : '#fff' }}>
+                  {m.player2 ? m.player2.name : 'BYE'}
+                </div>
+                <div style={{ marginTop: 8, textAlign: 'center' }}>
+                  {m.winner ? (
+                    <span style={{ color: '#00f260', fontSize: 10, fontFamily: 'Orbitron' }}>COMPLETED</span>
+                  ) : m.boardId ? (
+                    <span style={{ color: '#00ffff', fontSize: 10, fontFamily: 'Orbitron' }}>Board: {m.boardId}</span>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+        {t.status === 'completed' && t.tournamentWinner && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center' }}>
+            <h4 style={{ color: '#FFD700', fontFamily: 'Orbitron', textAlign: 'center', marginBottom: 16 }}>Champion</h4>
+            <div style={{ background: 'rgba(0,242,96,0.1)', border: '2px solid #00f260', borderRadius: 8, padding: 24, minWidth: 200, textAlign: 'center', boxShadow: '0 0 30px rgba(0,242,96,0.3)' }}>
+              <span style={{ fontSize: 40 }}>🏆</span><br/>
+              <strong style={{ color: '#00f260', fontFamily: 'Orbitron', fontSize: 20 }}>{t.tournamentWinner.name}</strong>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (loading) return <div className="spinner"></div>;
 
   return (
@@ -925,22 +1052,38 @@ function ChessTournamentManager({ toast }) {
               </div>
             )}
 
-            {t.status === 'active' && (
+            {(t.status === 'active' || t.status === 'completed') && (
               <div>
-                <h4 style={{ fontFamily: 'Orbitron', color: '#FFD700', marginBottom: 12 }}>Live Matches</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {t.matches?.map(m => (
-                    <div key={m.matchId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.5)', padding: 12, borderRadius: 8 }}>
-                      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                        <span style={{ color: m.winner === m.player1?.uid ? '#00f260' : '#fff' }}>{m.player1?.name}</span>
-                        <span style={{ color: 'var(--grey-500)' }}>vs</span>
-                        <span style={{ color: m.winner === m.player2?.uid ? '#00f260' : '#fff' }}>{m.player2 ? m.player2.name : 'BYE'}</span>
-                      </div>
-                      <div style={{ fontFamily: 'Orbitron', fontSize: 12 }}>
-                        {m.winner ? <span style={{ color: '#00f260' }}>Completed</span> : <span style={{ color: '#00ffff' }}>Board: {m.boardId}</span>}
-                      </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <h4 style={{ fontFamily: 'Orbitron', color: '#FFD700' }}>Live Tournament Web</h4>
+                  {t.status === 'active' && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-outline btn-sm" onClick={() => syncResults(t.id, t)}>🔄 Sync Results</button>
+                      <button className="btn btn-primary btn-sm" onClick={() => generateNextRound(t.id, t)}>▶ Next Round</button>
                     </div>
-                  ))}
+                  )}
+                </div>
+                
+                <div style={{ background: 'rgba(25,25,25,0.8)', padding: 24, borderRadius: 12, overflowX: 'auto', border: '1px solid rgba(255,215,0,0.1)' }}>
+                  {renderBracket(t)}
+                </div>
+
+                <div style={{ marginTop: 24 }}>
+                  <h5 style={{ fontFamily: 'Orbitron', color: '#fff', marginBottom: 12 }}>Match Overview</h5>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {t.matches?.map(m => (
+                      <div key={m.matchId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.5)', padding: 12, borderRadius: 8 }}>
+                        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                          <span style={{ color: m.winner === m.player1?.uid ? '#00f260' : '#fff' }}>{m.player1?.name}</span>
+                          <span style={{ color: 'var(--grey-500)' }}>vs</span>
+                          <span style={{ color: m.winner === m.player2?.uid ? '#00f260' : '#fff' }}>{m.player2 ? m.player2.name : 'BYE'}</span>
+                        </div>
+                        <div style={{ fontFamily: 'Orbitron', fontSize: 12 }}>
+                          {m.winner ? <span style={{ color: '#00f260' }}>Completed</span> : <span style={{ color: '#00ffff' }}>Board: {m.boardId}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

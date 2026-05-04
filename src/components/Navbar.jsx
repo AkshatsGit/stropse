@@ -26,6 +26,7 @@ export default function Navbar() {
     { to: '/', label: 'Home' },
     { to: '/tournaments', label: 'Tournaments' },
     { to: '/game-profiles', label: 'Game Profiles' },
+    { to: '/games', label: 'Games' },
     { to: '/community', label: 'Community' },
   ];
 

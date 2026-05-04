@@ -15,6 +15,9 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Auth = lazy(() => import('./pages/Auth'));
 const Admin = lazy(() => import('./pages/Admin'));
 const CardView = lazy(() => import('./pages/CardView'));
+const GamesLobby = lazy(() => import('./pages/games/GamesLobby'));
+const ChessGame = lazy(() => import('./pages/games/ChessGame'));
+const SudokuGame = lazy(() => import('./pages/games/SudokuGame'));
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -75,6 +78,9 @@ function AppRoutes() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/card/:profileId" element={<CardView />} />
+            <Route path="/games" element={<GamesLobby />} />
+            <Route path="/games/chess" element={<ChessGame />} />
+            <Route path="/games/sudoku" element={<SudokuGame />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

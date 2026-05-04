@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -8,11 +8,19 @@ export default function Auth() {
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' });
-  const { login, signup, loginWithGoogle, user } = useAuth();
+  const { login, signup, loginWithGoogle, user, loading: authLoading } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
-  if (user) { navigate('/'); return null; }
+  // Safely redirect in effect, not during render
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  // Don't flash login form while auth state is being determined
+  if (authLoading) return null;
 
   function handleChange(e) {
     setForm(p => ({ ...p, [e.target.name]: e.target.value }));

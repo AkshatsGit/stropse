@@ -120,11 +120,16 @@ export default function ChessGame() {
         const newFen = game.fen();
         const newHistory = [...moveHistory, { san: move.san, from: sourceSquare, to: targetSquare }];
         
-        // Push to Firebase
+        // Optimistic UI Update for zero latency feel
+        const optimisticGame = new Chess(newFen);
+        setGame(optimisticGame);
+        setMoveHistory(newHistory);
+
+        // Push to Firebase asynchronously
         updateDoc(doc(db, 'chessGames', gameId), {
           fen: newFen,
           history: newHistory,
-          status: game.isGameOver() ? 'completed' : 'playing'
+          status: optimisticGame.isGameOver() ? 'completed' : 'playing'
         });
         
         return true;
@@ -201,20 +206,24 @@ export default function ChessGame() {
             {/* STROPSE Faded Logo Background & Board Wrapper */}
             <div style={{ position: 'relative', width: 'min(500px, 90vw)', border: '2px solid rgba(255,215,0,0.3)', borderRadius: 8, boxShadow: '0 0 40px rgba(255,215,0,0.1)' }}>
               
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>
-                <img src="/stropse-seal.png" alt="" style={{ width: '60%', opacity: 0.1, filter: 'drop-shadow(0 0 20px #FFD700)' }} />
-              </div>
-
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <Chessboard 
                   position={game.fen()} 
                   onPieceDrop={onDrop}
                   boardOrientation={boardOrientation}
-                  animationDuration={300}
+                  animationDuration={100}
                   customDarkSquareStyle={{ backgroundColor: '#1a1a1a' }}
                   customLightSquareStyle={{ backgroundColor: '#333333' }}
                   arePiecesDraggable={gameDoc?.status === 'playing' && myTurn}
                 />
+              </div>
+
+              {/* Faded SVG Logo Overlay */}
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10 }}>
+                <svg width="60%" viewBox="0 0 100 100" fill="none" style={{ opacity: 0.1, filter: 'drop-shadow(0 0 20px #FFD700)' }}>
+                  <circle cx="50" cy="50" r="46" stroke="#FFD700" strokeWidth="2.5"/>
+                  <path d="M30 75 L50 20 L62 50 L50 45 L70 75" fill="#FFD700"/>
+                </svg>
               </div>
 
               {gameDoc?.status === 'waiting' && (

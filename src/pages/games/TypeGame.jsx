@@ -232,61 +232,180 @@ export default function TypeGame() {
 
   function downloadCertificate() {
     const canvas = document.createElement('canvas');
-    canvas.width = 1000;
-    canvas.height = 700;
+    canvas.width = 1200;
+    canvas.height = 800;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0, 0, 1000, 700);
+    // 1. Background
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, 1200, 800);
 
-    ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(20, 20, 960, 660);
-    ctx.strokeStyle = 'rgba(255,215,0,0.3)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(32, 32, 936, 636);
-
+    // Subtle background logo
     const img = new Image();
     img.src = '/stropse-seal.png';
     img.onload = () => {
-      ctx.globalAlpha = 0.15;
-      ctx.drawImage(img, 250, 100, 500, 500);
-      
+      ctx.globalAlpha = 0.05;
+      ctx.drawImage(img, 300, 150, 600, 600);
       ctx.globalAlpha = 1.0;
-      
+
+      // 2. Borders (Outer Chamfered)
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(80, 40);
+      ctx.lineTo(1120, 40);
+      ctx.lineTo(1160, 80);
+      ctx.lineTo(1160, 720);
+      ctx.lineTo(1120, 760);
+      ctx.lineTo(80, 760);
+      ctx.lineTo(40, 720);
+      ctx.lineTo(40, 80);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Inner border
+      ctx.strokeStyle = 'rgba(255,215,0,0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(90, 55);
+      ctx.lineTo(1110, 55);
+      ctx.lineTo(1145, 90);
+      ctx.lineTo(1145, 710);
+      ctx.lineTo(1110, 745);
+      ctx.lineTo(90, 745);
+      ctx.lineTo(55, 710);
+      ctx.lineTo(55, 90);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Corner accents
       ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 54px "Orbitron", sans-serif';
+      const drawCornerAccent = (x, y, dx, dy) => {
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      drawCornerAccent(80, 40); drawCornerAccent(1120, 40);
+      drawCornerAccent(1160, 80); drawCornerAccent(1160, 720);
+      drawCornerAccent(1120, 760); drawCornerAccent(80, 760);
+      drawCornerAccent(40, 720); drawCornerAccent(40, 80);
+
+      // 3. Top Logo & Title
+      ctx.globalAlpha = 1.0;
+      ctx.drawImage(img, 550, 60, 100, 100); // Top center logo
+
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 32px "Orbitron", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('STROPSE', 500, 120);
+      ctx.fillText('STROPSE', 600, 190);
+
+      ctx.fillStyle = '#aaaaaa';
+      ctx.font = '16px "Rajdhani", sans-serif';
+      ctx.letterSpacing = '4px';
+      ctx.fillText('OFFICIAL ESPORTS CERTIFICATION', 600, 220);
+
+      // Lines next to Cyber Typer
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(250, 290); ctx.lineTo(350, 290); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(850, 290); ctx.lineTo(950, 290); ctx.stroke();
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = '32px "Rajdhani", sans-serif';
-      ctx.fillText('OFFICIAL ESPORTS CERTIFICATION', 500, 170);
+      ctx.font = 'bold 56px "Orbitron", sans-serif';
+      ctx.shadowColor = 'rgba(255,255,255,0.5)';
+      ctx.shadowBlur = 15;
+      ctx.fillText('CYBER TYPER', 600, 310);
+      ctx.shadowBlur = 0;
 
-      ctx.fillStyle = '#00ffff';
-      ctx.font = 'bold 64px "Orbitron", sans-serif';
-      ctx.fillText('CYBER TYPER', 500, 280);
+      // 4. Recipient
+      ctx.fillStyle = '#aaaaaa';
+      ctx.font = '18px "Orbitron", sans-serif';
+      ctx.fillText('THIS CERTIFIES THAT', 600, 390);
+
+      // Create Gold Gradient for Name
+      const gradient = ctx.createLinearGradient(0, 410, 0, 460);
+      gradient.addColorStop(0, '#FFE866');
+      gradient.addColorStop(0.5, '#FFD700');
+      gradient.addColorStop(1, '#B8860B');
+      
+      ctx.fillStyle = gradient;
+      ctx.font = 'bold 54px "Orbitron", sans-serif';
+      ctx.shadowColor = 'rgba(255,215,0,0.3)';
+      ctx.shadowBlur = 10;
+      ctx.fillText(gameDoc?.player1Name?.toUpperCase() || 'PLAYER', 600, 450);
+      ctx.shadowBlur = 0;
+
+      // 5. WPM Section
+      ctx.fillStyle = '#aaaaaa';
+      ctx.font = '18px "Orbitron", sans-serif';
+      ctx.fillText('HAS ACHIEVED A TYPING SPEED OF', 600, 520);
+
+      // Hexagon/Chamfered box for WPM
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(380, 550);
+      ctx.lineTo(820, 550);
+      ctx.lineTo(850, 600);
+      ctx.lineTo(820, 650);
+      ctx.lineTo(380, 650);
+      ctx.lineTo(350, 600);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Inner faint box
+      ctx.strokeStyle = 'rgba(255,215,0,0.2)';
+      ctx.beginPath();
+      ctx.moveTo(385, 555);
+      ctx.lineTo(815, 555);
+      ctx.lineTo(842, 600);
+      ctx.lineTo(815, 645);
+      ctx.lineTo(385, 645);
+      ctx.lineTo(358, 600);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Side dashes
+      ctx.beginPath(); ctx.moveTo(280, 600); ctx.lineTo(330, 600); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(870, 600); ctx.lineTo(920, 600); ctx.stroke();
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = '24px "Orbitron", sans-serif';
-      ctx.fillText('This certifies that', 500, 380);
+      ctx.font = 'bold 72px "Orbitron", sans-serif';
+      ctx.shadowColor = 'rgba(255,255,255,0.4)';
+      ctx.shadowBlur = 20;
+      ctx.fillText(`${finalWPM} WPM`, 600, 625);
+      ctx.shadowBlur = 0;
 
-      ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 44px "Orbitron", sans-serif';
-      ctx.fillText(gameDoc?.player1Name?.toUpperCase() || 'PLAYER', 500, 440);
-
+      // 6. Footer
+      // Date
+      ctx.fillStyle = '#aaaaaa';
+      ctx.font = '14px "Rajdhani", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('DATE', 150, 715);
       ctx.fillStyle = '#ffffff';
-      ctx.font = '24px "Orbitron", sans-serif';
-      ctx.fillText('has achieved a typing speed of', 500, 500);
+      ctx.font = '18px "Orbitron", sans-serif';
+      ctx.fillText(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(), 150, 735);
 
-      ctx.fillStyle = '#00f260';
-      ctx.font = 'bold 80px "Orbitron", sans-serif';
-      ctx.fillText(finalWPM + ' WPM', 500, 580);
+      // Icon placeholder Date
+      ctx.strokeStyle = '#FFD700';
+      ctx.strokeRect(120, 710, 20, 20);
 
-      ctx.fillStyle = '#666666';
-      ctx.font = '16px monospace';
-      ctx.fillText('DATE: ' + new Date().toLocaleDateString() + ' | RACE ID: ' + gameId, 500, 650);
+      // Race ID
+      ctx.fillStyle = '#aaaaaa';
+      ctx.font = '14px "Rajdhani", sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('RACE ID', 1050, 715);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '18px "Orbitron", sans-serif';
+      ctx.fillText(gameId, 1050, 735);
 
+      // Icon placeholder ID
+      ctx.strokeRect(1060, 710, 20, 20);
+
+      // Bottom Center Logo
+      ctx.drawImage(img, 560, 680, 80, 80);
+
+      // Download
       const link = document.createElement('a');
       link.download = `Stropse_CyberTyper_${finalWPM}WPM.png`;
       link.href = canvas.toDataURL('image/png');
@@ -369,9 +488,9 @@ export default function TypeGame() {
                       </p>
                     )}
                     {gameDoc.isSolo && finalWPM > 0 && (
-                      <div style={{ marginTop: 16, background: 'rgba(0,255,255,0.1)', padding: '16px 32px', borderRadius: 12, border: '1px solid #00ffff' }}>
-                        <p style={{ color: '#00ffff', fontSize: 16, fontFamily: 'Orbitron', marginBottom: 4 }}>YOUR SPEED</p>
-                        <h1 style={{ color: '#fff', fontSize: 56, fontFamily: 'Orbitron', margin: 0, textShadow: '0 0 20px #00ffff' }}>{finalWPM} <span style={{ fontSize: 24, color: 'var(--grey-500)' }}>WPM</span></h1>
+                      <div style={{ marginTop: 16, background: 'rgba(255,215,0,0.05)', padding: '16px 32px', borderRadius: 12, border: '1px solid rgba(255,215,0,0.3)' }}>
+                        <p style={{ color: '#FFD700', fontSize: 16, fontFamily: 'Orbitron', marginBottom: 4 }}>YOUR SPEED</p>
+                        <h1 style={{ color: '#fff', fontSize: 56, fontFamily: 'Orbitron', margin: 0, textShadow: '0 0 20px rgba(255,215,0,0.5)' }}>{finalWPM} <span style={{ fontSize: 24, color: 'var(--grey-500)' }}>WPM</span></h1>
                       </div>
                     )}
                     {gameDoc.reason === 'resignation' && !gameDoc.isSolo && <p style={{ color: '#ff3333', marginTop: 8 }}>(By Resignation)</p>}
@@ -394,8 +513,8 @@ export default function TypeGame() {
                   
                   // Blinking cursor on current character
                   const isCurrent = i === inputVal.length;
-                  const borderBottom = isCurrent ? '3px solid #00ffff' : '3px solid transparent';
-                  const textShadow = isCurrent ? '0 0 10px #00ffff' : (color === '#00f260' ? '0 0 10px rgba(0,242,96,0.3)' : 'none');
+                  const borderBottom = isCurrent ? '3px solid #FFD700' : '3px solid transparent';
+                  const textShadow = isCurrent ? '0 0 10px #FFD700' : (color === '#00f260' ? '0 0 10px rgba(0,242,96,0.3)' : 'none');
 
                   return (
                     <span key={i} style={{ color, background, borderBottom, textShadow, padding: '0 2px', transition: 'color 0.1s' }}>

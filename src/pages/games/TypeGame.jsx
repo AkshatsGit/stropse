@@ -230,6 +230,70 @@ export default function TypeGame() {
     finalWPM = Math.round(words / minutes);
   }
 
+  function downloadCertificate() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1000;
+    canvas.height = 700;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, 1000, 700);
+
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(20, 20, 960, 660);
+    ctx.strokeStyle = 'rgba(255,215,0,0.3)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(32, 32, 936, 636);
+
+    const img = new Image();
+    img.src = '/stropse-seal.png';
+    img.onload = () => {
+      ctx.globalAlpha = 0.15;
+      ctx.drawImage(img, 250, 100, 500, 500);
+      
+      ctx.globalAlpha = 1.0;
+      
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 54px "Orbitron", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('STROPSE', 500, 120);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '32px "Rajdhani", sans-serif';
+      ctx.fillText('OFFICIAL ESPORTS CERTIFICATION', 500, 170);
+
+      ctx.fillStyle = '#00ffff';
+      ctx.font = 'bold 64px "Orbitron", sans-serif';
+      ctx.fillText('CYBER TYPER', 500, 280);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '24px "Orbitron", sans-serif';
+      ctx.fillText('This certifies that', 500, 380);
+
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 44px "Orbitron", sans-serif';
+      ctx.fillText(gameDoc?.player1Name?.toUpperCase() || 'PLAYER', 500, 440);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '24px "Orbitron", sans-serif';
+      ctx.fillText('has achieved a typing speed of', 500, 500);
+
+      ctx.fillStyle = '#00f260';
+      ctx.font = 'bold 80px "Orbitron", sans-serif';
+      ctx.fillText(finalWPM + ' WPM', 500, 580);
+
+      ctx.fillStyle = '#666666';
+      ctx.font = '16px monospace';
+      ctx.fillText('DATE: ' + new Date().toLocaleDateString() + ' | RACE ID: ' + gameId, 500, 650);
+
+      const link = document.createElement('a');
+      link.download = `Stropse_CyberTyper_${finalWPM}WPM.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+  }
+
   return (
     <div className="chess-page">
       <div className="container" style={{ maxWidth: 800 }}>
@@ -249,8 +313,8 @@ export default function TypeGame() {
 
         <div className="card" style={{ padding: 48, position: 'relative', overflow: 'hidden' }}>
           
-          <div style={{ position: 'absolute', right: -50, top: -50, opacity: 0.05, pointerEvents: 'none' }}>
-             <img src="/stropse-seal.png" alt="" style={{ width: 400 }} />
+          <div style={{ position: 'absolute', right: -100, top: -100, opacity: 0.03, pointerEvents: 'none' }}>
+             <img src="/stropse-seal.png" alt="" style={{ width: 600 }} />
           </div>
 
           {gameDoc?.status === 'waiting' && (
@@ -307,20 +371,34 @@ export default function TypeGame() {
                     {gameDoc.isSolo && finalWPM > 0 && (
                       <div style={{ marginTop: 16, background: 'rgba(0,255,255,0.1)', padding: '16px 32px', borderRadius: 12, border: '1px solid #00ffff' }}>
                         <p style={{ color: '#00ffff', fontSize: 16, fontFamily: 'Orbitron', marginBottom: 4 }}>YOUR SPEED</p>
-                        <h1 style={{ color: '#fff', fontSize: 48, fontFamily: 'Orbitron', margin: 0 }}>{finalWPM} <span style={{ fontSize: 24, color: 'var(--grey-500)' }}>WPM</span></h1>
+                        <h1 style={{ color: '#fff', fontSize: 56, fontFamily: 'Orbitron', margin: 0, textShadow: '0 0 20px #00ffff' }}>{finalWPM} <span style={{ fontSize: 24, color: 'var(--grey-500)' }}>WPM</span></h1>
                       </div>
                     )}
                     {gameDoc.reason === 'resignation' && !gameDoc.isSolo && <p style={{ color: '#ff3333', marginTop: 8 }}>(By Resignation)</p>}
+                    
+                    {gameDoc.isSolo && finalWPM > 0 && (
+                      <button className="btn btn-outline" style={{ marginTop: 24, borderColor: '#FFD700', color: '#FFD700', fontSize: 18 }} onClick={downloadCertificate}>
+                        📥 Download Official Certificate
+                      </button>
+                    )}
                   </div>
                 )}
 
                 {targetText.split('').map((char, i) => {
-                  let color = '#666';
+                  let color = '#555';
+                  let background = 'transparent';
                   if (i < inputVal.length) {
                     color = inputVal[i] === char ? '#00f260' : '#ff3333';
+                    if (inputVal[i] !== char) background = 'rgba(255,51,51,0.2)';
                   }
+                  
+                  // Blinking cursor on current character
+                  const isCurrent = i === inputVal.length;
+                  const borderBottom = isCurrent ? '3px solid #00ffff' : '3px solid transparent';
+                  const textShadow = isCurrent ? '0 0 10px #00ffff' : (color === '#00f260' ? '0 0 10px rgba(0,242,96,0.3)' : 'none');
+
                   return (
-                    <span key={i} style={{ color, background: i === inputVal.length ? 'rgba(255,255,255,0.1)' : 'transparent', textDecoration: i === inputVal.length ? 'underline' : 'none' }}>
+                    <span key={i} style={{ color, background, borderBottom, textShadow, padding: '0 2px', transition: 'color 0.1s' }}>
                       {char}
                     </span>
                   );

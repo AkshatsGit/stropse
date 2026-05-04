@@ -83,6 +83,7 @@
   font-weight: 900;
   line-height: 0.9;
   letter-spacing: -0.02em;
+  white-space: nowrap;
   /* Animation is per-letter via .neon-letter spans */
 }
 

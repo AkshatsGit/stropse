@@ -54,10 +54,9 @@ export default function Auth() {
       <div className="auth-container">
         {/* Brand */}
         <Link to="/" className="auth-brand">
-          <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="46" stroke="#FFD700" strokeWidth="2.5" opacity="0.8"/>
-            <path d="M30 75 L50 20 L62 50 L50 45 L70 75" fill="#FFD700"/>
-          </svg>
+          <div style={{ width: 40, height: 40, flexShrink: 0 }}>
+            <img src="/stropse-seal.png" alt="STROPSE" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 0 8px rgba(255,215,0,0.5))' }} />
+          </div>
           <span className="auth-brand-name">STROPSE</span>
         </Link>
 

@@ -206,9 +206,9 @@
 
 .t-meta-label {
   font-family: 'Orbitron', sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.1em;
   color: var(--grey-300);
   text-transform: uppercase;
 }
@@ -221,14 +221,14 @@
 
 .t-meta-value {
   font-family: 'Orbitron', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--white);
 }
 
 .t-meta-highlight {
-  font-size: 16px;
-  text-shadow: 0 0 10px rgba(255,215,0,0.3);
+  font-size: 20px;
+  text-shadow: 0 0 14px rgba(255,215,0,0.5);
 }
 
 .t-meta-arrow {

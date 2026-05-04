@@ -436,11 +436,11 @@ export default function TypeGame() {
               <div style={{ marginBottom: 40 }}>
                 <div style={{ marginBottom: 24 }}>
                   <div className="flex-between" style={{ marginBottom: 8, fontFamily: 'Orbitron' }}>
-                    <span style={{ color: '#00f260' }}>{gameDoc?.isSolo ? 'Your Progress' : `${gameDoc?.player1Name} ${gameDoc?.player1 === user?.uid ? '(You)' : ''}`}</span>
+                    <span style={{ color: '#FFD700' }}>{gameDoc?.isSolo ? 'Your Progress' : `${gameDoc?.player1Name} ${gameDoc?.player1 === user?.uid ? '(You)' : ''}`}</span>
                     <span>{Math.round(p1Pct)}%</span>
                   </div>
                   <div style={{ background: '#222', height: 12, borderRadius: 6, overflow: 'hidden' }}>
-                    <div style={{ background: '#00f260', height: '100%', width: `${p1Pct}%`, transition: 'width 0.1s linear' }} />
+                    <div style={{ background: '#FFD700', height: '100%', width: `${p1Pct}%`, transition: 'width 0.1s linear' }} />
                   </div>
                 </div>
 
@@ -464,7 +464,7 @@ export default function TypeGame() {
                     <h2 style={{ fontFamily: 'Orbitron', color: '#FFD700', fontSize: 40, marginBottom: 12 }}>{gameDoc.isSolo ? 'TEST COMPLETE' : 'RACE FINISHED'}</h2>
                     {!gameDoc.isSolo && (
                       <p style={{ color: '#fff', fontSize: 20 }}>
-                        Winner: <span style={{ color: '#00f260' }}>{gameDoc.winner === gameDoc.player1 ? gameDoc.player1Name : gameDoc.player2Name}</span>
+                        Winner: <span style={{ color: '#FFD700' }}>{gameDoc.winner === gameDoc.player1 ? gameDoc.player1Name : gameDoc.player2Name}</span>
                       </p>
                     )}
                     {gameDoc.isSolo && finalWPM > 0 && (
@@ -495,14 +495,14 @@ export default function TypeGame() {
                   let color = '#555';
                   let background = 'transparent';
                   if (i < inputVal.length) {
-                    color = inputVal[i] === char ? '#00f260' : '#ff3333';
+                    color = inputVal[i] === char ? '#FFD700' : '#ff3333';
                     if (inputVal[i] !== char) background = 'rgba(255,51,51,0.2)';
                   }
                   
                   // Blinking cursor on current character
                   const isCurrent = i === inputVal.length;
                   const borderBottom = isCurrent ? '3px solid #FFD700' : '3px solid transparent';
-                  const textShadow = isCurrent ? '0 0 10px #FFD700' : (color === '#00f260' ? '0 0 10px rgba(0,242,96,0.3)' : 'none');
+                  const textShadow = isCurrent ? '0 0 10px #FFD700' : (color === '#FFD700' ? '0 0 10px rgba(255,215,0,0.4)' : 'none');
 
                   return (
                     <span key={i} style={{ color, background, borderBottom, textShadow, padding: '0 2px', transition: 'color 0.1s' }}>

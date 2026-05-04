@@ -4,26 +4,20 @@ import './Games.css';
 const PUZZLES = [
   {
     initial: [
-      5,3,0,0,7,0,0,0,0,
-      6,0,0,1,9,5,0,0,0,
-      0,9,8,0,0,0,0,6,0,
-      8,0,0,0,6,0,0,0,3,
-      4,0,0,8,0,3,0,0,1,
-      7,0,0,0,2,0,0,0,6,
-      0,6,0,0,0,0,2,8,0,
-      0,0,0,4,1,9,0,0,5,
-      0,0,0,0,8,0,0,7,9
+      1, 0, 0, 0, 0, 6,
+      0, 0, 6, 0, 3, 0,
+      0, 2, 0, 0, 0, 0,
+      0, 0, 0, 5, 0, 0,
+      0, 6, 0, 2, 0, 0,
+      4, 0, 0, 0, 0, 1
     ],
     solution: [
-      5,3,4,6,7,8,9,1,2,
-      6,7,2,1,9,5,3,4,8,
-      1,9,8,3,4,2,5,6,7,
-      8,5,9,7,6,1,4,2,3,
-      4,2,6,8,5,3,7,9,1,
-      7,1,3,9,2,4,8,5,6,
-      9,6,1,5,3,7,2,8,4,
-      2,8,7,4,1,9,6,3,5,
-      3,4,5,2,8,6,1,7,9
+      1, 5, 3, 4, 2, 6,
+      2, 4, 6, 1, 3, 5,
+      6, 2, 5, 3, 1, 4,
+      3, 1, 4, 5, 6, 2,
+      5, 6, 1, 2, 4, 3,
+      4, 3, 2, 6, 5, 1
     ]
   }
 ];
@@ -31,7 +25,7 @@ const PUZZLES = [
 export default function SudokuGame() {
   const [board, setBoard] = useState(PUZZLES[0].initial);
   const [selectedIdx, setSelectedIdx] = useState(null);
-  const [moves, setMoves] = useState([]); // to note moves
+  const [moves, setMoves] = useState([]);
 
   function handleCellClick(idx) {
     if (PUZZLES[0].initial[idx] !== 0) return; // fixed cell
@@ -45,8 +39,8 @@ export default function SudokuGame() {
     setBoard(newBoard);
     
     // Add to history
-    const row = Math.floor(selectedIdx / 9) + 1;
-    const col = (selectedIdx % 9) + 1;
+    const row = Math.floor(selectedIdx / 6) + 1;
+    const col = (selectedIdx % 6) + 1;
     setMoves([{ text: `Placed ${num !== 0 ? num : 'blank'} at R${row}C${col}` }, ...moves]);
   }
 
@@ -65,19 +59,20 @@ export default function SudokuGame() {
       <div className="container">
         <div className="chess-layout">
           <div className="chess-board-container" style={{ alignItems: 'center' }}>
-            <div className="chess-header" style={{ width: '100%', maxWidth: 450 }}>
+            <div className="chess-header" style={{ width: '100%', maxWidth: 400 }}>
               <h2>Cyber <span className="text-glow" style={{ color: '#00ffff' }}>Sudoku</span></h2>
               <button className="btn btn-outline btn-sm" onClick={resetGame}>↺ Restart</button>
             </div>
             
-            <div className="sudoku-board">
+            <div className="sudoku-board-6x6">
               {board.map((val, idx) => {
                 const isFixed = PUZZLES[0].initial[idx] !== 0;
                 const isSelected = selectedIdx === idx;
-                const row = Math.floor(idx / 9);
-                const col = idx % 9;
-                const isBottomBorder = row === 2 || row === 5;
-                const isRightBorder = col === 2 || col === 5;
+                const row = Math.floor(idx / 6);
+                const col = idx % 6;
+                // 6x6 usually has 2x3 blocks: blocks are every 2 rows, and every 3 cols.
+                const isBottomBorder = row === 1 || row === 3;
+                const isRightBorder = col === 2;
 
                 return (
                   <div 
@@ -91,8 +86,8 @@ export default function SudokuGame() {
               })}
             </div>
 
-            <div className="sudoku-controls">
-              {[1,2,3,4,5,6,7,8,9].map(num => (
+            <div className="sudoku-controls" style={{ gridTemplateColumns: 'repeat(7, 1fr)', width: 'min(400px, 90vw)' }}>
+              {[1,2,3,4,5,6].map(num => (
                 <button key={num} className="sudoku-num-btn" onClick={() => handleNumberInput(num)}>{num}</button>
               ))}
               <button className="sudoku-num-btn erase" onClick={() => handleNumberInput(0)}>⌫</button>

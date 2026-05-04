@@ -185,14 +185,14 @@
 .chess-game-over h3 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 24px; margin-bottom: 8px; }
 .chess-game-over p { margin-bottom: 24px; color: var(--white); }
 
-/* Sudoku */
-.sudoku-board {
+/* Sudoku 6x6 */
+.sudoku-board-6x6 {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   border: 2px solid #00ffff;
   background: #000;
-  width: min(450px, 90vw);
-  height: min(450px, 90vw);
+  width: min(400px, 90vw);
+  height: min(400px, 90vw);
   box-shadow: 0 0 30px rgba(0,255,255,0.1);
 }
 

@@ -5,7 +5,8 @@ import './Games.css';
 export default function GamesLobby() {
   const games = [
     { id: 'chess', name: 'Neo Chess', desc: 'Classic strategy, neon arena. Play against an AI or analyze positions.', icon: '♟️', color: '#FFD700' },
-    { id: 'sudoku', name: 'Cyber Sudoku', desc: 'Number logic puzzle with dynamic difficulty and pristine styling.', icon: '🔢', color: '#00ffff' }
+    { id: 'typing', name: 'Cyber Typer', desc: '1v1 High-Speed Typing Arena. Prove your speed.', icon: '⌨️', color: '#00ffff' },
+    { id: 'sudoku', name: 'Cyber Sudoku', desc: 'Number logic puzzle with dynamic difficulty and pristine styling.', icon: '🔢', color: '#ff00ff' }
   ];
 
   return (

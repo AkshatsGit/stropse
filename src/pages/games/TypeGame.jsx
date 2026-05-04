@@ -1,0 +1,302 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { doc, updateDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import './Games.css';
+
+const TEXTS = [
+  "In the world of competitive esports, milliseconds matter. Precision, strategy, and rapid execution distinguish champions from amateurs.",
+  "Neon lights cast long shadows over the arena. The crowd roars as the final move is made, cementing a new legacy in the digital age.",
+  "Cybernetics and artificial intelligence have revolutionized the way we interact with technology, blurring the lines between human and machine."
+];
+
+export default function TypeGame() {
+  const { user } = useAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const gameId = searchParams.get('id');
+
+  const [joinId, setJoinId] = useState('');
+  const [creating, setCreating] = useState(false);
+  
+  const [gameDoc, setGameDoc] = useState(null);
+  const [inputVal, setInputVal] = useState('');
+  const [startTime, setStartTime] = useState(null);
+  
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!gameId || !user) return;
+
+    const unsub = onSnapshot(doc(db, 'typeGames', gameId), async (snapshot) => {
+      if (!snapshot.exists()) {
+        toast('Game not found', 'error');
+        navigate('/games/typing');
+        return;
+      }
+      const data = snapshot.data();
+      
+      // Auto join as p2
+      if (!data.player2 && data.player1 !== user.uid) {
+        await updateDoc(doc(db, 'typeGames', gameId), {
+          player2: user.uid,
+          player2Name: user.displayName || 'Player 2',
+          status: 'playing',
+          startedAt: Date.now()
+        });
+        toast('Joined Typing Match!', 'success');
+      }
+
+      setGameDoc(data);
+
+      if (data.status === 'playing' && !startTime) {
+        setStartTime(data.startedAt || Date.now());
+      }
+      
+    }, (error) => {
+      console.error(error);
+      toast('Lost connection', 'error');
+    });
+
+    return () => unsub();
+  }, [gameId, user, navigate, toast, startTime]);
+
+  async function handleCreateGame() {
+    if (!user) { toast('Please log in first', 'error'); return; }
+    setCreating(true);
+    try {
+      const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
+      
+      await setDoc(doc(db, 'typeGames', generatedId), {
+        textToType: randomText,
+        player1: user.uid,
+        player1Name: user.displayName || 'Player 1',
+        player2: null,
+        player2Name: null,
+        p1Progress: 0,
+        p2Progress: 0,
+        status: 'waiting',
+        createdAt: serverTimestamp()
+      });
+      toast('Match created! Waiting for opponent...', 'success');
+      navigate(`/games/typing?id=${generatedId}`);
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  function handleJoinGame(e) {
+    e.preventDefault();
+    if (!joinId) return;
+    navigate(`/games/typing?id=${joinId}`);
+  }
+
+  function handleResign() {
+    if (window.confirm("Are you sure you want to forfeit the typing race?")) {
+      const isP1 = gameDoc?.player1 === user?.uid;
+      updateDoc(doc(db, 'typeGames', gameId), {
+        status: 'completed',
+        winner: isP1 ? gameDoc.player2 : gameDoc.player1,
+        reason: 'resignation'
+      });
+    }
+  }
+
+  function handleInputChange(e) {
+    if (!gameDoc || gameDoc.status !== 'playing') return;
+    const isParticipant = gameDoc.player1 === user.uid || gameDoc.player2 === user.uid;
+    if (!isParticipant) return;
+
+    const val = e.target.value;
+    const targetText = gameDoc.textToType;
+    
+    // Check if input matches so far
+    const isCorrectSoFar = targetText.startsWith(val);
+    if (!isCorrectSoFar) {
+      // Disallow typing if mistake is made until they backspace
+      return; 
+    }
+
+    setInputVal(val);
+
+    const progress = val.length;
+    const isP1 = gameDoc.player1 === user.uid;
+
+    const updates = {};
+    if (isP1) updates.p1Progress = progress;
+    else updates.p2Progress = progress;
+
+    if (progress === targetText.length) {
+      // Win
+      updates.status = 'completed';
+      updates.winner = user.uid;
+      updates.reason = 'finished';
+    }
+
+    updateDoc(doc(db, 'typeGames', gameId), updates);
+  }
+
+  // ==================
+  // LOBBY
+  // ==================
+  if (!gameId) {
+    return (
+      <div className="chess-page">
+        <div className="container" style={{ maxWidth: 600 }}>
+          <div className="page-header" style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h1 style={{ fontSize: 48 }}>Cyber <span className="text-glow">Typer</span></h1>
+            <p className="section-subtitle">1v1 High-Speed Typing Arena</p>
+          </div>
+          
+          <div className="card" style={{ textAlign: 'center', marginBottom: 24, padding: 48 }}>
+            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Start a Race</h2>
+            <button className="btn btn-primary btn-lg" onClick={handleCreateGame} disabled={creating || !user}>
+              {creating ? 'Creating...' : (user ? '⚡ Create New Race' : 'Log in to Play')}
+            </button>
+          </div>
+
+          <div className="card" style={{ textAlign: 'center', padding: 48 }}>
+            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Join via Code</h2>
+            <form onSubmit={handleJoinGame} style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <input 
+                className="form-input" 
+                placeholder="Enter Race ID" 
+                value={joinId} 
+                onChange={e => setJoinId(e.target.value)}
+                style={{ maxWidth: 250 }}
+              />
+              <button type="submit" className="btn btn-outline" disabled={!user}>Join Race</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==================
+  // GAME UI
+  // ==================
+  const isParticipant = gameDoc && user && (gameDoc.player1 === user.uid || gameDoc.player2 === user.uid);
+  const targetText = gameDoc?.textToType || "";
+  
+  const p1Prog = gameDoc?.p1Progress || 0;
+  const p2Prog = gameDoc?.p2Progress || 0;
+  const p1Pct = Math.min(100, (p1Prog / targetText.length) * 100);
+  const p2Pct = Math.min(100, (p2Prog / targetText.length) * 100);
+
+  return (
+    <div className="chess-page">
+      <div className="container" style={{ maxWidth: 800 }}>
+        
+        <div className="flex-between" style={{ marginBottom: 24 }}>
+          <div>
+            <h2 style={{ fontFamily: 'Orbitron' }}>Race: <span className="text-glow" style={{ fontSize: 16 }}>{gameId}</span></h2>
+            <p style={{ color: 'var(--grey-400)' }}>{gameDoc?.status.toUpperCase()}</p>
+          </div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            {gameDoc?.status === 'playing' && isParticipant && (
+               <button className="btn btn-outline btn-sm" style={{ borderColor: '#ff3333', color: '#ff3333' }} onClick={handleResign}>⚑ Resign</button>
+            )}
+            <button className="btn btn-outline btn-sm" onClick={() => navigate('/games/typing')}>Leave</button>
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: 48, position: 'relative', overflow: 'hidden' }}>
+          
+          <div style={{ position: 'absolute', right: -50, top: -50, opacity: 0.05, pointerEvents: 'none' }}>
+             <img src="/stropse-seal.png" alt="" style={{ width: 400 }} />
+          </div>
+
+          {gameDoc?.status === 'waiting' && (
+            <div style={{ textAlign: 'center' }}>
+              <div className="spinner" style={{ marginBottom: 16 }}></div>
+              <h3 style={{ color: '#FFD700', fontFamily: 'Orbitron', marginBottom: 16 }}>Waiting for opponent...</h3>
+              <div style={{ background: '#111', padding: 12, borderRadius: 8, display: 'inline-block', marginBottom: 16 }}>
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/games/typing?id=' + gameId)}&bgcolor=ffffff&color=000000`} 
+                  alt="QR" style={{ display: 'block', width: 120, height: 120 }}
+                />
+              </div>
+              <p style={{ color: '#fff' }}>Scan to Join Race</p>
+            </div>
+          )}
+
+          {gameDoc?.status !== 'waiting' && (
+            <div>
+              {/* RACERS */}
+              <div style={{ marginBottom: 40 }}>
+                <div style={{ marginBottom: 24 }}>
+                  <div className="flex-between" style={{ marginBottom: 8, fontFamily: 'Orbitron' }}>
+                    <span style={{ color: '#00f260' }}>{gameDoc?.player1Name} {gameDoc?.player1 === user?.uid ? '(You)' : ''}</span>
+                    <span>{Math.round(p1Pct)}%</span>
+                  </div>
+                  <div style={{ background: '#222', height: 12, borderRadius: 6, overflow: 'hidden' }}>
+                    <div style={{ background: '#00f260', height: '100%', width: `${p1Pct}%`, transition: 'width 0.1s linear' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex-between" style={{ marginBottom: 8, fontFamily: 'Orbitron' }}>
+                    <span style={{ color: '#00ffff' }}>{gameDoc?.player2Name || 'Player 2'} {gameDoc?.player2 === user?.uid ? '(You)' : ''}</span>
+                    <span>{Math.round(p2Pct)}%</span>
+                  </div>
+                  <div style={{ background: '#222', height: 12, borderRadius: 6, overflow: 'hidden' }}>
+                    <div style={{ background: '#00ffff', height: '100%', width: `${p2Pct}%`, transition: 'width 0.1s linear' }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* TARGET TEXT */}
+              <div style={{ background: '#111', padding: 24, borderRadius: 8, border: '1px solid #333', fontSize: 24, lineHeight: 1.6, fontFamily: 'monospace', position: 'relative' }}>
+                {gameDoc?.status === 'completed' && (
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                    <h2 style={{ fontFamily: 'Orbitron', color: '#FFD700', fontSize: 40, marginBottom: 12 }}>RACE FINISHED</h2>
+                    <p style={{ color: '#fff', fontSize: 20 }}>
+                      Winner: <span style={{ color: '#00f260' }}>{gameDoc.winner === gameDoc.player1 ? gameDoc.player1Name : gameDoc.player2Name}</span>
+                    </p>
+                    {gameDoc.reason === 'resignation' && <p style={{ color: '#ff3333', marginTop: 8 }}>(By Resignation)</p>}
+                  </div>
+                )}
+
+                {targetText.split('').map((char, i) => {
+                  let color = '#666';
+                  if (i < inputVal.length) {
+                    color = inputVal[i] === char ? '#00f260' : '#ff3333';
+                  }
+                  return (
+                    <span key={i} style={{ color, background: i === inputVal.length ? 'rgba(255,255,255,0.1)' : 'transparent', textDecoration: i === inputVal.length ? 'underline' : 'none' }}>
+                      {char}
+                    </span>
+                  );
+                })}
+              </div>
+
+              {/* INPUT BOX */}
+              {isParticipant && gameDoc?.status === 'playing' && (
+                <div style={{ marginTop: 24 }}>
+                  <input
+                    ref={inputRef}
+                    autoFocus
+                    type="text"
+                    value={inputVal}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: 'transparent', caretColor: 'transparent', position: 'absolute', opacity: 0 }}
+                    disabled={gameDoc.status !== 'playing'}
+                  />
+                  <p style={{ textAlign: 'center', color: '#FFD700', fontFamily: 'Orbitron', marginTop: 12, animation: 'pulse 1.5s infinite' }}>Start typing to race...</p>
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}

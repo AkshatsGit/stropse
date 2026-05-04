@@ -87,7 +87,8 @@ export default function Admin() {
             { id: 'registrations', label: '📋 Registrations' },
             { id: 'promotions', label: '📢 Promotions' },
             { id: 'messages', label: '📬 Inbox' },
-            { id: 'chess_tourneys', label: '♟️ Chess Tournaments' },
+            { id: 'chess_tourneys', label: '♟️ Chess Tourneys' },
+            { id: 'typing_tourneys', label: '⌨️ Typing Tourneys' },
           ].map(t => (
             <button
               key={t.id}
@@ -106,6 +107,7 @@ export default function Admin() {
         {activeTab === 'promotions' && <PromotionManager toast={toast} />}
         {activeTab === 'messages' && <MessageViewer toast={toast} />}
         {activeTab === 'chess_tourneys' && <ChessTournamentManager toast={toast} />}
+        {activeTab === 'typing_tourneys' && <TypeTournamentManager toast={toast} />}
       </div>
     </div>
   );
@@ -1100,6 +1102,284 @@ function ChessTournamentManager({ toast }) {
           </div>
         ))}
         {tournaments.length === 0 && <p style={{ textAlign: 'center', color: 'var(--grey-500)', marginTop: 40 }}>No chess tournaments hosted yet.</p>}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================
+   TYPING TOURNAMENT MANAGER
+========================================= */
+function TypeTournamentManager({ toast }) {
+  const [tournaments, setTournaments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(query(collection(db, 'typeTournaments'), orderBy('createdAt', 'desc')), snap => {
+      setTournaments(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  async function handleHost() {
+    try {
+      const tid = Math.random().toString(36).substring(2, 8).toUpperCase();
+      await setDoc(doc(db, 'typeTournaments', tid), {
+        status: 'pooling',
+        players: [],
+        matches: [],
+        createdAt: serverTimestamp()
+      });
+      toast('Typing Tournament Hub created!', 'success');
+    } catch(err) {
+      toast(err.message, 'error');
+    }
+  }
+
+  async function generateBracket(tid, players) {
+    if (!players || players.length < 2) {
+      toast('Need at least 2 players', 'error');
+      return;
+    }
+    const shuffled = [...players].sort(() => 0.5 - Math.random());
+    const matches = [];
+    
+    for (let i = 0; i < shuffled.length; i += 2) {
+      const p1 = shuffled[i];
+      const p2 = shuffled[i+1];
+      if (!p2) {
+        matches.push({ matchId: `R1-M${i}`, round: 1, player1: p1, player2: null, boardId: null, winner: p1.uid });
+        continue;
+      }
+      const boardId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
+      const TEXTS = [
+        "In the world of competitive esports, milliseconds matter. Precision, strategy, and rapid execution distinguish champions from amateurs.",
+        "Neon lights cast long shadows over the arena. The crowd roars as the final move is made, cementing a new legacy in the digital age."
+      ];
+      const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
+
+      await setDoc(doc(db, 'typeGames', boardId), {
+        textToType: randomText,
+        player1: p1.uid,
+        player1Name: p1.name,
+        player2: p2.uid,
+        player2Name: p2.name,
+        p1Progress: 0,
+        p2Progress: 0,
+        status: 'waiting',
+        createdAt: serverTimestamp()
+      });
+      
+      matches.push({ matchId: `R1-M${i}`, round: 1, player1: p1, player2: p2, boardId, winner: null });
+    }
+
+    await updateDoc(doc(db, 'typeTournaments', tid), {
+      status: 'active',
+      matches
+    });
+    toast('Bracket generated and matches live!', 'success');
+  }
+
+  async function syncResults(tid, tData) {
+    if (!tData.matches) return;
+    const updatedMatches = [...tData.matches];
+    let changed = false;
+    for (let m of updatedMatches) {
+      if (!m.winner && m.boardId) {
+        const boardSnap = await getDoc(doc(db, 'typeGames', m.boardId));
+        if (boardSnap.exists()) {
+          const bData = boardSnap.data();
+          if (bData.status === 'completed') {
+            m.winner = bData.winner;
+            changed = true;
+          }
+        }
+      }
+    }
+    if (changed) {
+      await updateDoc(doc(db, 'typeTournaments', tid), { matches: updatedMatches });
+      toast('Synced latest match results!', 'success');
+    } else {
+      toast('No new results available.', 'info');
+    }
+  }
+
+  async function generateNextRound(tid, tData) {
+    if (!tData.matches || tData.matches.length === 0) return;
+    const currentRound = Math.max(...tData.matches.map(m => m.round));
+    const currentRoundMatches = tData.matches.filter(m => m.round === currentRound);
+    
+    if (currentRoundMatches.some(m => !m.winner)) {
+      toast('Not all matches in this round are completed!', 'error');
+      return;
+    }
+
+    const winners = currentRoundMatches.map(m => {
+       if (m.winner === m.player1?.uid) return m.player1;
+       if (m.winner === m.player2?.uid) return m.player2;
+       return null;
+    }).filter(Boolean);
+
+    if (winners.length === 1) {
+      await updateDoc(doc(db, 'typeTournaments', tid), {
+        status: 'completed',
+        tournamentWinner: winners[0]
+      });
+      toast(`Tournament Complete! Winner: ${winners[0].name}`, 'success');
+      return;
+    }
+
+    const newMatches = [...tData.matches];
+    for (let i = 0; i < winners.length; i += 2) {
+      const p1 = winners[i];
+      const p2 = winners[i+1];
+      
+      if (!p2) {
+        newMatches.push({ matchId: `R${currentRound+1}-M${i}`, round: currentRound + 1, player1: p1, player2: null, boardId: null, winner: p1.uid });
+        continue;
+      }
+
+      const boardId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const TEXTS = [
+        "In the world of competitive esports, milliseconds matter. Precision, strategy, and rapid execution distinguish champions from amateurs."
+      ];
+      
+      await setDoc(doc(db, 'typeGames', boardId), {
+        textToType: TEXTS[0],
+        player1: p1.uid,
+        player1Name: p1.name,
+        player2: p2.uid,
+        player2Name: p2.name,
+        p1Progress: 0,
+        p2Progress: 0,
+        status: 'waiting',
+        createdAt: serverTimestamp()
+      });
+      
+      newMatches.push({ matchId: `R${currentRound+1}-M${i}`, round: currentRound + 1, player1: p1, player2: p2, boardId, winner: null });
+    }
+
+    await updateDoc(doc(db, 'typeTournaments', tid), { matches: newMatches });
+    toast(`Round ${currentRound + 1} generated!`, 'success');
+  }
+
+  async function dropTournament(tid) {
+    if (window.confirm("Are you sure you want to drop and end this typing tournament entirely?")) {
+      await deleteDoc(doc(db, 'typeTournaments', tid));
+      toast('Tournament dropped.', 'success');
+    }
+  }
+
+  function renderBracket(t) {
+    if (!t.matches) return null;
+    const rounds = {};
+    t.matches.forEach(m => {
+      if (!rounds[m.round]) rounds[m.round] = [];
+      rounds[m.round].push(m);
+    });
+
+    return (
+      <div style={{ display: 'flex', gap: 40, overflowX: 'auto', padding: '24px 0' }}>
+        {Object.entries(rounds).map(([roundNum, matches]) => (
+          <div key={roundNum} style={{ display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center' }}>
+            <h4 style={{ color: '#00ffff', fontFamily: 'Orbitron', textAlign: 'center', marginBottom: 16 }}>Round {roundNum}</h4>
+            {matches.map(m => (
+              <div key={m.matchId} style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(0,255,255,0.2)', borderRadius: 8, padding: 12, minWidth: 200, position: 'relative' }}>
+                <div style={{ padding: 4, borderBottom: '1px solid rgba(255,255,255,0.05)', color: m.winner === m.player1?.uid ? '#00f260' : '#fff' }}>
+                  {m.player1?.name || 'TBD'}
+                </div>
+                <div style={{ padding: 4, color: m.winner === m.player2?.uid ? '#00f260' : '#fff' }}>
+                  {m.player2 ? m.player2.name : 'BYE'}
+                </div>
+                <div style={{ marginTop: 8, textAlign: 'center' }}>
+                  {m.winner ? (
+                    <span style={{ color: '#00f260', fontSize: 10, fontFamily: 'Orbitron' }}>COMPLETED</span>
+                  ) : m.boardId ? (
+                    <span style={{ color: '#00ffff', fontSize: 10, fontFamily: 'Orbitron' }}>Race: {m.boardId}</span>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+        {t.status === 'completed' && t.tournamentWinner && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center' }}>
+            <h4 style={{ color: '#00ffff', fontFamily: 'Orbitron', textAlign: 'center', marginBottom: 16 }}>Champion</h4>
+            <div style={{ background: 'rgba(0,242,96,0.1)', border: '2px solid #00f260', borderRadius: 8, padding: 24, minWidth: 200, textAlign: 'center', boxShadow: '0 0 30px rgba(0,242,96,0.3)' }}>
+              <span style={{ fontSize: 40 }}>🏆</span><br/>
+              <strong style={{ color: '#00f260', fontFamily: 'Orbitron', fontSize: 20 }}>{t.tournamentWinner.name}</strong>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (loading) return <div className="spinner"></div>;
+
+  return (
+    <div>
+      <div className="flex-between" style={{ marginBottom: 24 }}>
+        <h2 style={{ fontFamily: 'Orbitron', color: '#00ffff' }}>Typing Tournament Hub</h2>
+        <button className="btn btn-primary" style={{ background: '#00ffff', color: '#000' }} onClick={handleHost}>⚡ Host New Race Event</button>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {tournaments.map(t => (
+          <div key={t.id} className="card" style={{ padding: 24 }}>
+            <div className="flex-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 16, marginBottom: 16 }}>
+              <div>
+                <h3 style={{ fontFamily: 'Orbitron', fontSize: 24 }}>ID: {t.id} <span style={{ fontSize: 12, padding: '4px 8px', background: t.status === 'pooling' ? 'rgba(0,255,255,0.1)' : 'rgba(0,255,100,0.1)', borderRadius: 4, color: t.status === 'pooling' ? '#00ffff' : '#00f260', marginLeft: 12 }}>{t.status.toUpperCase()}</span></h3>
+                <p style={{ color: 'var(--grey-500)', fontSize: 13, marginTop: 4 }}>Joined Racers: {t.players?.length || 0}</p>
+              </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                {t.status === 'pooling' && (
+                  <button className="btn btn-outline" style={{ borderColor: '#00ffff', color: '#00ffff' }} onClick={() => generateBracket(t.id, t.players)}>Generate Bracket</button>
+                )}
+                <button className="btn btn-outline" style={{ borderColor: '#ff3333', color: '#ff3333' }} onClick={() => dropTournament(t.id)}>🗑️ Drop</button>
+              </div>
+            </div>
+
+            {t.status === 'pooling' && (
+              <div style={{ display: 'flex', gap: 24 }}>
+                <div>
+                  <p style={{ marginBottom: 8, fontSize: 12, color: 'var(--grey-400)' }}>Player Scan to Join</p>
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/games/tournament-typing?id=' + t.id)}&bgcolor=ffffff&color=000000`} alt="QR" style={{ width: 120, height: 120, borderRadius: 8 }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontFamily: 'Orbitron', color: '#00ffff', marginBottom: 12 }}>Waiting Pool</h4>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {t.players?.map(p => (
+                      <span key={p.uid} style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: 20, fontSize: 14 }}>{p.name}</span>
+                    ))}
+                    {(!t.players || t.players.length === 0) && <span style={{ color: 'var(--grey-600)' }}>No racers yet.</span>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {(t.status === 'active' || t.status === 'completed') && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <h4 style={{ fontFamily: 'Orbitron', color: '#00ffff' }}>Live Race Web</h4>
+                  {t.status === 'active' && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-outline btn-sm" onClick={() => syncResults(t.id, t)}>🔄 Sync Results</button>
+                      <button className="btn btn-primary btn-sm" style={{ background: '#00ffff', color: '#000' }} onClick={() => generateNextRound(t.id, t)}>▶ Next Round</button>
+                    </div>
+                  )}
+                </div>
+                
+                <div style={{ background: 'rgba(25,25,25,0.8)', padding: 24, borderRadius: 12, overflowX: 'auto', border: '1px solid rgba(0,255,255,0.1)' }}>
+                  {renderBracket(t)}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        {tournaments.length === 0 && <p style={{ textAlign: 'center', color: 'var(--grey-500)', marginTop: 40 }}>No typing tournaments hosted yet.</p>}
       </div>
     </div>
   );

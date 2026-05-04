@@ -4,7 +4,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -42,6 +44,27 @@ export function AuthProvider({ children }) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
+  async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    const cred = await signInWithPopup(auth, provider);
+    // Create Firestore profile if first time
+    const snap = await getDoc(doc(db, 'users', cred.user.uid));
+    if (!snap.exists()) {
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        uid: cred.user.uid,
+        name: cred.user.displayName || 'Player',
+        username: cred.user.email.split('@')[0],
+        email: cred.user.email,
+        bio: '',
+        profilePicture: cred.user.photoURL || '',
+        friends: [],
+        friendRequests: [],
+        createdAt: serverTimestamp(),
+      });
+    }
+    return cred;
+  }
+
   async function logout() {
     return signOut(auth);
   }
@@ -73,6 +96,7 @@ export function AuthProvider({ children }) {
     loading,
     signup,
     login,
+    loginWithGoogle,
     logout,
     refreshProfile: () => user && fetchUserProfile(user.uid),
   };

@@ -491,7 +491,7 @@ export default function TypeGame() {
                 </div>
 
                 {/* TARGET TEXT */}
-                <div style={{ background: '#111', padding: 24, borderRadius: 8, border: '1px solid #333', fontSize: 24, lineHeight: 1.6, fontFamily: 'monospace', position: 'relative' }}>
+                <div style={{ background: '#111', padding: 24, borderRadius: 8, border: '1px solid #333', fontSize: 24, lineHeight: 1.6, fontFamily: 'monospace', position: 'relative', textAlign: 'center' }}>
                   {targetText.split('').map((char, i) => {
                     let color = '#555';
                     let background = 'transparent';

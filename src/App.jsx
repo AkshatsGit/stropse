@@ -18,6 +18,7 @@ const CardView = lazy(() => import('./pages/CardView'));
 const GamesLobby = lazy(() => import('./pages/games/GamesLobby'));
 const ChessGame = lazy(() => import('./pages/games/ChessGame'));
 const SudokuGame = lazy(() => import('./pages/games/SudokuGame'));
+const TournamentLobby = lazy(() => import('./pages/games/TournamentLobby'));
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -81,6 +82,7 @@ function AppRoutes() {
             <Route path="/games" element={<GamesLobby />} />
             <Route path="/games/chess" element={<ChessGame />} />
             <Route path="/games/sudoku" element={<SudokuGame />} />
+            <Route path="/games/tournament" element={<TournamentLobby />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

@@ -87,6 +87,7 @@ export default function Admin() {
             { id: 'registrations', label: '📋 Registrations' },
             { id: 'promotions', label: '📢 Promotions' },
             { id: 'messages', label: '📬 Inbox' },
+            { id: 'chess_tourneys', label: '♟️ Chess Tournaments' },
           ].map(t => (
             <button
               key={t.id}
@@ -104,6 +105,7 @@ export default function Admin() {
         {activeTab === 'registrations' && <RegistrationViewer toast={toast} />}
         {activeTab === 'promotions' && <PromotionManager toast={toast} />}
         {activeTab === 'messages' && <MessageViewer toast={toast} />}
+        {activeTab === 'chess_tourneys' && <ChessTournamentManager toast={toast} />}
       </div>
     </div>
   );
@@ -807,6 +809,145 @@ function MessageViewer({ toast }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/* =========================================
+   CHESS TOURNAMENT MANAGER
+========================================= */
+function ChessTournamentManager({ toast }) {
+  const [tournaments, setTournaments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(query(collection(db, 'chessTournaments'), orderBy('createdAt', 'desc')), snap => {
+      setTournaments(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  async function handleHost() {
+    try {
+      const tid = Math.random().toString(36).substring(2, 8).toUpperCase();
+      await setDoc(doc(db, 'chessTournaments', tid), {
+        status: 'pooling',
+        players: [],
+        matches: [],
+        createdAt: serverTimestamp()
+      });
+      toast('Tournament Hub created!', 'success');
+    } catch(err) {
+      toast(err.message, 'error');
+    }
+  }
+
+  async function generateBracket(tid, players) {
+    if (!players || players.length < 2) {
+      toast('Need at least 2 players', 'error');
+      return;
+    }
+    // Simple shuffle for MVP
+    const shuffled = [...players].sort(() => 0.5 - Math.random());
+    const matches = [];
+    
+    for (let i = 0; i < shuffled.length; i += 2) {
+      const p1 = shuffled[i];
+      const p2 = shuffled[i+1];
+      if (!p2) {
+        // Bye
+        matches.push({ matchId: `R1-M${i}`, round: 1, player1: p1, player2: null, boardId: null, winner: p1.uid });
+        continue;
+      }
+      const boardId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      // create chessGames document for this match
+      await setDoc(doc(db, 'chessGames', boardId), {
+        fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        history: [],
+        whitePlayer: p1.uid,
+        blackPlayer: p2.uid,
+        status: 'playing',
+        mode: 'rapid', // default
+        whiteTime: 600,
+        blackTime: 600,
+        lastMoveAt: Date.now(),
+        createdAt: serverTimestamp()
+      });
+      
+      matches.push({ matchId: `R1-M${i}`, round: 1, player1: p1, player2: p2, boardId, winner: null });
+    }
+
+    await updateDoc(doc(db, 'chessTournaments', tid), {
+      status: 'active',
+      matches
+    });
+    toast('Bracket generated and matches live!', 'success');
+  }
+
+  if (loading) return <div className="spinner"></div>;
+
+  return (
+    <div>
+      <div className="flex-between" style={{ marginBottom: 24 }}>
+        <h2 style={{ fontFamily: 'Orbitron', color: '#FFD700' }}>Chess Tournament Hub</h2>
+        <button className="btn btn-primary" onClick={handleHost}>⚡ Host New Tournament</button>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {tournaments.map(t => (
+          <div key={t.id} className="card" style={{ padding: 24 }}>
+            <div className="flex-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 16, marginBottom: 16 }}>
+              <div>
+                <h3 style={{ fontFamily: 'Orbitron', fontSize: 24 }}>ID: {t.id} <span style={{ fontSize: 12, padding: '4px 8px', background: t.status === 'pooling' ? 'rgba(255,215,0,0.1)' : 'rgba(0,255,100,0.1)', borderRadius: 4, color: t.status === 'pooling' ? '#FFD700' : '#00f260', marginLeft: 12 }}>{t.status.toUpperCase()}</span></h3>
+                <p style={{ color: 'var(--grey-500)', fontSize: 13, marginTop: 4 }}>Joined Players: {t.players?.length || 0}</p>
+              </div>
+              {t.status === 'pooling' && (
+                <button className="btn btn-outline" onClick={() => generateBracket(t.id, t.players)}>Generate Bracket</button>
+              )}
+            </div>
+
+            {t.status === 'pooling' && (
+              <div style={{ display: 'flex', gap: 24 }}>
+                <div>
+                  <p style={{ marginBottom: 8, fontSize: 12, color: 'var(--grey-400)' }}>Player Scan to Join</p>
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/games/tournament?id=' + t.id)}&bgcolor=ffffff&color=000000`} alt="QR" style={{ width: 120, height: 120, borderRadius: 8 }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontFamily: 'Orbitron', color: '#FFD700', marginBottom: 12 }}>Waiting Pool</h4>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {t.players?.map(p => (
+                      <span key={p.uid} style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: 20, fontSize: 14 }}>{p.name} ({p.rating})</span>
+                    ))}
+                    {(!t.players || t.players.length === 0) && <span style={{ color: 'var(--grey-600)' }}>No players yet.</span>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {t.status === 'active' && (
+              <div>
+                <h4 style={{ fontFamily: 'Orbitron', color: '#FFD700', marginBottom: 12 }}>Live Matches</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {t.matches?.map(m => (
+                    <div key={m.matchId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.5)', padding: 12, borderRadius: 8 }}>
+                      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                        <span style={{ color: m.winner === m.player1?.uid ? '#00f260' : '#fff' }}>{m.player1?.name}</span>
+                        <span style={{ color: 'var(--grey-500)' }}>vs</span>
+                        <span style={{ color: m.winner === m.player2?.uid ? '#00f260' : '#fff' }}>{m.player2 ? m.player2.name : 'BYE'}</span>
+                      </div>
+                      <div style={{ fontFamily: 'Orbitron', fontSize: 12 }}>
+                        {m.winner ? <span style={{ color: '#00f260' }}>Completed</span> : <span style={{ color: '#00ffff' }}>Board: {m.boardId}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        {tournaments.length === 0 && <p style={{ textAlign: 'center', color: 'var(--grey-500)', marginTop: 40 }}>No chess tournaments hosted yet.</p>}
+      </div>
     </div>
   );
 }

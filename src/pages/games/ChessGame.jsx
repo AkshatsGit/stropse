@@ -30,6 +30,10 @@ export default function ChessGame() {
   const [gameDoc, setGameDoc] = useState(null);
   const [moveHistory, setMoveHistory] = useState([]);
   
+  // AI Rating
+  const [aiRating, setAiRating] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  
   // Tap-to-move state
   const [moveFrom, setMoveFrom] = useState('');
   const [optionSquares, setOptionSquares] = useState({});
@@ -79,6 +83,43 @@ export default function ChessGame() {
 
     return () => unsub();
   }, [gameId, user, navigate, toast]);
+
+  // AI Analysis Effect
+  useEffect(() => {
+    if (gameDoc?.status === 'completed' && !aiRating && !analyzing && moveHistory.length > 0) {
+      analyzeGameWithGemini();
+    }
+  }, [gameDoc?.status]);
+
+  async function analyzeGameWithGemini() {
+    setAnalyzing(true);
+    try {
+      const pgnMoves = moveHistory.map((m, i) => `${i % 2 === 0 ? Math.floor(i / 2) + 1 + '.' : ''}${m.san}`).join(' ');
+      
+      if (moveHistory.length < 5) {
+        setAiRating("Blunderous Start. The game ended too quickly to determine a solid rating. Estimated Performance: 300 - 400 ELO.");
+        setAnalyzing(false);
+        return;
+      }
+
+      const prompt = `You are a Chess Grandmaster and Engine. Analyze the following chess game moves (PGN). Based on the tactical awareness, opening principles, and blunders, estimate the average ELO rating of the players (like Chess.com does). If the game is very short or chaotic, give a rating around 300-400. Give ONLY a concise 1-2 sentence assessment followed by the estimated ELO rating.\nGame Moves: ${pgnMoves}`;
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAH45YAgEYZuuLIqu9fxoVIOhQvceIGCPM`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+      const data = await res.json();
+      const text = data.candidates[0].content.parts[0].text;
+      setAiRating(text);
+    } catch (err) {
+      setAiRating("Analysis failed. Estimated Performance: 1000 ELO.");
+    } finally {
+      setAnalyzing(false);
+    }
+  }
 
   // Timer countdown effect
   useEffect(() => {
@@ -261,12 +302,9 @@ export default function ChessGame() {
   }
 
   function calculateAIAssessment() {
-    if (!game.isGameOver() && gameDoc?.status !== 'completed') return null;
-    const moves = moveHistory.length;
-    if (moves < 10) return "Blunderous Start (Rating Performance: 400 - 800)";
-    if (moves < 30) return "Tactical Skirmish (Rating Performance: 1100 - 1500)";
-    if (moves < 50) return "Solid Positional Play (Rating Performance: 1600 - 1900)";
-    return "Strategic Masterclass (Rating Performance: 2000+)";
+    if (analyzing) return "Analyzing moves with STROPSE AI (Gemini)...";
+    if (aiRating) return aiRating;
+    return "Analysis unavailable.";
   }
 
   // ==================

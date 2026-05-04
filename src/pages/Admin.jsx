@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc,
+  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc,
   query, orderBy, serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -634,9 +634,7 @@ function PromotionManager({ toast }) {
     try {
       await updateDoc(doc(db, 'settings', 'homepage'), { promotion: promo })
         .catch(async (err) => {
-          // If doc doesn't exist, create it
           if (err.code === 'not-found') {
-            const { setDoc } = require('firebase/firestore');
             await setDoc(doc(db, 'settings', 'homepage'), { promotion: promo });
           } else throw err;
         });
@@ -711,12 +709,18 @@ function PromotionManager({ toast }) {
           </div>
 
           <div className="form-group" style={{ gridColumn: '1/-1', marginTop: 16 }}>
-            <label className="form-label">Live Preview</label>
-            <div style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', background: '#000', minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <label className="form-label">Live Preview (As seen on Homepage)</label>
+            <div style={{ width: '100%', background: 'var(--bg)', padding: '40px 24px', borderRadius: 12, border: '1px dashed rgba(255,255,255,0.1)' }}>
               {promo.bannerUrl ? (
-                <img src={promo.bannerUrl} alt="Promo Preview" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+                  <div style={{ display: 'block', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,215,0,0.3)', boxShadow: '0 0 30px rgba(255,215,0,0.1)', cursor: promo.link ? 'pointer' : 'default' }}>
+                    <img src={promo.bannerUrl} alt="Promotion" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                  </div>
+                </div>
               ) : (
-                <span style={{ color: 'var(--grey-600)' }}>No image uploaded</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 100 }}>
+                  <span style={{ color: 'var(--grey-600)' }}>No image uploaded</span>
+                </div>
               )}
             </div>
           </div>

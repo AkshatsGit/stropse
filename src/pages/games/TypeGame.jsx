@@ -21,14 +21,14 @@ export default function TypeGame() {
 
   const [joinId, setJoinId] = useState('');
   const [creating, setCreating] = useState(false);
-  
+
   const [gameDoc, setGameDoc] = useState(null);
   const [inputVal, setInputVal] = useState('');
   const [startTime, setStartTime] = useState(null);
-  
+
   const [certDataUrl, setCertDataUrl] = useState(null);
   const [viewingCert, setViewingCert] = useState(false);
-  
+
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function TypeGame() {
         return;
       }
       const data = snapshot.data();
-      
+
       // Auto join as p2
       if (!data.player2 && data.player1 !== user.uid) {
         await updateDoc(doc(db, 'typeGames', gameId), {
@@ -58,7 +58,7 @@ export default function TypeGame() {
       if (data.status === 'playing' && !startTime) {
         setStartTime(data.startedAt || Date.now());
       }
-      
+
     }, (error) => {
       console.error(error);
       toast('Lost connection', 'error');
@@ -73,7 +73,7 @@ export default function TypeGame() {
     try {
       const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
       const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
-      
+
       await setDoc(doc(db, 'typeGames', generatedId), {
         textToType: randomText,
         player1: user.uid,
@@ -101,7 +101,7 @@ export default function TypeGame() {
     try {
       const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
       const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
-      
+
       await setDoc(doc(db, 'typeGames', generatedId), {
         textToType: randomText,
         player1: user.uid,
@@ -146,7 +146,7 @@ export default function TypeGame() {
 
     const val = e.target.value;
     const targetText = gameDoc.textToType;
-    
+
     const isCorrectSoFar = targetText.startsWith(val);
     if (!isCorrectSoFar) return;
 
@@ -185,7 +185,7 @@ export default function TypeGame() {
             <h1 style={{ fontSize: 48 }}>Cyber <span className="text-glow">Typer</span></h1>
             <p className="section-subtitle">1v1 High-Speed Typing Arena</p>
           </div>
-          
+
           <div className="card" style={{ textAlign: 'center', marginBottom: 24, padding: 48 }}>
             <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Start a Race</h2>
             <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
@@ -193,7 +193,7 @@ export default function TypeGame() {
                 {creating ? 'Creating...' : (user ? 'âš¡ Create 1v1 Race' : 'Log in to Play')}
               </button>
               <button className="btn btn-outline btn-lg" style={{ borderColor: '#00ffff', color: '#00ffff' }} onClick={handleCreateSoloGame} disabled={creating || !user}>
-                {creating ? '...' : 'â±ï¸ Solo Speed Test'}
+                {creating ? '...' : 'Solo Speed Test'}
               </button>
             </div>
           </div>
@@ -201,10 +201,10 @@ export default function TypeGame() {
           <div className="card" style={{ textAlign: 'center', padding: 48 }}>
             <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Join via Code</h2>
             <form onSubmit={handleJoinGame} style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <input 
-                className="form-input" 
-                placeholder="Enter Race ID" 
-                value={joinId} 
+              <input
+                className="form-input"
+                placeholder="Enter Race ID"
+                value={joinId}
                 onChange={e => setJoinId(e.target.value)}
                 style={{ maxWidth: 250 }}
               />
@@ -221,7 +221,7 @@ export default function TypeGame() {
   // ==================
   const isParticipant = gameDoc && user && (gameDoc.player1 === user.uid || gameDoc.player2 === user.uid);
   const targetText = gameDoc?.textToType || "";
-  
+
   const p1Prog = gameDoc?.p1Progress || 0;
   const p2Prog = gameDoc?.p2Progress || 0;
   const p1Pct = Math.min(100, (p1Prog / targetText.length) * 100);
@@ -318,7 +318,7 @@ export default function TypeGame() {
         ctx.fillText('THIS CERTIFIES THAT', 600, 390);
 
         const playerName = gameDoc?.isSolo ? (gameDoc?.player1Name || 'Player') : (gameDoc?.winner === gameDoc?.player1 ? gameDoc?.player1Name : (gameDoc?.player2Name || 'Player 2'));
-        
+
         ctx.font = 'bold 64px "Orbitron", sans-serif';
         ctx.fillStyle = '#000000';
         ctx.fillText(playerName, 604, 454);
@@ -330,7 +330,7 @@ export default function TypeGame() {
         gradient.addColorStop(0.4, '#FFD700');
         gradient.addColorStop(0.6, '#B8860B');
         gradient.addColorStop(1, '#8A6300');
-        
+
         ctx.fillStyle = gradient;
         ctx.shadowColor = 'rgba(255,215,0,0.4)';
         ctx.shadowBlur = 15;
@@ -369,7 +369,7 @@ export default function TypeGame() {
           ctx.fillStyle = '#fff';
           ctx.fillRect(90, 630, 100, 100);
           ctx.drawImage(qrImg, 95, 635, 90, 90);
-          
+
           ctx.fillStyle = '#FFD700';
           ctx.font = 'bold 16px "Orbitron", sans-serif';
           ctx.textAlign = 'left';
@@ -426,10 +426,10 @@ export default function TypeGame() {
 
         {/* MAIN CARD */}
         <div style={{ background: '#0f0f0f', border: '1px solid #2a2a2a', borderRadius: 12, padding: 32, width: '100%', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
-          
+
           {/* Background seal watermark */}
           <img src="/stropse-seal.png" alt="" style={{ position: 'absolute', right: -80, top: -80, width: 500, opacity: 0.03, pointerEvents: 'none', zIndex: 0 }} />
-          
+
           <div style={{ position: 'relative', zIndex: 1 }}>
 
             {/* ===== COMPLETED ===== */}

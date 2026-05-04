@@ -85,6 +85,7 @@ export default function Admin() {
             { id: 'cards', label: '🪪 Player Cards' },
             { id: 'rooms', label: '💬 Community' },
             { id: 'registrations', label: '📋 Registrations' },
+            { id: 'promotions', label: '📢 Promotions' },
           ].map(t => (
             <button
               key={t.id}
@@ -100,6 +101,7 @@ export default function Admin() {
         {activeTab === 'cards' && <CardManager toast={toast} />}
         {activeTab === 'rooms' && <RoomManager toast={toast} />}
         {activeTab === 'registrations' && <RegistrationViewer toast={toast} />}
+        {activeTab === 'promotions' && <PromotionManager toast={toast} />}
       </div>
     </div>
   );
@@ -593,6 +595,137 @@ function RegistrationViewer({ toast }) {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+/* =========================================
+   PROMOTION MANAGER
+========================================= */
+function PromotionManager({ toast }) {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [promo, setPromo] = useState({ bannerUrl: '', link: '', isActive: false });
+
+  useEffect(() => {
+    async function fetchPromo() {
+      try {
+        // We use getDocs to find if a settings document exists. Alternatively, use a known doc ID.
+        // We'll use a specific doc ID 'homepage' inside the 'settings' collection.
+        const docRef = doc(db, 'settings', 'homepage');
+        const snap = await getDocs(query(collection(db, 'settings')));
+        let data = snap.docs.find(d => d.id === 'homepage')?.data()?.promotion;
+        if (data) setPromo(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPromo();
+  }, []);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await updateDoc(doc(db, 'settings', 'homepage'), { promotion: promo })
+        .catch(async (err) => {
+          // If doc doesn't exist, create it
+          if (err.code === 'not-found') {
+            const { setDoc } = require('firebase/firestore');
+            await setDoc(doc(db, 'settings', 'homepage'), { promotion: promo });
+          } else throw err;
+        });
+      toast('Promotion updated! 📢', 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setUploadingImage(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        const MAX_WIDTH = 1200; // Larger for homepage banner
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        setPromo(p => ({ ...p, bannerUrl: compressedBase64 }));
+        setUploadingImage(false);
+        toast('Banner processed!', 'success');
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (loading) return <div className="spinner" />;
+
+  return (
+    <div className="admin-section">
+      <div className="admin-section-header">
+        <h2 className="admin-section-title">Industry Partner / Promotion Banner</h2>
+      </div>
+
+      <div className="card" style={{ marginBottom: 32 }}>
+        <form onSubmit={handleSave} className="admin-form-grid">
+          <div className="form-group" style={{ gridColumn: '1/-1' }}>
+            <label className="form-label">Banner Image (Wide aspect ratio recommended)</label>
+            <input type="file" accept="image/*" className="form-input" onChange={handleImageUpload} disabled={uploadingImage} />
+            {uploadingImage && <p style={{ fontSize: 12, color: 'var(--primary)', marginTop: 4 }}>Processing image...</p>}
+          </div>
+
+          <div className="form-group" style={{ gridColumn: '1/-1' }}>
+            <label className="form-label">Target Link (Optional)</label>
+            <input className="form-input" placeholder="https://..." value={promo.link}
+              onChange={e => setPromo(p => ({ ...p, link: e.target.value }))} />
+          </div>
+
+          <div className="form-group" style={{ gridColumn: '1/-1', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <input type="checkbox" id="promo-active" checked={promo.isActive}
+              onChange={e => setPromo(p => ({ ...p, isActive: e.target.checked }))} style={{ width: 18, height: 18, cursor: 'pointer' }} />
+            <label htmlFor="promo-active" className="form-label" style={{ cursor: 'pointer', margin: 0 }}>Banner is Active (Visible on Homepage)</label>
+          </div>
+
+          <div className="form-group" style={{ gridColumn: '1/-1', marginTop: 16 }}>
+            <label className="form-label">Live Preview</label>
+            <div style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', background: '#000', minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {promo.bannerUrl ? (
+                <img src={promo.bannerUrl} alt="Promo Preview" style={{ width: '100%', height: 'auto', display: 'block' }} />
+              ) : (
+                <span style={{ color: 'var(--grey-600)' }}>No image uploaded</span>
+              )}
+            </div>
+          </div>
+
+          <div style={{ gridColumn: '1/-1' }}>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? 'Saving...' : '💾 Save Promotion Settings'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

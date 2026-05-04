@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useToast } from '../contexts/ToastContext';
 import { TournamentCard } from './Tournaments';
 import './Tournaments.css'; // Make sure card styles are loaded
 import './Home.css';
@@ -24,18 +25,46 @@ const FEATURES = [
 
 export default function Home() {
   const glitchRef = useRef(null);
+  const toast = useToast();
   const [featured, setFeatured] = useState([]);
+  const [promo, setPromo] = useState(null);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
-    async function loadFeatured() {
+    async function loadData() {
       try {
         const q = query(collection(db, 'tournaments'), orderBy('createdAt', 'desc'), limit(3));
         const snap = await getDocs(q);
         setFeatured(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        
+        const settingsDoc = await getDoc(doc(db, 'settings', 'homepage'));
+        if (settingsDoc.exists() && settingsDoc.data().promotion?.isActive) {
+          setPromo(settingsDoc.data().promotion);
+        }
       } catch (e) { console.error(e); }
     }
-    loadFeatured();
+    loadData();
   }, []);
+
+  async function handleContactSubmit(e) {
+    e.preventDefault();
+    if (!contactForm.name || !contactForm.email || !contactForm.message) return;
+    
+    setSendingMessage(true);
+    try {
+      await addDoc(collection(db, 'contacts'), {
+        ...contactForm,
+        createdAt: serverTimestamp()
+      });
+      toast('Message sent successfully! We will get back to you.', 'success');
+      setContactForm({ name: '', email: '', message: '' });
+    } catch (err) {
+      toast('Failed to send message', 'error');
+    } finally {
+      setSendingMessage(false);
+    }
+  }
 
   return (
     <div className="home">
@@ -82,6 +111,23 @@ export default function Home() {
           <span>SCROLL</span>
         </div>
       </section>
+
+      {/* PROMOTION BANNER */}
+      {promo && promo.bannerUrl && (
+        <section className="section" style={{ padding: '0 24px', marginTop: 40 }}>
+          <div className="container" style={{ padding: 0 }}>
+            {promo.link ? (
+              <a href={promo.link} target="_blank" rel="noreferrer" style={{ display: 'block', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,215,0,0.3)', boxShadow: '0 0 30px rgba(255,215,0,0.1)' }} className="scroll-reveal">
+                <img src={promo.bannerUrl} alt="Promotion" style={{ width: '100%', height: 'auto', display: 'block' }} />
+              </a>
+            ) : (
+              <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,215,0,0.3)', boxShadow: '0 0 30px rgba(255,215,0,0.1)' }} className="scroll-reveal">
+                <img src={promo.bannerUrl} alt="Promotion" style={{ width: '100%', height: 'auto', display: 'block' }} />
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* FEATURED TOURNAMENTS */}
       {featured.length > 0 && (
@@ -172,6 +218,38 @@ export default function Home() {
                 <img src="/stropse-seal.png" alt="STROPSE Seal" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 0 14px rgba(255,215,0,0.35))' }} />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT US */}
+      <section className="section">
+        <div className="container">
+          <div className="card scroll-reveal" style={{ maxWidth: 600, margin: '0 auto' }}>
+            <div className="section-header" style={{ marginBottom: 32 }}>
+              <h2 className="section-title" style={{ fontSize: 28 }}>Contact <span className="text-glow">Us</span></h2>
+              <p className="section-subtitle">Have a question or want to partner with STROPSE?</p>
+            </div>
+            <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input className="form-input" placeholder="Your Name" value={contactForm.name}
+                  onChange={e => setContactForm(p => ({ ...p, name: e.target.value }))} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input type="email" className="form-input" placeholder="your@email.com" value={contactForm.email}
+                  onChange={e => setContactForm(p => ({ ...p, email: e.target.value }))} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Message</label>
+                <textarea className="form-textarea" placeholder="How can we help?" value={contactForm.message}
+                  onChange={e => setContactForm(p => ({ ...p, message: e.target.value }))} required rows={4} />
+              </div>
+              <button type="submit" className="btn btn-primary btn-full" disabled={sendingMessage}>
+                {sendingMessage ? 'Sending...' : 'Send Message'}
+              </button>
+            </form>
           </div>
         </div>
       </section>

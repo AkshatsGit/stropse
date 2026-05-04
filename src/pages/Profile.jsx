@@ -12,6 +12,7 @@ export default function Profile() {
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingPic, setUploadingPic] = useState(false);
   const [verifiedCards, setVerifiedCards] = useState([]);
   const [form, setForm] = useState({
     name: userProfile?.name || '',
@@ -58,6 +59,53 @@ export default function Profile() {
 
   const initials = (userProfile?.name || user?.email || 'U').slice(0, 2).toUpperCase();
 
+  function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingPic(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 400; // Small size for profile pics
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const base64String = canvas.toDataURL('image/jpeg', 0.6);
+        
+        updateDoc(doc(db, 'users', user.uid), { profilePicture: base64String })
+          .then(() => {
+             refreshProfile();
+             toast('Profile picture updated!', 'success');
+          })
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setUploadingPic(false));
+      };
+      img.onerror = () => {
+        setUploadingPic(false);
+        toast('Failed to load image', 'error');
+      };
+      img.src = event.target.result;
+    };
+    reader.onerror = () => {
+      setUploadingPic(false);
+      toast('Failed to read file', 'error');
+    };
+    reader.readAsDataURL(file);
+  }
+
   return (
     <div className="profile-page">
       <div className="container">
@@ -70,13 +118,22 @@ export default function Profile() {
           {/* Left - Avatar */}
           <div className="profile-sidebar">
             <div className="profile-card">
-              <div className="profile-avatar-large">
+              <div className="profile-avatar-large" onClick={() => document.getElementById('profile-pic-upload').click()}>
+                {uploadingPic && (
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
+                    <div className="spinner" style={{ width: 24, height: 24, borderWidth: 2 }} />
+                  </div>
+                )}
                 {userProfile?.profilePicture ? (
                   <img src={userProfile.profilePicture} alt="avatar" />
                 ) : (
                   <span className="avatar-initials">{initials}</span>
                 )}
+                <div className="avatar-edit-overlay">
+                  <span>📷 Edit</span>
+                </div>
               </div>
+              <input type="file" id="profile-pic-upload" style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
               <h2 className="profile-name">{userProfile?.name || 'Player'}</h2>
               <p className="profile-username">@{userProfile?.username || 'username'}</p>
               <div className="profile-email">

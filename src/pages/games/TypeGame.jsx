@@ -412,6 +412,7 @@ export default function TypeGame() {
             )}
             <button className="btn btn-outline btn-sm" onClick={() => navigate('/games/typing')}>Leave</button>
           </div>
+        </div>
                 {gameDoc?.status === 'completed' ? (
           <div className="card" style={{ padding: 48, textAlign: 'center', background: '#0a0a0a', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', right: -100, top: -100, opacity: 0.03, pointerEvents: 'none' }}>
@@ -530,6 +531,7 @@ export default function TypeGame() {
                 )}
               </div>
             )}
+          </div>
         )}
       </div>
     </div>

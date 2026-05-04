@@ -80,9 +80,37 @@ export default function TypeGame() {
         p1Progress: 0,
         p2Progress: 0,
         status: 'waiting',
+        isSolo: false,
         createdAt: serverTimestamp()
       });
       toast('Match created! Waiting for opponent...', 'success');
+      navigate(`/games/typing?id=${generatedId}`);
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleCreateSoloGame() {
+    if (!user) { toast('Please log in first', 'error'); return; }
+    setCreating(true);
+    try {
+      const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
+      
+      await setDoc(doc(db, 'typeGames', generatedId), {
+        textToType: randomText,
+        player1: user.uid,
+        player1Name: user.displayName || 'Player 1',
+        player2: null,
+        p1Progress: 0,
+        status: 'playing',
+        isSolo: true,
+        startedAt: Date.now(),
+        createdAt: serverTimestamp()
+      });
+      toast('Solo speed test started!', 'success');
       navigate(`/games/typing?id=${generatedId}`);
     } catch (err) {
       toast(err.message, 'error');
@@ -133,10 +161,10 @@ export default function TypeGame() {
     else updates.p2Progress = progress;
 
     if (progress === targetText.length) {
-      // Win
       updates.status = 'completed';
       updates.winner = user.uid;
       updates.reason = 'finished';
+      updates.endedAt = Date.now();
     }
 
     updateDoc(doc(db, 'typeGames', gameId), updates);
@@ -156,9 +184,14 @@ export default function TypeGame() {
           
           <div className="card" style={{ textAlign: 'center', marginBottom: 24, padding: 48 }}>
             <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Start a Race</h2>
-            <button className="btn btn-primary btn-lg" onClick={handleCreateGame} disabled={creating || !user}>
-              {creating ? 'Creating...' : (user ? '⚡ Create New Race' : 'Log in to Play')}
-            </button>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+              <button className="btn btn-primary btn-lg" onClick={handleCreateGame} disabled={creating || !user}>
+                {creating ? 'Creating...' : (user ? '⚡ Create 1v1 Race' : 'Log in to Play')}
+              </button>
+              <button className="btn btn-outline btn-lg" style={{ borderColor: '#00ffff', color: '#00ffff' }} onClick={handleCreateSoloGame} disabled={creating || !user}>
+                {creating ? '...' : '⏱️ Solo Speed Test'}
+              </button>
+            </div>
           </div>
 
           <div className="card" style={{ textAlign: 'center', padding: 48 }}>
@@ -189,6 +222,13 @@ export default function TypeGame() {
   const p2Prog = gameDoc?.p2Progress || 0;
   const p1Pct = Math.min(100, (p1Prog / targetText.length) * 100);
   const p2Pct = Math.min(100, (p2Prog / targetText.length) * 100);
+
+  let finalWPM = 0;
+  if (gameDoc?.status === 'completed' && gameDoc?.startedAt && gameDoc?.endedAt) {
+    const minutes = (gameDoc.endedAt - gameDoc.startedAt) / 60000;
+    const words = targetText.length / 5;
+    finalWPM = Math.round(words / minutes);
+  }
 
   return (
     <div className="chess-page">
@@ -233,7 +273,7 @@ export default function TypeGame() {
               <div style={{ marginBottom: 40 }}>
                 <div style={{ marginBottom: 24 }}>
                   <div className="flex-between" style={{ marginBottom: 8, fontFamily: 'Orbitron' }}>
-                    <span style={{ color: '#00f260' }}>{gameDoc?.player1Name} {gameDoc?.player1 === user?.uid ? '(You)' : ''}</span>
+                    <span style={{ color: '#00f260' }}>{gameDoc?.isSolo ? 'Your Progress' : `${gameDoc?.player1Name} ${gameDoc?.player1 === user?.uid ? '(You)' : ''}`}</span>
                     <span>{Math.round(p1Pct)}%</span>
                   </div>
                   <div style={{ background: '#222', height: 12, borderRadius: 6, overflow: 'hidden' }}>
@@ -241,26 +281,36 @@ export default function TypeGame() {
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex-between" style={{ marginBottom: 8, fontFamily: 'Orbitron' }}>
-                    <span style={{ color: '#00ffff' }}>{gameDoc?.player2Name || 'Player 2'} {gameDoc?.player2 === user?.uid ? '(You)' : ''}</span>
-                    <span>{Math.round(p2Pct)}%</span>
+                {!gameDoc?.isSolo && (
+                  <div>
+                    <div className="flex-between" style={{ marginBottom: 8, fontFamily: 'Orbitron' }}>
+                      <span style={{ color: '#00ffff' }}>{gameDoc?.player2Name || 'Player 2'} {gameDoc?.player2 === user?.uid ? '(You)' : ''}</span>
+                      <span>{Math.round(p2Pct)}%</span>
+                    </div>
+                    <div style={{ background: '#222', height: 12, borderRadius: 6, overflow: 'hidden' }}>
+                      <div style={{ background: '#00ffff', height: '100%', width: `${p2Pct}%`, transition: 'width 0.1s linear' }} />
+                    </div>
                   </div>
-                  <div style={{ background: '#222', height: 12, borderRadius: 6, overflow: 'hidden' }}>
-                    <div style={{ background: '#00ffff', height: '100%', width: `${p2Pct}%`, transition: 'width 0.1s linear' }} />
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* TARGET TEXT */}
               <div style={{ background: '#111', padding: 24, borderRadius: 8, border: '1px solid #333', fontSize: 24, lineHeight: 1.6, fontFamily: 'monospace', position: 'relative' }}>
                 {gameDoc?.status === 'completed' && (
                   <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                    <h2 style={{ fontFamily: 'Orbitron', color: '#FFD700', fontSize: 40, marginBottom: 12 }}>RACE FINISHED</h2>
-                    <p style={{ color: '#fff', fontSize: 20 }}>
-                      Winner: <span style={{ color: '#00f260' }}>{gameDoc.winner === gameDoc.player1 ? gameDoc.player1Name : gameDoc.player2Name}</span>
-                    </p>
-                    {gameDoc.reason === 'resignation' && <p style={{ color: '#ff3333', marginTop: 8 }}>(By Resignation)</p>}
+                    <h2 style={{ fontFamily: 'Orbitron', color: '#FFD700', fontSize: 40, marginBottom: 12 }}>{gameDoc.isSolo ? 'TEST COMPLETE' : 'RACE FINISHED'}</h2>
+                    {!gameDoc.isSolo && (
+                      <p style={{ color: '#fff', fontSize: 20 }}>
+                        Winner: <span style={{ color: '#00f260' }}>{gameDoc.winner === gameDoc.player1 ? gameDoc.player1Name : gameDoc.player2Name}</span>
+                      </p>
+                    )}
+                    {gameDoc.isSolo && finalWPM > 0 && (
+                      <div style={{ marginTop: 16, background: 'rgba(0,255,255,0.1)', padding: '16px 32px', borderRadius: 12, border: '1px solid #00ffff' }}>
+                        <p style={{ color: '#00ffff', fontSize: 16, fontFamily: 'Orbitron', marginBottom: 4 }}>YOUR SPEED</p>
+                        <h1 style={{ color: '#fff', fontSize: 48, fontFamily: 'Orbitron', margin: 0 }}>{finalWPM} <span style={{ fontSize: 24, color: 'var(--grey-500)' }}>WPM</span></h1>
+                      </div>
+                    )}
+                    {gameDoc.reason === 'resignation' && !gameDoc.isSolo && <p style={{ color: '#ff3333', marginTop: 8 }}>(By Resignation)</p>}
                   </div>
                 )}
 

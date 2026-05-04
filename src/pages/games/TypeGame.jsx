@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { doc, updateDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -110,7 +110,7 @@ export default function TypeGame() {
         p1Progress: 0,
         status: 'playing',
         isSolo: true,
-        startedAt: Date.now(),
+        startedAt: null,       // Will be set on first keystroke
         createdAt: serverTimestamp()
       });
       toast('Solo speed test started!', 'success');
@@ -147,12 +147,8 @@ export default function TypeGame() {
     const val = e.target.value;
     const targetText = gameDoc.textToType;
     
-    // Check if input matches so far
     const isCorrectSoFar = targetText.startsWith(val);
-    if (!isCorrectSoFar) {
-      // Disallow typing if mistake is made until they backspace
-      return; 
-    }
+    if (!isCorrectSoFar) return;
 
     setInputVal(val);
 
@@ -162,6 +158,11 @@ export default function TypeGame() {
     const updates = {};
     if (isP1) updates.p1Progress = progress;
     else updates.p2Progress = progress;
+
+    // Record actual start time on very first keystroke (for accurate WPM)
+    if (progress === 1 && !gameDoc.startedAt) {
+      updates.startedAt = Date.now();
+    }
 
     if (progress === targetText.length) {
       updates.status = 'completed';
@@ -226,16 +227,18 @@ export default function TypeGame() {
   const p1Pct = Math.min(100, (p1Prog / targetText.length) * 100);
   const p2Pct = Math.min(100, (p2Prog / targetText.length) * 100);
 
+  // WPM = (characters / 5) / minutes
+  // startedAt is set on FIRST keystroke → endedAt on LAST keystroke = pure net typing time
   let finalWPM = 0;
-  if (gameDoc?.status === 'completed') {
-    if (gameDoc.startedAt && gameDoc.endedAt) {
-      const minutes = (gameDoc.endedAt - gameDoc.startedAt) / 60000;
+  if (gameDoc?.status === 'completed' && gameDoc?.startedAt && gameDoc?.endedAt) {
+    const elapsedMs = gameDoc.endedAt - gameDoc.startedAt;
+    if (elapsedMs > 0) {
+      const minutes = elapsedMs / 60000;
       const words = targetText.length / 5;
-      finalWPM = Math.max(0, Math.round(words / Math.max(minutes, 0.001)));
-    } else {
-      finalWPM = 60; // Fallback for old documents missing timestamps
+      finalWPM = Math.round(words / minutes);
     }
   }
+
 
   const generateCertificateImage = () => {
     return new Promise((resolve) => {

@@ -71,6 +71,40 @@ function isRowComplete(board, solution, row) {
   return true;
 }
 
+function isColComplete(board, solution, col) {
+  for (let r = 0; r < SIZE; r++) {
+    const i = r * SIZE + col;
+    if (board[i] !== solution[i]) return false;
+  }
+  return true;
+}
+
+function isBoxComplete(board, solution, boxR, boxC) {
+  for (let r = boxR; r < boxR + BOX_ROWS; r++)
+    for (let c = boxC; c < boxC + BOX_COLS; c++) {
+      const i = r * SIZE + c;
+      if (board[i] !== solution[i]) return false;
+    }
+  return true;
+}
+
+// Red only when same number appears twice in row/col/box
+function hasConflict(board, idx) {
+  const val = board[idx];
+  if (!val) return false;
+  const row = Math.floor(idx / SIZE), col = idx % SIZE;
+  for (let i = 0; i < SIZE; i++) {
+    if (i !== col && board[row * SIZE + i] === val) return true;
+    if (i !== row && board[i * SIZE + col] === val) return true;
+  }
+  const br = Math.floor(row / BOX_ROWS) * BOX_ROWS;
+  const bc = Math.floor(col / BOX_COLS) * BOX_COLS;
+  for (let r = br; r < br + BOX_ROWS; r++)
+    for (let c = bc; c < bc + BOX_COLS; c++)
+      if ((r * SIZE + c) !== idx && board[r * SIZE + c] === val) return true;
+  return false;
+}
+
 function isBoardSolved(board, solution) {
   return board.every((v, i) => v === solution[i]);
 }
@@ -135,6 +169,36 @@ export default function SudokuGame() {
     return () => unsub();
   }, [gameId, user]);
 
+  // Keyboard & arrow key handler
+  useEffect(() => {
+    function onKey(e) {
+      if (solved) return;
+      const key = e.key;
+      // Arrow navigation
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)) {
+        e.preventDefault();
+        setSelected(prev => {
+          if (prev === null) return 0;
+          if (key === 'ArrowRight') return Math.min(SIZE * SIZE - 1, prev + 1);
+          if (key === 'ArrowLeft')  return Math.max(0, prev - 1);
+          if (key === 'ArrowDown')  return Math.min(SIZE * SIZE - 1, prev + SIZE);
+          if (key === 'ArrowUp')    return Math.max(0, prev - SIZE);
+          return prev;
+        });
+        return;
+      }
+      // Number input
+      if (selected !== null && puzzle && puzzle[selected] === 0) {
+        const num = parseInt(key);
+        if (num >= 1 && num <= SIZE) handleInput(num);
+        if (key === 'Backspace' || key === 'Delete' || key === '0') handleInput(0);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selected, solved, puzzle, board]);
+
+
   async function createMultiGame() {
     if (!user) { toast('Log in first', 'error'); return; }
     setCreating(true);
@@ -161,7 +225,7 @@ export default function SudokuGame() {
     newBoard[selected] = num;
     setBoard(newBoard);
 
-    if (num !== 0 && num !== solution[selected]) setMistakes(m => m + 1);
+    if (num !== 0 && hasConflict(newBoard, selected)) setMistakes(m => m + 1);
 
     if (isBoardSolved(newBoard, solution)) {
       setSolved(true); setRunning(false);
@@ -182,7 +246,13 @@ export default function SudokuGame() {
 
   const fmt = s => `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
   const totalCorrect = board ? board.filter((v, i) => v !== 0 && solution && v === solution[i]).length : 0;
-  const completedRows = solution ? Array.from({ length: SIZE }, (_, r) => board ? isRowComplete(board, solution, r) : false) : [];
+  const completedRows  = solution ? Array.from({ length: SIZE }, (_, r) => board ? isRowComplete(board, solution, r) : false) : [];
+  const completedCols  = solution ? Array.from({ length: SIZE }, (_, c) => board ? isColComplete(board, solution, c) : false) : [];
+  const completedBoxes = solution ? Array.from({ length: (SIZE/BOX_ROWS)*(SIZE/BOX_COLS) }, (_, b) => {
+    const boxR = Math.floor(b / (SIZE / BOX_COLS)) * BOX_ROWS;
+    const boxC = (b % (SIZE / BOX_COLS)) * BOX_COLS;
+    return board ? isBoxComplete(board, solution, boxR, boxC) : false;
+  }) : [];
 
   // ── LOBBY ──
   if (!gameId && !puzzle) {
@@ -322,44 +392,64 @@ export default function SudokuGame() {
                 const col = idx % SIZE;
                 const isFixed = puzzle[idx] !== 0;
                 const isSel = selected === idx;
-                const isWrong = val !== 0 && val !== solution[idx];
+                const conflict = hasConflict(board, idx);
                 const rowDone = completedRows[row];
+                const colDone = completedCols[col];
+                const boxR = Math.floor(row / BOX_ROWS) * BOX_ROWS;
+                const boxC = Math.floor(col / BOX_COLS) * BOX_COLS;
+                const boxIdx = Math.floor(row / BOX_ROWS) * (SIZE / BOX_COLS) + Math.floor(col / BOX_COLS);
+                const boxDone = completedBoxes[boxIdx];
+                const anyDone = rowDone || colDone || boxDone;
                 const sameNum = selected !== null && val !== 0 && board[selected] !== 0 && val === board[selected] && !isSel;
+                // Highlight same row/col as selected cell
+                const selRow = selected !== null ? Math.floor(selected / SIZE) : -1;
+                const selCol = selected !== null ? selected % SIZE : -1;
+                const inSameRowCol = !isSel && (row === selRow || col === selCol);
 
-                // Box borders: 2-row × 3-col boxes
                 const borderRight = (col + 1) % BOX_COLS === 0 && col !== SIZE - 1
                   ? '2px solid rgba(0,255,255,0.6)' : '1px solid rgba(0,255,255,0.1)';
                 const borderBottom = (row + 1) % BOX_ROWS === 0 && row !== SIZE - 1
                   ? '2px solid rgba(0,255,255,0.6)' : '1px solid rgba(0,255,255,0.1)';
 
                 let bg = 'transparent';
-                if (rowDone) bg = 'rgba(255,215,0,0.1)';
-                if (sameNum) bg = 'rgba(0,255,255,0.07)';
+                if (inSameRowCol) bg = 'rgba(0,255,255,0.04)';
+                if (anyDone) bg = 'rgba(255,215,0,0.1)';
+                if (sameNum) bg = 'rgba(0,255,255,0.1)';
                 if (isSel) bg = 'rgba(0,255,255,0.25)';
+                if (conflict && !isSel) bg = 'rgba(255,68,68,0.12)';
+
+                const textColor = conflict ? '#ff4444'
+                  : anyDone ? '#FFD700'
+                  : isFixed ? '#ffffff'
+                  : '#00e5ff';
 
                 return (
                   <div key={idx}
-                    onClick={() => !isFixed && setSelected(idx)}
+                    onClick={() => setSelected(idx)}
                     style={{
                       width: cellSize, height: cellSize,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: 'Orbitron',
-                      fontSize,
-                      color: isWrong ? '#ff4444' : isFixed ? '#ffffff' : rowDone ? '#FFD700' : '#00ffff',
+                      fontFamily: 'Orbitron', fontSize,
+                      color: isSel ? '#ffffff' : textColor,
                       fontWeight: isFixed ? 700 : 400,
                       background: bg,
                       borderRight, borderBottom,
-                      cursor: isFixed ? 'default' : 'pointer',
+                      cursor: 'pointer',
                       transition: 'background 0.2s, color 0.3s',
                       boxSizing: 'border-box',
-                      boxShadow: rowDone && !isSel ? 'inset 0 0 16px rgba(255,215,0,0.12)' : 'none',
-                      textShadow: rowDone && !isWrong ? '0 0 14px #FFD700' : isSel ? '0 0 14px #00ffff' : 'none',
+                      boxShadow: anyDone && !isSel ? 'inset 0 0 18px rgba(255,215,0,0.14)' : 'none',
+                      textShadow: conflict ? '0 0 8px #ff4444'
+                        : anyDone ? '0 0 16px #FFD700'
+                        : isSel ? '0 0 14px #00ffff' : 'none',
                       userSelect: 'none',
+                      outline: isSel ? '2px solid #00ffff' : 'none',
+                      outlineOffset: '-2px',
                     }}>
                     {val !== 0 ? val : ''}
                   </div>
                 );
               })}
+
             </div>
 
             {/* Number pad */}

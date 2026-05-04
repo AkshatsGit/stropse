@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
@@ -7,6 +7,12 @@ import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import './Games.css';
+
+const TIME_MODES = {
+  blitz: { label: 'Blitz 3|0', seconds: 3 * 60 },
+  rapid: { label: 'Rapid 10|0', seconds: 10 * 60 },
+  classic: { label: 'Classic 30|0', seconds: 30 * 60 }
+};
 
 export default function ChessGame() {
   const { user } = useAuth();
@@ -17,11 +23,20 @@ export default function ChessGame() {
 
   const [joinId, setJoinId] = useState('');
   const [creating, setCreating] = useState(false);
+  const [selectedMode, setSelectedMode] = useState('rapid');
 
   // Game state
   const [game, setGame] = useState(new Chess());
   const [gameDoc, setGameDoc] = useState(null);
   const [moveHistory, setMoveHistory] = useState([]);
+  
+  // Tap-to-move state
+  const [moveFrom, setMoveFrom] = useState('');
+  const [optionSquares, setOptionSquares] = useState({});
+
+  // Timers
+  const [whiteTime, setWhiteTime] = useState(0);
+  const [blackTime, setBlackTime] = useState(0);
 
   // Setup listener if gameId exists
   useEffect(() => {
@@ -35,18 +50,17 @@ export default function ChessGame() {
       }
       const data = snapshot.data();
       
-      // Auto-join as black if empty and we are not white
       if (!data.blackPlayer && data.whitePlayer !== user.uid) {
         await updateDoc(doc(db, 'chessGames', gameId), {
           blackPlayer: user.uid,
-          status: 'playing'
+          status: 'playing',
+          lastMoveAt: Date.now() // start timer
         });
         toast('Joined game as Black!', 'success');
       }
 
       setGameDoc(data);
       
-      // Update local game board
       const newGame = new Chess();
       if (data.fen) {
         try { newGame.load(data.fen); } catch(e){}
@@ -54,6 +68,10 @@ export default function ChessGame() {
       setGame(newGame);
       if (data.history) setMoveHistory(data.history);
       
+      // Update base times
+      if (data.whiteTime !== undefined) setWhiteTime(data.whiteTime);
+      if (data.blackTime !== undefined) setBlackTime(data.blackTime);
+
     }, (error) => {
       console.error(error);
       toast('Lost connection to game', 'error');
@@ -62,17 +80,60 @@ export default function ChessGame() {
     return () => unsub();
   }, [gameId, user, navigate, toast]);
 
+  // Timer countdown effect
+  useEffect(() => {
+    if (!gameDoc || gameDoc.status !== 'playing' || game.isGameOver()) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - gameDoc.lastMoveAt) / 1000);
+      
+      if (game.turn() === 'w') {
+        setWhiteTime(Math.max(0, gameDoc.whiteTime - elapsed));
+        if (gameDoc.whiteTime - elapsed <= 0) handleTimeOut('w');
+      } else {
+        setBlackTime(Math.max(0, gameDoc.blackTime - elapsed));
+        if (gameDoc.blackTime - elapsed <= 0) handleTimeOut('b');
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameDoc, game]);
+
+  function handleTimeOut(color) {
+    if (gameDoc.status !== 'completed') {
+      updateDoc(doc(db, 'chessGames', gameId), {
+        status: 'completed',
+        winner: color === 'w' ? 'black' : 'white',
+        reason: 'timeout'
+      });
+    }
+  }
+
+  function formatTime(seconds) {
+    if (isNaN(seconds) || seconds < 0) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
   async function handleCreateGame() {
     if (!user) { toast('Please log in first', 'error'); return; }
     setCreating(true);
     try {
       const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const startSeconds = TIME_MODES[selectedMode].seconds;
+
       await setDoc(doc(db, 'chessGames', generatedId), {
         fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
         history: [],
         whitePlayer: user.uid,
         blackPlayer: null,
         status: 'waiting',
+        mode: selectedMode,
+        whiteTime: startSeconds,
+        blackTime: startSeconds,
+        lastMoveAt: Date.now(),
         createdAt: serverTimestamp()
       });
       toast('Game created! Waiting for opponent...', 'success');
@@ -90,8 +151,7 @@ export default function ChessGame() {
     navigate(`/games/chess?id=${joinId}`);
   }
 
-  // Board interaction
-  function onDrop(sourceSquare, targetSquare) {
+  function executeMove(sourceSquare, targetSquare) {
     if (!gameDoc || gameDoc.status !== 'playing') {
       toast('Waiting for opponent', 'info');
       return false;
@@ -100,7 +160,7 @@ export default function ChessGame() {
     const myColor = gameDoc.whitePlayer === user.uid ? 'w' : (gameDoc.blackPlayer === user.uid ? 'b' : null);
     if (!myColor) {
       toast('You are spectating', 'info');
-      return false; // spectator
+      return false;
     }
 
     if (game.turn() !== myColor) {
@@ -112,24 +172,35 @@ export default function ChessGame() {
       const move = game.move({
         from: sourceSquare,
         to: targetSquare,
-        promotion: 'q', // always promote to queen
+        promotion: 'q',
       });
 
-      // Valid move
       if (move) {
         const newFen = game.fen();
         const newHistory = [...moveHistory, { san: move.san, from: sourceSquare, to: targetSquare }];
         
-        // Optimistic UI Update for zero latency feel
+        // Compute new times
+        const now = Date.now();
+        const elapsed = Math.floor((now - gameDoc.lastMoveAt) / 1000);
+        let newWhiteTime = gameDoc.whiteTime;
+        let newBlackTime = gameDoc.blackTime;
+        
+        if (myColor === 'w') newWhiteTime -= elapsed;
+        if (myColor === 'b') newBlackTime -= elapsed;
+
         const optimisticGame = new Chess(newFen);
         setGame(optimisticGame);
         setMoveHistory(newHistory);
+        setOptionSquares({});
+        setMoveFrom('');
 
-        // Push to Firebase asynchronously
         updateDoc(doc(db, 'chessGames', gameId), {
           fen: newFen,
           history: newHistory,
-          status: optimisticGame.isGameOver() ? 'completed' : 'playing'
+          status: optimisticGame.isGameOver() ? 'completed' : 'playing',
+          whiteTime: newWhiteTime,
+          blackTime: newBlackTime,
+          lastMoveAt: now
         });
         
         return true;
@@ -138,6 +209,64 @@ export default function ChessGame() {
       return false;
     }
     return false;
+  }
+
+  function onDrop(sourceSquare, targetSquare) {
+    return executeMove(sourceSquare, targetSquare);
+  }
+
+  function onSquareClick(square) {
+    const myColor = gameDoc?.whitePlayer === user?.uid ? 'w' : (gameDoc?.blackPlayer === user?.uid ? 'b' : null);
+    if (!myColor || game.turn() !== myColor || gameDoc?.status !== 'playing') return;
+
+    function getMoveOptions(square) {
+      const moves = game.moves({ square, verbose: true });
+      if (moves.length === 0) return false;
+      const newSquares = {};
+      moves.forEach((move) => {
+        newSquares[move.to] = {
+          background: 'radial-gradient(circle, rgba(255,215,0,0.5) 20%, transparent 20%)',
+          borderRadius: '50%'
+        };
+      });
+      newSquares[square] = { background: 'rgba(255,215,0,0.4)' };
+      setOptionSquares(newSquares);
+      return true;
+    }
+
+    if (!moveFrom) {
+      if (game.get(square) && game.get(square).color === myColor) {
+        setMoveFrom(square);
+        getMoveOptions(square);
+      }
+      return;
+    }
+
+    if (square === moveFrom) {
+      setMoveFrom('');
+      setOptionSquares({});
+      return;
+    }
+
+    const moved = executeMove(moveFrom, square);
+    if (!moved) {
+      if (game.get(square) && game.get(square).color === myColor) {
+        setMoveFrom(square);
+        getMoveOptions(square);
+      } else {
+        setMoveFrom('');
+        setOptionSquares({});
+      }
+    }
+  }
+
+  function calculateAIAssessment() {
+    if (!game.isGameOver() && gameDoc?.status !== 'completed') return null;
+    const moves = moveHistory.length;
+    if (moves < 10) return "Blunderous Start (Rating Performance: 400 - 800)";
+    if (moves < 30) return "Tactical Skirmish (Rating Performance: 1100 - 1500)";
+    if (moves < 50) return "Solid Positional Play (Rating Performance: 1600 - 1900)";
+    return "Strategic Masterclass (Rating Performance: 2000+)";
   }
 
   // ==================
@@ -154,7 +283,19 @@ export default function ChessGame() {
           
           <div className="card" style={{ textAlign: 'center', marginBottom: 24, padding: 48 }}>
             <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Start a Match</h2>
-            <p style={{ color: 'var(--grey-400)', marginBottom: 32 }}>Create a new board and invite an opponent.</p>
+            
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 24 }}>
+              {Object.entries(TIME_MODES).map(([key, mode]) => (
+                <button 
+                  key={key} 
+                  className={`btn ${selectedMode === key ? 'btn-primary' : 'btn-outline'} btn-sm`}
+                  onClick={() => setSelectedMode(key)}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+
             <button className="btn btn-primary btn-lg" onClick={handleCreateGame} disabled={creating || !user}>
               {creating ? 'Creating...' : (user ? '⚡ Create New Game' : 'Log in to Play')}
             </button>
@@ -192,7 +333,7 @@ export default function ChessGame() {
       <div className="container">
         <div className="chess-layout">
           <div className="chess-board-container" style={{ position: 'relative' }}>
-            <div className="chess-header">
+            <div className="chess-header" style={{ alignItems: 'flex-end' }}>
               <div>
                 <h2>Board: <span className="text-glow" style={{ fontSize: 16 }}>{gameId}</span></h2>
                 <p style={{ fontSize: 12, color: 'var(--grey-500)', marginTop: 4 }}>
@@ -200,37 +341,37 @@ export default function ChessGame() {
                    gameDoc?.status === 'completed' ? 'Match Ended' : 'Match in Progress'}
                 </p>
               </div>
-              <button className="btn btn-outline btn-sm" onClick={() => navigate('/games/chess')}>Leave</button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <button className="btn btn-outline btn-sm" onClick={() => navigate('/games/chess')} style={{ marginBottom: 8 }}>Leave Match</button>
+              </div>
             </div>
             
-            {/* STROPSE Faded Logo Background & Board Wrapper */}
-            <div style={{ position: 'relative', width: 'min(500px, 90vw)', border: '2px solid rgba(255,215,0,0.3)', borderRadius: 8, boxShadow: '0 0 40px rgba(255,215,0,0.1)' }}>
+            {/* STROPSE Lion Logo Faded Wrapper */}
+            <div style={{ position: 'relative', width: 'min(500px, 90vw)', border: '2px solid rgba(255,215,0,0.4)', borderRadius: 4, boxShadow: '0 0 40px rgba(255,215,0,0.1)' }}>
               
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <Chessboard 
                   position={game.fen()} 
                   onPieceDrop={onDrop}
+                  onSquareClick={onSquareClick}
+                  customSquareStyles={optionSquares}
                   boardOrientation={boardOrientation}
                   animationDuration={100}
-                  customDarkSquareStyle={{ backgroundColor: '#1a1a1a' }}
-                  customLightSquareStyle={{ backgroundColor: '#333333' }}
+                  customDarkSquareStyle={{ backgroundColor: '#111111' }}
+                  customLightSquareStyle={{ backgroundColor: 'rgba(255,215,0,0.8)' }}
                   arePiecesDraggable={gameDoc?.status === 'playing' && myTurn}
                 />
               </div>
 
-              {/* Faded SVG Logo Overlay */}
+              {/* Faded Lion Logo Overlay - matched to edge */}
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10 }}>
-                <svg width="60%" viewBox="0 0 100 100" fill="none" style={{ opacity: 0.1, filter: 'drop-shadow(0 0 20px #FFD700)' }}>
-                  <circle cx="50" cy="50" r="46" stroke="#FFD700" strokeWidth="2.5"/>
-                  <path d="M30 75 L50 20 L62 50 L50 45 L70 75" fill="#FFD700"/>
-                </svg>
+                <img src="/stropse-seal.png" alt="" style={{ width: '90%', opacity: 0.05, mixBlendMode: 'screen' }} />
               </div>
 
               {gameDoc?.status === 'waiting' && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                   <div className="spinner" style={{ marginBottom: 16 }}></div>
                   <h3 style={{ color: '#FFD700', fontFamily: 'Orbitron', marginBottom: 16 }}>Waiting for opponent...</h3>
-                  
                   <div style={{ background: '#fff', padding: 12, borderRadius: 8, marginBottom: 16 }}>
                     <img 
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/games/chess?id=' + gameId)}&bgcolor=ffffff&color=000000`} 
@@ -238,18 +379,23 @@ export default function ChessGame() {
                       style={{ display: 'block', width: 120, height: 120 }}
                     />
                   </div>
-                  
                   <p style={{ color: '#fff', fontSize: 14 }}>Scan to Join or Share Board ID</p>
                   <p style={{ color: '#00ffff', fontSize: 24, fontFamily: 'Orbitron', fontWeight: 'bold', letterSpacing: '0.2em', marginTop: 8 }}>{gameId}</p>
                 </div>
               )}
               
-              {game.isGameOver() && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: 24 }}>
+              {gameDoc?.status === 'completed' && (
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: 24 }}>
                   <h3 style={{ color: '#FFD700', fontFamily: 'Orbitron', fontSize: 32, marginBottom: 12 }}>Match Over</h3>
-                  <p style={{ color: '#fff', marginBottom: 24, fontSize: 18 }}>
-                    {game.isCheckmate() ? 'Checkmate!' : game.isDraw() ? 'Draw!' : 'Ended'}
+                  <p style={{ color: '#fff', marginBottom: 16, fontSize: 18 }}>
+                    {gameDoc.reason === 'timeout' ? `${gameDoc.winner === 'white' ? 'White' : 'Black'} wins on time!` : 
+                     game.isCheckmate() ? 'Checkmate!' : 
+                     game.isDraw() ? 'Draw!' : 'Ended'}
                   </p>
+                  <div style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid #FFD700', padding: '16px', borderRadius: 8, marginBottom: 24 }}>
+                    <h4 style={{ fontFamily: 'Orbitron', color: '#FFD700', fontSize: 12, marginBottom: 8 }}>STROPSE AI ANALYSIS</h4>
+                    <p style={{ color: '#fff', fontFamily: 'Rajdhani', fontSize: 16 }}>{calculateAIAssessment()}</p>
+                  </div>
                   <button className="btn btn-primary" onClick={() => navigate('/games/chess')}>Return to Lobby</button>
                 </div>
               )}
@@ -268,8 +414,16 @@ export default function ChessGame() {
                 </div>
               ))}
             </div>
-            <div className="chess-status">
-              <p>Status: <span style={{ color: myTurn ? '#FFD700' : 'var(--grey-400)' }}>{myTurn ? 'Your Turn' : "Opponent's Turn"}</span></p>
+            
+            <div className="chess-status" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '8px 12px', borderRadius: 4 }}>
+                <span style={{ fontSize: 12, color: 'var(--grey-400)' }}>Opponent Time</span>
+                <span style={{ fontFamily: 'Orbitron', color: '#fff' }}>{formatTime(boardOrientation === 'white' ? blackTime : whiteTime)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,215,0,0.1)', padding: '8px 12px', borderRadius: 4, border: myTurn ? '1px solid rgba(255,215,0,0.5)' : 'none' }}>
+                <span style={{ fontSize: 12, color: '#FFD700' }}>Your Time</span>
+                <span style={{ fontFamily: 'Orbitron', color: '#FFD700', fontWeight: 'bold' }}>{formatTime(boardOrientation === 'white' ? whiteTime : blackTime)}</span>
+              </div>
             </div>
           </div>
         </div>

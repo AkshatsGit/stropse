@@ -318,6 +318,28 @@ export default function ChessGame() {
     return "Analysis unavailable.";
   }
 
+  function handleResignOrLeave(isResignBtn = false) {
+    const isParticipant = gameDoc && user && (gameDoc.whitePlayer === user.uid || gameDoc.blackPlayer === user.uid);
+    const myColor = gameDoc?.whitePlayer === user?.uid ? 'w' : (gameDoc?.blackPlayer === user?.uid ? 'b' : null);
+
+    if (gameDoc?.status === 'playing' && isParticipant) {
+      const msg = isResignBtn 
+        ? "Are you sure you want to resign?" 
+        : "Are you sure you want to leave? You will forfeit the match.";
+        
+      if (window.confirm(msg)) {
+        updateDoc(doc(db, 'chessGames', gameId), {
+          status: 'completed',
+          winner: myColor === 'w' ? 'black' : 'white',
+          reason: 'resignation'
+        });
+        if (!isResignBtn) navigate('/games/chess');
+      }
+    } else {
+      navigate('/games/chess');
+    }
+  }
+
   // ==================
   // RENDER LOBBY
   // ==================
@@ -390,8 +412,13 @@ export default function ChessGame() {
                    gameDoc?.status === 'completed' ? 'Match Ended' : 'Match in Progress'}
                 </p>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <button className="btn btn-outline btn-sm" onClick={() => navigate('/games/chess')} style={{ marginBottom: 8 }}>Leave Match</button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                  {gameDoc?.status === 'playing' && (gameDoc.whitePlayer === user?.uid || gameDoc.blackPlayer === user?.uid) && (
+                    <button className="btn btn-primary btn-sm" style={{ background: '#ff3333', borderColor: '#ff3333', color: '#fff' }} onClick={() => handleResignOrLeave(true)}>⚑ Resign</button>
+                  )}
+                  <button className="btn btn-outline btn-sm" onClick={() => handleResignOrLeave(false)}>Leave</button>
+                </div>
               </div>
             </div>
             
@@ -438,6 +465,7 @@ export default function ChessGame() {
                   <h3 style={{ color: '#FFD700', fontFamily: 'Orbitron', fontSize: 32, marginBottom: 12 }}>Match Over</h3>
                   <p style={{ color: '#fff', marginBottom: 16, fontSize: 18 }}>
                     {gameDoc.reason === 'timeout' ? `${gameDoc.winner === 'white' ? 'White' : 'Black'} wins on time!` : 
+                     gameDoc.reason === 'resignation' ? `${gameDoc.winner === 'white' ? 'White' : 'Black'} wins by resignation!` :
                      game.isCheckmate() ? 'Checkmate!' : 
                      game.isDraw() ? 'Draw!' : 'Ended'}
                   </p>

@@ -967,6 +967,13 @@ function ChessTournamentManager({ toast }) {
     toast(`Round ${currentRound + 1} generated!`, 'success');
   }
 
+  async function dropTournament(tid) {
+    if (window.confirm("Are you sure you want to drop and end this tournament entirely?")) {
+      await deleteDoc(doc(db, 'chessTournaments', tid));
+      toast('Tournament dropped.', 'success');
+    }
+  }
+
   function renderBracket(t) {
     if (!t.matches) return null;
     const rounds = {};
@@ -1029,9 +1036,12 @@ function ChessTournamentManager({ toast }) {
                 <h3 style={{ fontFamily: 'Orbitron', fontSize: 24 }}>ID: {t.id} <span style={{ fontSize: 12, padding: '4px 8px', background: t.status === 'pooling' ? 'rgba(255,215,0,0.1)' : 'rgba(0,255,100,0.1)', borderRadius: 4, color: t.status === 'pooling' ? '#FFD700' : '#00f260', marginLeft: 12 }}>{t.status.toUpperCase()}</span></h3>
                 <p style={{ color: 'var(--grey-500)', fontSize: 13, marginTop: 4 }}>Joined Players: {t.players?.length || 0}</p>
               </div>
-              {t.status === 'pooling' && (
-                <button className="btn btn-outline" onClick={() => generateBracket(t.id, t.players)}>Generate Bracket</button>
-              )}
+              <div style={{ display: 'flex', gap: 12 }}>
+                {t.status === 'pooling' && (
+                  <button className="btn btn-outline" onClick={() => generateBracket(t.id, t.players)}>Generate Bracket</button>
+                )}
+                <button className="btn btn-outline" style={{ borderColor: '#ff3333', color: '#ff3333' }} onClick={() => dropTournament(t.id)}>🗑️ Drop</button>
+              </div>
             </div>
 
             {t.status === 'pooling' && (

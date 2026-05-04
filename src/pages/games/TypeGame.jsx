@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { doc, updateDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -398,153 +398,183 @@ export default function TypeGame() {
   }, [gameDoc?.status, certDataUrl]);
 
   return (
-    <div style={{ minHeight: '80vh', padding: '40px 24px 80px' }}>
-      <div style={{ maxWidth: 820, margin: '0 auto' }}>
+    <div style={{ minHeight: '90vh', paddingTop: 40, paddingBottom: 80, paddingLeft: 20, paddingRight: 20, boxSizing: 'border-box' }}>
+      <div style={{ maxWidth: 780, width: '100%', marginLeft: 'auto', marginRight: 'auto', boxSizing: 'border-box' }}>
 
-        {/* Header */}
-        <div className="flex-between" style={{ marginBottom: 24 }}>
+        {/* TOP BAR */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
-            <h2 style={{ fontFamily: 'Orbitron' }}>Race: <span className="text-glow" style={{ fontSize: 16 }}>{gameId}</span></h2>
-            <p style={{ color: 'var(--grey-400)' }}>{gameDoc?.status?.toUpperCase()}</p>
+            <h2 style={{ fontFamily: 'Orbitron', margin: 0, fontSize: 22 }}>
+              Race: <span style={{ color: '#FFD700' }}>{gameId}</span>
+            </h2>
+            <p style={{ color: '#888', margin: '4px 0 0', fontSize: 13 }}>{gameDoc?.status?.toUpperCase()}</p>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 10 }}>
             {gameDoc?.status === 'playing' && isParticipant && (
-              <button className="btn btn-outline btn-sm" style={{ borderColor: '#ff3333', color: '#ff3333' }} onClick={handleResign}>⚑ Resign</button>
+              <button onClick={handleResign} style={{ background: 'transparent', border: '1px solid #ff3333', color: '#ff3333', padding: '6px 14px', borderRadius: 6, cursor: 'pointer', fontFamily: 'Orbitron', fontSize: 12 }}>
+                ⚑ RESIGN
+              </button>
             )}
-            <button className="btn btn-outline btn-sm" onClick={() => navigate('/games/typing')}>Leave</button>
+            <button onClick={() => navigate('/games/typing')} style={{ background: 'transparent', border: '1px solid #555', color: '#fff', padding: '6px 14px', borderRadius: 6, cursor: 'pointer', fontFamily: 'Orbitron', fontSize: 12 }}>
+              LEAVE
+            </button>
           </div>
         </div>
 
-        {/* COMPLETED */}
-        {gameDoc?.status === 'completed' ? (
-          <div className="card" style={{ padding: 48, textAlign: 'center', background: '#0a0a0a', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', right: -100, top: -100, opacity: 0.03, pointerEvents: 'none' }}>
-              <img src="/stropse-seal.png" alt="" style={{ width: 600 }} />
-            </div>
-            <h2 style={{ fontFamily: 'Orbitron', color: '#FFD700', fontSize: 40, marginBottom: 12 }}>
-              {gameDoc?.isSolo ? 'TEST COMPLETE' : 'RACE FINISHED'}
-            </h2>
-            {!gameDoc?.isSolo && (
-              <p style={{ color: '#fff', fontSize: 20, marginBottom: 16 }}>
-                Winner: <span style={{ color: '#FFD700' }}>{gameDoc.winner === gameDoc.player1 ? gameDoc.player1Name : gameDoc.player2Name}</span>
-              </p>
-            )}
-            {gameDoc?.reason === 'resignation' && (
-              <p style={{ color: '#ff3333', marginBottom: 16 }}>(By Resignation)</p>
-            )}
-            {certDataUrl ? (
-              <div style={{ marginTop: 24 }}>
-                <img src={certDataUrl} alt="Stropse Certificate" style={{ maxWidth: '100%', maxHeight: '60vh', objectFit: 'contain', border: '2px solid #FFD700', borderRadius: 12, boxShadow: '0 0 50px rgba(255,215,0,0.2)' }} />
-                <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 24, flexWrap: 'wrap' }}>
-                  <a href={certDataUrl} download={`Stropse_CyberTyper_${finalWPM}WPM.png`} className="btn btn-primary" style={{ background: '#FFD700', color: '#000', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-                    📥 Download Certificate
-                  </a>
-                  <button className="btn btn-outline" style={{ borderColor: '#FFD700', color: '#FFD700' }} onClick={() => navigate('/games/typing')}>
-                    Back to Lobby
-                  </button>
-                </div>
-                <p style={{ color: 'var(--grey-500)', marginTop: 12, fontSize: 13 }}>
-                  Download and attach to your LinkedIn post to verify your typing speed.
-                </p>
+        {/* MAIN CARD */}
+        <div style={{ background: '#0f0f0f', border: '1px solid #2a2a2a', borderRadius: 12, padding: 32, width: '100%', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+          
+          {/* Background seal watermark */}
+          <img src="/stropse-seal.png" alt="" style={{ position: 'absolute', right: -80, top: -80, width: 500, opacity: 0.03, pointerEvents: 'none', zIndex: 0 }} />
+          
+          <div style={{ position: 'relative', zIndex: 1 }}>
+
+            {/* ===== COMPLETED ===== */}
+            {gameDoc?.status === 'completed' && (
+              <div style={{ textAlign: 'center' }}>
+                <h2 style={{ fontFamily: 'Orbitron', color: '#FFD700', fontSize: 36, margin: '0 0 12px' }}>
+                  {gameDoc?.isSolo ? 'TEST COMPLETE' : 'RACE FINISHED'}
+                </h2>
+                {!gameDoc?.isSolo && (
+                  <p style={{ color: '#fff', fontSize: 18, marginBottom: 12 }}>
+                    Winner: <span style={{ color: '#FFD700' }}>
+                      {gameDoc.winner === gameDoc.player1 ? gameDoc.player1Name : gameDoc.player2Name}
+                    </span>
+                  </p>
+                )}
+                {gameDoc?.reason === 'resignation' && (
+                  <p style={{ color: '#ff4444', marginBottom: 12 }}>(By Resignation)</p>
+                )}
+                {certDataUrl ? (
+                  <div style={{ marginTop: 24 }}>
+                    <img
+                      src={certDataUrl}
+                      alt="Stropse Certificate"
+                      style={{ maxWidth: '100%', maxHeight: '55vh', objectFit: 'contain', border: '2px solid #FFD700', borderRadius: 10, boxShadow: '0 0 40px rgba(255,215,0,0.15)' }}
+                    />
+                    <div style={{ display: 'flex', gap: 14, justifyContent: 'center', marginTop: 24, flexWrap: 'wrap' }}>
+                      <a
+                        href={certDataUrl}
+                        download={`Stropse_${finalWPM}WPM.png`}
+                        style={{ background: '#FFD700', color: '#000', textDecoration: 'none', padding: '10px 24px', borderRadius: 8, fontFamily: 'Orbitron', fontSize: 13, fontWeight: 700 }}
+                      >
+                        📥 Download Certificate
+                      </a>
+                      <button
+                        onClick={() => navigate('/games/typing')}
+                        style={{ background: 'transparent', border: '1px solid #FFD700', color: '#FFD700', padding: '10px 24px', borderRadius: 8, fontFamily: 'Orbitron', fontSize: 13, cursor: 'pointer' }}
+                      >
+                        Back to Lobby
+                      </button>
+                    </div>
+                    <p style={{ color: '#666', marginTop: 12, fontSize: 12 }}>
+                      Download and upload to LinkedIn to verify your speed.
+                    </p>
+                  </div>
+                ) : (
+                  <p style={{ color: '#FFD700', fontFamily: 'Orbitron', marginTop: 32 }}>
+                    Generating Certificate...
+                  </p>
+                )}
               </div>
-            ) : (
-              <p style={{ color: '#FFD700', fontFamily: 'Orbitron', marginTop: 32, animation: 'pulse 1.5s infinite' }}>
-                Generating Official Certificate...
-              </p>
             )}
-          </div>
 
-        ) : (
-          /* PLAYING / WAITING */
-          <div className="card" style={{ padding: 40, position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', right: -100, top: -100, opacity: 0.03, pointerEvents: 'none' }}>
-              <img src="/stropse-seal.png" alt="" style={{ width: 600 }} />
-            </div>
-
-            {/* WAITING */}
+            {/* ===== WAITING ===== */}
             {gameDoc?.status === 'waiting' && (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <div className="spinner" style={{ marginBottom: 20 }}></div>
-                <h3 style={{ color: '#FFD700', fontFamily: 'Orbitron', marginBottom: 20 }}>Waiting for opponent...</h3>
-                <div style={{ background: '#111', padding: 16, borderRadius: 10, display: 'inline-block', marginBottom: 16 }}>
+                <h3 style={{ color: '#FFD700', fontFamily: 'Orbitron', marginBottom: 24 }}>Waiting for opponent...</h3>
+                <div style={{ background: '#1a1a1a', padding: 16, borderRadius: 10, display: 'inline-block', marginBottom: 16 }}>
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/games/typing?id=' + gameId)}&bgcolor=ffffff&color=000000`}
-                    alt="QR" style={{ display: 'block', width: 130, height: 130 }}
+                    alt="QR"
+                    style={{ display: 'block', width: 130, height: 130 }}
                   />
                 </div>
-                <p style={{ color: '#aaa' }}>Scan to Join Race</p>
+                <p style={{ color: '#aaa', margin: 0 }}>Share this QR to invite opponent</p>
               </div>
             )}
 
-            {/* PLAYING */}
+            {/* ===== PLAYING ===== */}
             {gameDoc?.status === 'playing' && (
               <div>
-                {/* Progress Bars */}
-                <div style={{ marginBottom: 28 }}>
-                  <div style={{ marginBottom: 14 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontFamily: 'Orbitron', fontSize: 13 }}>
-                      <span style={{ color: '#FFD700' }}>{gameDoc?.isSolo ? 'Your Progress' : `${gameDoc?.player1Name}${gameDoc?.player1 === user?.uid ? ' (You)' : ''}`}</span>
-                      <span style={{ color: '#FFD700' }}>{Math.round(p1Pct)}%</span>
-                    </div>
-                    <div style={{ background: '#222', height: 10, borderRadius: 6, overflow: 'hidden' }}>
-                      <div style={{ background: 'linear-gradient(90deg, #FFD700, #FFF176)', height: '100%', width: `${p1Pct}%`, transition: 'width 0.1s linear', boxShadow: '0 0 8px rgba(255,215,0,0.5)' }} />
-                    </div>
+                {/* P1 Progress */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ color: '#FFD700', fontFamily: 'Orbitron', fontSize: 13 }}>
+                      {gameDoc?.isSolo ? 'Your Progress' : `${gameDoc?.player1Name || 'Player 1'}${gameDoc?.player1 === user?.uid ? ' (You)' : ''}`}
+                    </span>
+                    <span style={{ color: '#FFD700', fontFamily: 'Orbitron', fontSize: 13 }}>{Math.round(p1Pct)}%</span>
                   </div>
-                  {!gameDoc?.isSolo && (
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontFamily: 'Orbitron', fontSize: 13 }}>
-                        <span style={{ color: '#00ffff' }}>{gameDoc?.player2Name || 'Player 2'}{gameDoc?.player2 === user?.uid ? ' (You)' : ''}</span>
-                        <span style={{ color: '#00ffff' }}>{Math.round(p2Pct)}%</span>
-                      </div>
-                      <div style={{ background: '#222', height: 10, borderRadius: 6, overflow: 'hidden' }}>
-                        <div style={{ background: 'linear-gradient(90deg, #00ffff, #a8ffff)', height: '100%', width: `${p2Pct}%`, transition: 'width 0.1s linear', boxShadow: '0 0 8px rgba(0,255,255,0.4)' }} />
-                      </div>
-                    </div>
-                  )}
+                  <div style={{ background: '#1a1a1a', height: 8, borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ background: 'linear-gradient(90deg, #b8860b, #FFD700, #fffacd)', height: '100%', width: `${p1Pct}%`, transition: 'width 0.15s ease', borderRadius: 4, boxShadow: '0 0 10px rgba(255,215,0,0.4)' }} />
+                  </div>
                 </div>
 
-                {/* Typing Arena */}
+                {/* P2 Progress */}
+                {!gameDoc?.isSolo && (
+                  <div style={{ marginBottom: 24 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ color: '#00e5ff', fontFamily: 'Orbitron', fontSize: 13 }}>
+                        {gameDoc?.player2Name || 'Player 2'}{gameDoc?.player2 === user?.uid ? ' (You)' : ''}
+                      </span>
+                      <span style={{ color: '#00e5ff', fontFamily: 'Orbitron', fontSize: 13 }}>{Math.round(p2Pct)}%</span>
+                    </div>
+                    <div style={{ background: '#1a1a1a', height: 8, borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ background: 'linear-gradient(90deg, #006080, #00e5ff)', height: '100%', width: `${p2Pct}%`, transition: 'width 0.15s ease', borderRadius: 4, boxShadow: '0 0 10px rgba(0,229,255,0.3)' }} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Typing Text Box */}
                 <div
-                  style={{ background: '#0d0d0d', padding: '28px 24px', borderRadius: 10, border: '1px solid #2a2a2a', fontSize: 20, lineHeight: 2, fontFamily: 'monospace', letterSpacing: '0.04em', wordBreak: 'break-word', cursor: 'text', userSelect: 'none' }}
                   onClick={() => inputRef.current?.focus()}
+                  style={{ background: '#090909', border: '1px solid #333', borderRadius: 10, padding: '24px 20px', fontSize: 20, lineHeight: '2', fontFamily: '"Courier New", Courier, monospace', wordBreak: 'break-word', wordWrap: 'break-word', cursor: 'text', userSelect: 'none', width: '100%', boxSizing: 'border-box' }}
                 >
                   {targetText.split('').map((char, i) => {
-                    let color = '#444';
-                    let bg = 'transparent';
-                    if (i < inputVal.length) {
-                      color = inputVal[i] === char ? '#FFD700' : '#ff4444';
-                      if (inputVal[i] !== char) bg = 'rgba(255,68,68,0.15)';
-                    }
+                    const typed = i < inputVal.length;
+                    const correct = typed && inputVal[i] === char;
+                    const wrong = typed && inputVal[i] !== char;
                     const isCurrent = i === inputVal.length;
                     return (
-                      <span key={i} style={{ color, background: bg, borderBottom: isCurrent ? '2px solid #FFD700' : '2px solid transparent', textShadow: isCurrent ? '0 0 12px #FFD700' : color === '#FFD700' ? '0 0 8px rgba(255,215,0,0.35)' : 'none', transition: 'color 0.08s', padding: '0 1px' }}>
+                      <span
+                        key={i}
+                        style={{
+                          color: correct ? '#FFD700' : wrong ? '#ff4444' : '#555',
+                          background: wrong ? 'rgba(255,68,68,0.12)' : 'transparent',
+                          borderBottom: isCurrent ? '2px solid #FFD700' : '2px solid transparent',
+                          textShadow: isCurrent ? '0 0 10px #FFD700' : correct ? '0 0 6px rgba(255,215,0,0.3)' : 'none',
+                          transition: 'color 0.08s',
+                        }}
+                      >
                         {char}
                       </span>
                     );
                   })}
                 </div>
 
-                {/* Hidden Input + Hint */}
+                {/* Hidden real input */}
                 {isParticipant && (
-                  <div style={{ position: 'relative', marginTop: 20, textAlign: 'center' }}>
+                  <div style={{ marginTop: 16, textAlign: 'center' }}>
                     <input
                       ref={inputRef}
                       autoFocus
                       type="text"
                       value={inputVal}
                       onChange={handleInputChange}
-                      style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: '100%' }}
                       disabled={gameDoc.status !== 'playing'}
+                      style={{ position: 'fixed', top: -9999, left: -9999, opacity: 0 }}
                     />
-                    <p style={{ color: '#FFD700', fontFamily: 'Orbitron', fontSize: 12, letterSpacing: 2, animation: 'pulse 1.5s infinite' }}>
-                      — CLICK TEXT ABOVE TO START TYPING —
+                    <p style={{ color: '#555', fontFamily: 'Orbitron', fontSize: 11, letterSpacing: 3, margin: 0 }}>
+                      CLICK TEXT BOX TO TYPE
                     </p>
                   </div>
                 )}
               </div>
             )}
+
           </div>
-        )}
+        </div>
+
       </div>
     </div>
   );

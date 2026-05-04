@@ -76,7 +76,7 @@ export default function Home() {
 
         <div className="container hero-content">
           <div className="hero-eyebrow">
-            <span className="hero-badge">⚡ PREMIER ESPORTS TOURNAMENTS IN LUCKNOW</span>
+            <span className="hero-badge">⚡ ESPORTS TOURNAMENTS IN LUCKNOW</span>
           </div>
 
           <h1 className="hero-title" ref={glitchRef}>
@@ -90,8 +90,8 @@ export default function Home() {
           </h1>
 
           <p className="hero-subtitle">
-            Welcome to Stropse Esports. Play. Improve. Compete. Dominate.<br />
-            <span style={{ color: 'var(--grey-600)' }}>The ultimate platform for live BGMI matches in Lucknow and India's competitive gaming.</span>
+            Welcome to Stropse Esports. Play. Improve. Compete.<br />
+            <span style={{ color: 'var(--grey-600)' }}>Join live BGMI matches in Lucknow and dominate the leaderboards.</span>
           </p>
 
           <div className="hero-cta">

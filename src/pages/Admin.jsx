@@ -86,6 +86,7 @@ export default function Admin() {
             { id: 'rooms', label: '💬 Community' },
             { id: 'registrations', label: '📋 Registrations' },
             { id: 'promotions', label: '📢 Promotions' },
+            { id: 'messages', label: '📬 Inbox' },
           ].map(t => (
             <button
               key={t.id}
@@ -102,6 +103,7 @@ export default function Admin() {
         {activeTab === 'rooms' && <RoomManager toast={toast} />}
         {activeTab === 'registrations' && <RegistrationViewer toast={toast} />}
         {activeTab === 'promotions' && <PromotionManager toast={toast} />}
+        {activeTab === 'messages' && <MessageViewer toast={toast} />}
       </div>
     </div>
   );
@@ -726,6 +728,81 @@ function PromotionManager({ toast }) {
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+/* =========================================
+   MESSAGE VIEWER (INBOX)
+========================================= */
+function MessageViewer({ toast }) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMessages() {
+      try {
+        const snap = await getDocs(query(collection(db, 'contacts'), orderBy('createdAt', 'desc')));
+        setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (err) {
+        console.error("Failed to load messages", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMessages();
+  }, []);
+
+  async function handleDelete(id) {
+    if (!confirm('Delete this message?')) return;
+    try {
+      await deleteDoc(doc(db, 'contacts', id));
+      setMessages(p => p.filter(m => m.id !== id));
+      toast('Message deleted', 'info');
+    } catch (err) {
+      toast('Failed to delete', 'error');
+    }
+  }
+
+  return (
+    <div className="admin-section">
+      <div className="admin-section-header">
+        <h2 className="admin-section-title">Support Inbox</h2>
+        <span className="badge badge-primary">{messages.length} messages</span>
+      </div>
+      
+      {loading ? <div className="spinner" /> : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {messages.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">📭</div>
+              <p>Your inbox is empty.</p>
+            </div>
+          ) : messages.map(msg => (
+            <div key={msg.id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 16, color: 'var(--primary)' }}>{msg.name}</h3>
+                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'var(--grey-400)' }}>
+                    <a href={`mailto:${msg.email}`} style={{ color: 'var(--info)' }}>{msg.email}</a>
+                  </p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--grey-600)' }}>
+                    {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleString('en-IN') : 'Just now'}
+                  </span>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDelete(msg.id)}>🗑️ Delete</button>
+                </div>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: 'var(--white)', whiteSpace: 'pre-wrap', margin: 0 }}>
+                  {msg.message}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
-import { doc, updateDoc, onSnapshot, serverTimestamp, collection, addDoc } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -66,7 +66,8 @@ export default function ChessGame() {
     if (!user) { toast('Please log in first', 'error'); return; }
     setCreating(true);
     try {
-      const docRef = await addDoc(collection(db, 'chessGames'), {
+      const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      await setDoc(doc(db, 'chessGames', generatedId), {
         fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
         history: [],
         whitePlayer: user.uid,
@@ -75,7 +76,7 @@ export default function ChessGame() {
         createdAt: serverTimestamp()
       });
       toast('Game created! Waiting for opponent...', 'success');
-      navigate(`/games/chess?id=${docRef.id}`);
+      navigate(`/games/chess?id=${generatedId}`);
     } catch (err) {
       toast(err.message, 'error');
     } finally {
@@ -217,10 +218,20 @@ export default function ChessGame() {
               </div>
 
               {gameDoc?.status === 'waiting' && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                   <div className="spinner" style={{ marginBottom: 16 }}></div>
-                  <h3 style={{ color: '#FFD700', fontFamily: 'Orbitron' }}>Waiting for opponent...</h3>
-                  <p style={{ color: '#fff', fontSize: 12, marginTop: 8 }}>Share the Board ID: {gameId}</p>
+                  <h3 style={{ color: '#FFD700', fontFamily: 'Orbitron', marginBottom: 16 }}>Waiting for opponent...</h3>
+                  
+                  <div style={{ background: '#fff', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/games/chess?id=' + gameId)}&bgcolor=ffffff&color=000000`} 
+                      alt="Join QR" 
+                      style={{ display: 'block', width: 120, height: 120 }}
+                    />
+                  </div>
+                  
+                  <p style={{ color: '#fff', fontSize: 14 }}>Scan to Join or Share Board ID</p>
+                  <p style={{ color: '#00ffff', fontSize: 24, fontFamily: 'Orbitron', fontWeight: 'bold', letterSpacing: '0.2em', marginTop: 8 }}>{gameId}</p>
                 </div>
               )}
               

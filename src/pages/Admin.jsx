@@ -89,6 +89,8 @@ export default function Admin() {
             { id: 'messages', label: '📬 Inbox' },
             { id: 'chess_tourneys', label: '♟️ Chess Tourneys' },
             { id: 'typing_tourneys', label: '⌨️ Typing Tourneys' },
+            { id: 'sudoku_tourneys', label: '🧩 Sudoku Tourneys' },
+            { id: 'analytics', label: '📊 Site Analytics' },
           ].map(t => (
             <button
               key={t.id}
@@ -107,7 +109,9 @@ export default function Admin() {
         {activeTab === 'promotions' && <PromotionManager toast={toast} />}
         {activeTab === 'messages' && <MessageViewer toast={toast} />}
         {activeTab === 'chess_tourneys' && <ChessTournamentManager toast={toast} />}
-        {activeTab === 'typing_tourneys' && <TypeTournamentManager toast={toast} />}
+        {activeTab === 'typing_tourneys' && <TypingTournamentManagerTab toast={toast} />}
+        {activeTab === 'sudoku_tourneys' && <SudokuTournamentManager toast={toast} />}
+        {activeTab === 'analytics' && <AnalyticsPanel toast={toast} />}
       </div>
     </div>
   );
@@ -576,11 +580,12 @@ function RegistrationViewer({ toast }) {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>User ID</th>
-                <th>Tournament ID</th>
-                <th>Player ID</th>
+                <th>Player / Name</th>
+                <th>Tournament</th>
+                <th>Institution / Grade</th>
+                <th>Contact</th>
                 <th>Status</th>
-                <th>Registered</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
@@ -588,11 +593,35 @@ function RegistrationViewer({ toast }) {
                 <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--grey-600)', padding: 32 }}>No registrations yet</td></tr>
               ) : registrations.map(r => (
                 <tr key={r.id}>
-                  <td style={{ fontSize: 12, color: 'var(--grey-400)' }}>{r.userId?.slice(0, 12)}...</td>
-                  <td style={{ fontSize: 12, color: 'var(--grey-400)' }}>{r.tournamentId?.slice(0, 12)}...</td>
-                  <td className="t-name">{r.playerId?.slice(0, 16)}...</td>
-                  <td><span className="badge badge-success">{r.status}</span></td>
-                  <td style={{ fontSize: 12, color: 'var(--grey-600)' }}>
+                  <td className="t-name">
+                    {r.source === 'stropse_form' ? (
+                      <div>
+                        <div style={{ color: '#00ffff' }}>{r.fullName}</div>
+                        <div style={{ fontSize: 10, color: 'var(--grey-600)' }}>{r.email}</div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, color: 'var(--grey-400)' }}>{r.playerId || r.userId?.slice(0, 8)}</div>
+                    )}
+                  </td>
+                  <td style={{ fontSize: 12, color: 'var(--grey-400)' }}>{r.tournamentId?.slice(0, 8)}...</td>
+                  <td style={{ fontSize: 12 }}>
+                    {r.source === 'stropse_form' ? (
+                      <div>
+                        <div>{r.institution}</div>
+                        <div style={{ fontSize: 10, color: 'var(--grey-600)' }}>{r.grade}</div>
+                      </div>
+                    ) : '—'}
+                  </td>
+                  <td style={{ fontSize: 12 }}>
+                    {r.source === 'stropse_form' ? (
+                      <div>
+                        <div>W: {r.whatsapp}</div>
+                        <div style={{ fontSize: 10, color: 'var(--grey-600)' }}>C: {r.callNumber}</div>
+                      </div>
+                    ) : '—'}
+                  </td>
+                  <td><span className={`badge ${r.status === 'confirmed' ? 'badge-success' : 'badge-primary'}`}>{r.status}</span></td>
+                  <td style={{ fontSize: 11, color: 'var(--grey-600)' }}>
                     {r.registeredAt?.toDate ? r.registeredAt.toDate().toLocaleDateString('en-IN') : '—'}
                   </td>
                 </tr>
@@ -1110,7 +1139,7 @@ function ChessTournamentManager({ toast }) {
 /* =========================================
    TYPING TOURNAMENT MANAGER
 ========================================= */
-function TypeTournamentManager({ toast }) {
+function TypingTournamentManagerTab({ toast }) {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1380,6 +1409,195 @@ function TypeTournamentManager({ toast }) {
           </div>
         ))}
         {tournaments.length === 0 && <p style={{ textAlign: 'center', color: 'var(--grey-500)', marginTop: 40 }}>No typing tournaments hosted yet.</p>}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================
+   SUDOKU TOURNAMENT MANAGER
+========================================= */
+function SudokuTournamentManager({ toast }) {
+  const [tournaments, setTournaments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(query(collection(db, 'sudokuTournaments'), orderBy('createdAt', 'desc')), snap => {
+      setTournaments(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  async function handleHost() {
+    try {
+      const tid = Math.random().toString(36).substring(2, 8).toUpperCase();
+      await setDoc(doc(db, 'sudokuTournaments', tid), {
+        status: 'pooling',
+        players: [],
+        matches: [],
+        createdAt: serverTimestamp()
+      });
+      toast('Sudoku Tournament Hub created!', 'success');
+    } catch(err) {
+      toast(err.message, 'error');
+    }
+  }
+
+  async function generateBracket(tid, players) {
+    if (!players || players.length < 2) {
+      toast('Need at least 2 players', 'error'); return;
+    }
+    const shuffled = [...players].sort(() => 0.5 - Math.random());
+    const matches = [];
+    for (let i = 0; i < shuffled.length; i += 2) {
+      const p1 = shuffled[i], p2 = shuffled[i+1];
+      if (!p2) {
+        matches.push({ matchId: `R1-M${i}`, round: 1, player1: p1, player2: null, boardId: null, winner: p1.uid });
+        continue;
+      }
+      const boardId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
+      // Helper to generate a 6x6 puzzle
+      const generate6x6 = () => {
+        const s = [1,2,3,4,5,6, 4,5,6,1,2,3, 2,3,4,5,6,1, 5,6,1,2,3,4, 3,4,5,6,1,2, 6,1,2,3,4,5];
+        // Shuffle rows within boxes
+        const p = [...s];
+        for(let i=0; i<15; i++) {
+          const idx = Math.floor(Math.random()*36);
+          p[idx] = 0;
+        }
+        return { puzzle: p, solution: s };
+      };
+      const { puzzle, solution } = generate6x6();
+
+      await setDoc(doc(db, 'sudokuGames', boardId), {
+        puzzle, solution,
+        status: 'waiting',
+        player1: p1.uid, player1Name: p1.name,
+        player2: p2.uid, player2Name: p2.name,
+        p1Progress: 0, p2Progress: 0,
+        createdAt: serverTimestamp()
+      });
+      matches.push({ matchId: `R1-M${i}`, round: 1, player1: p1, player2: p2, boardId, winner: null });
+    }
+    await updateDoc(doc(db, 'sudokuTournaments', tid), { status: 'active', matches });
+    toast('Bracket generated!', 'success');
+  }
+
+  async function syncResults(tid, tData) {
+    if (!tData.matches) return;
+    const updated = [...tData.matches];
+    let changed = false;
+    for (let m of updated) {
+      if (!m.winner && m.boardId) {
+        const snap = await getDoc(doc(db, 'sudokuGames', m.boardId));
+        if (snap.exists() && snap.data().status === 'completed') {
+          m.winner = snap.data().winner;
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      await updateDoc(doc(db, 'sudokuTournaments', tid), { matches: updated });
+      toast('Synced!', 'success');
+    }
+  }
+
+  if (loading) return <div className="spinner"></div>;
+
+  return (
+    <div>
+      <div className="flex-between" style={{ marginBottom: 24 }}>
+        <h2 style={{ fontFamily: 'Orbitron', color: '#00ffff' }}>Sudoku Tournament Hub</h2>
+        <button className="btn btn-primary" onClick={handleHost}>⚡ Host New Sudoku Event</button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {tournaments.map(t => (
+          <div key={t.id} className="card" style={{ padding: 24 }}>
+             <div className="flex-between">
+               <h3 style={{ fontFamily: 'Orbitron' }}>ID: {t.id} [{t.status}]</h3>
+               {t.status === 'pooling' && <button className="btn btn-outline" onClick={() => generateBracket(t.id, t.players)}>Generate Bracket</button>}
+             </div>
+             {t.status === 'active' && (
+               <div style={{ marginTop: 16 }}>
+                 <button className="btn btn-outline btn-sm" onClick={() => syncResults(t.id, t)}>🔄 Sync Results</button>
+               </div>
+             )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================
+   ANALYTICS PANEL
+========================================= */
+function AnalyticsPanel() {
+  const [stats, setStats] = useState({ total: 0, unique: 0, today: 0 });
+  const [visits, setVisits] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const snap = await getDocs(query(collection(db, 'siteVisits'), orderBy('timestamp', 'desc'), limit(50)));
+        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const today = new Date().toISOString().split('T')[0];
+        
+        setStats({
+          total: data.length, // Capped at 50 for live view
+          unique: new Set(data.map(v => v.ip)).size,
+          today: data.filter(v => v.date === today).length
+        });
+        setVisits(data);
+      } catch (e) { console.error(e); }
+      finally { setLoading(false); }
+    }
+    loadStats();
+  }, []);
+
+  if (loading) return <div className="spinner"></div>;
+
+  return (
+    <div className="analytics-panel">
+      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 40 }}>
+        <div className="card" style={{ padding: 24, textAlign: 'center' }}>
+          <div style={{ color: 'var(--grey-500)', fontSize: 12 }}>TOTAL VISITS (RECENT)</div>
+          <div style={{ fontSize: 32, fontFamily: 'Orbitron', color: '#00ffff' }}>{stats.total}</div>
+        </div>
+        <div className="card" style={{ padding: 24, textAlign: 'center' }}>
+          <div style={{ color: 'var(--grey-500)', fontSize: 12 }}>UNIQUE VISITORS</div>
+          <div style={{ fontSize: 32, fontFamily: 'Orbitron', color: '#FFD700' }}>{stats.unique}</div>
+        </div>
+        <div className="card" style={{ padding: 24, textAlign: 'center' }}>
+          <div style={{ color: 'var(--grey-500)', fontSize: 12 }}>VISITS TODAY</div>
+          <div style={{ fontSize: 32, fontFamily: 'Orbitron', color: '#00f260' }}>{stats.today}</div>
+        </div>
+      </div>
+
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
+          <thead style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--grey-500)' }}>
+            <tr>
+              <th style={{ padding: 16 }}>Time</th>
+              <th style={{ padding: 16 }}>IP</th>
+              <th style={{ padding: 16 }}>Location</th>
+              <th style={{ padding: 16 }}>Page</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visits.map(v => (
+              <tr key={v.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                <td style={{ padding: 16 }}>{v.timestamp?.toDate().toLocaleTimeString()}</td>
+                <td style={{ padding: 16, color: '#00ffff', fontFamily: 'monospace' }}>{v.ip}</td>
+                <td style={{ padding: 16 }}>{v.city ? `${v.city}, ${v.country}` : 'Unknown'}</td>
+                <td style={{ padding: 16 }}>{v.page}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

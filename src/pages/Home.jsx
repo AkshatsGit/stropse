@@ -30,6 +30,9 @@ export default function Home() {
   const [promo, setPromo] = useState(null);
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -46,6 +49,30 @@ export default function Home() {
     }
     loadData();
   }, []);
+
+  async function handleSearch(e) {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    setSearchResults([]);
+    try {
+      // Search by username (exact) or name (exact)
+      const q1 = query(collection(db, 'users'), where('username', '==', searchQuery.trim()));
+      const q2 = query(collection(db, 'users'), where('name', '==', searchQuery.trim()));
+      
+      const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+      const combined = [...s1.docs, ...s2.docs].map(d => ({ id: d.id, ...d.data() }));
+      
+      // De-duplicate by ID
+      const unique = Array.from(new Map(combined.map(u => [u.id, u])).values());
+      setSearchResults(unique);
+      if (unique.length === 0) toast('No players found with that name/username', 'info');
+    } catch (err) {
+      toast('Search failed', 'error');
+    } finally {
+      setSearching(false);
+    }
+  }
 
   async function handleContactSubmit(e) {
     e.preventDefault();
@@ -94,13 +121,47 @@ export default function Home() {
             <span style={{ color: 'var(--grey-600)' }}>Join live BGMI matches in Lucknow and dominate the leaderboards.</span>
           </p>
 
-          <div className="hero-cta">
-            <Link to="/tournaments" className="btn btn-primary btn-lg">
-              ⚡ Explore Tournaments
-            </Link>
-            <Link to="/auth" className="btn btn-outline btn-lg">
-              Create Account
-            </Link>
+          <div className="hero-cta" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 24 }}>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <Link to="/tournaments" className="btn btn-primary btn-lg">⚡ Explore Tournaments</Link>
+              <Link to="/auth" className="btn btn-outline btn-lg">Create Account</Link>
+            </div>
+            
+            {/* Player Search Bar */}
+            <form onSubmit={handleSearch} style={{ position: 'relative', width: '100%', maxWidth: 400 }}>
+              <input 
+                className="form-input" 
+                placeholder="Find a player (username or name)..." 
+                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(0,255,255,0.2)', paddingRight: 50 }}
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+              <button type="submit" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 20 }}>
+                {searching ? '⏳' : '🔍'}
+              </button>
+            </form>
+
+            {searchResults.length > 0 && (
+              <div className="search-results-overlay" style={{ background: 'rgba(10,10,10,0.95)', border: '1px solid #00ffff', borderRadius: 12, padding: 20, width: '100%', maxWidth: 400, marginTop: -10, zIndex: 100, boxShadow: '0 0 30px rgba(0,255,255,0.2)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <span style={{ fontSize: 12, color: 'var(--grey-500)' }}>SEARCH RESULTS</span>
+                  <button onClick={() => setSearchResults([])} style={{ background: 'none', border: 'none', color: '#ff3333', cursor: 'pointer', fontSize: 12 }}>✕ Close</button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {searchResults.map(res => (
+                    <Link key={res.id} to={`/profile/${res.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: '#fff', padding: '8px', borderRadius: 8, background: 'rgba(255,255,255,0.05)' }}>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, overflow: 'hidden' }}>
+                        {res.profilePicture ? <img src={res.profilePicture} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (res.name || 'U').slice(0,1)}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 'bold' }}>{res.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--grey-500)' }}>@{res.username}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
 

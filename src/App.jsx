@@ -5,6 +5,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import Navbar from './components/Navbar';
 import NeonLines from './components/NeonLines';
 import LoadingScreen from './components/LoadingScreen';
+import { trackVisit } from './utils/visitTracker';
 
 const Home = lazy(() => import('./pages/Home'));
 const Tournaments = lazy(() => import('./pages/Tournaments'));
@@ -29,6 +30,11 @@ function ProtectedRoute({ children }) {
 
 function AdminRoute({ children }) {
   return children; // Admin has its own login
+}
+
+function VisitTracker() {
+  useEffect(() => { trackVisit(); }, []);
+  return null;
 }
 
 function ScrollObserver() {
@@ -67,6 +73,7 @@ function AppRoutes() {
   return (
     <>
       <ScrollObserver />
+      <VisitTracker />
       <NeonLines />
       <Navbar />
       <main style={{ paddingTop: '72px', minHeight: '100vh', position: 'relative' }}>
@@ -78,6 +85,7 @@ function AppRoutes() {
             <Route path="/game-profiles" element={<ProtectedRoute><GameProfiles /></ProtectedRoute>} />
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/profile/:id" element={<Profile />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/card/:profileId" element={<CardView />} />

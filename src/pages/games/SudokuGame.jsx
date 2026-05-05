@@ -376,17 +376,26 @@ export default function SudokuGame() {
           {/* Board + controls */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-            {/* 6x6 Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${SIZE}, ${cellSize})`,
-              gridTemplateRows: `repeat(${SIZE}, ${cellSize})`,
-              border: '3px solid #00ffff',
-              borderRadius: 10,
-              boxShadow: '0 0 40px rgba(0,255,255,0.15)',
-              overflow: 'hidden',
-              background: '#050505',
-            }}>
+            {/* 6x6 Grid Container with Watermark */}
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              {/* Faded Stropse Watermark behind grid */}
+              <img src="/stropse-seal.png" alt="" 
+                style={{ 
+                  position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', 
+                  width: '80%', opacity: 0.05, pointerEvents: 'none', zIndex: 0, userSelect: 'none' 
+                }} 
+              />
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${SIZE}, ${cellSize})`,
+                gridTemplateRows: `repeat(${SIZE}, ${cellSize})`,
+                border: '3px solid #00ffff',
+                borderRadius: 10,
+                boxShadow: '0 0 40px rgba(0,255,255,0.15)',
+                overflow: 'hidden',
+                background: '#050505',
+                position: 'relative', zIndex: 1, // Ensure cells are above watermark
+              }}>
               {board.map((val, idx) => {
                 const row = Math.floor(idx / SIZE);
                 const col = idx % SIZE;
@@ -449,7 +458,7 @@ export default function SudokuGame() {
                   </div>
                 );
               })}
-
+            </div>
             </div>
 
             {/* Number pad */}

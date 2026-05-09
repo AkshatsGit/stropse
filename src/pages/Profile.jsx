@@ -23,6 +23,8 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploadingPic, setUploadingPic] = useState(false);
   const [form, setForm] = useState({ name: '', username: '', bio: '' });
+  const [isFriend, setIsFriend] = useState(false);
+  const [addingFriend, setAddingFriend] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -44,6 +46,9 @@ export default function Profile() {
             username: profileData.username || '',
             bio: profileData.bio || '',
           });
+          if (!isOwnProfile && ownProfile?.friends?.includes(targetId)) {
+            setIsFriend(true);
+          }
         }
 
         // 2. Get Player Cards
@@ -99,6 +104,33 @@ export default function Profile() {
     }
   }
 
+  async function handleAddFriend() {
+    if (!user) {
+      toast('Please log in to add friends', 'error');
+      return;
+    }
+    setAddingFriend(true);
+    try {
+      const currentFriends = ownProfile?.friends || [];
+      if (isFriend) {
+        const newFriends = currentFriends.filter(id => id !== targetId);
+        await updateDoc(doc(db, 'users', user.uid), { friends: newFriends });
+        setIsFriend(false);
+        toast('Friend removed', 'info');
+      } else {
+        const newFriends = [...currentFriends, targetId];
+        await updateDoc(doc(db, 'users', user.uid), { friends: newFriends });
+        setIsFriend(true);
+        toast('Friend added!', 'success');
+      }
+      refreshProfile();
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      setAddingFriend(false);
+    }
+  }
+
   if (loading) return <div className="loading-screen"><div className="spinner" /></div>;
   if (!targetUser) return <div className="container" style={{ padding: 100, textAlign: 'center' }}><h2>User not found</h2><Link to="/">Back Home</Link></div>;
 
@@ -125,9 +157,17 @@ export default function Profile() {
               <p className="profile-username">@{targetUser.username || 'username'}</p>
               <div className="profile-email"><span>📧</span> {targetUser.email}</div>
               {targetUser.bio && <p className="profile-bio">{targetUser.bio}</p>}
-              {isOwnProfile && (
+              {isOwnProfile ? (
                 <button className="btn btn-outline btn-full" onClick={() => setEditing(!editing)}>
                   {editing ? '✕ Cancel' : '✏️ Edit Profile'}
+                </button>
+              ) : (
+                <button 
+                  className={`btn ${isFriend ? 'btn-outline' : 'btn-primary'} btn-full`} 
+                  onClick={handleAddFriend}
+                  disabled={addingFriend}
+                >
+                  {addingFriend ? '...' : isFriend ? 'Remove Friend' : '➕ Add Friend'}
                 </button>
               )}
             </div>

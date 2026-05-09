@@ -67,6 +67,12 @@ export default function TypeGame() {
     return () => unsub();
   }, [gameId, user, navigate, toast, startTime]);
 
+  useEffect(() => {
+    if (gameDoc?.status === 'playing') {
+      inputRef.current?.focus();
+    }
+  }, [gameDoc?.status]);
+
   async function handleCreateGame() {
     if (!user) { toast('Please log in first', 'error'); return; }
     setCreating(true);

@@ -1197,7 +1197,7 @@ function TypingTournamentManagerTab({ toast }) {
         player2Name: p2.name,
         p1Progress: 0,
         p2Progress: 0,
-        status: 'waiting',
+        status: 'playing',
         createdAt: serverTimestamp()
       });
       
@@ -1283,7 +1283,7 @@ function TypingTournamentManagerTab({ toast }) {
         player2Name: p2.name,
         p1Progress: 0,
         p2Progress: 0,
-        status: 'waiting',
+        status: 'playing',
         createdAt: serverTimestamp()
       });
       
@@ -1473,7 +1473,7 @@ function SudokuTournamentManager({ toast }) {
 
       await setDoc(doc(db, 'sudokuGames', boardId), {
         puzzle, solution,
-        status: 'waiting',
+        status: 'playing',
         player1: p1.uid, player1Name: p1.name,
         player2: p2.uid, player2Name: p2.name,
         p1Progress: 0, p2Progress: 0,

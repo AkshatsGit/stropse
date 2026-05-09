@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -9,6 +12,11 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -20,6 +28,30 @@ export default function Navbar() {
     await logout();
     navigate('/');
     setProfileOpen(false);
+  }
+
+  async function handleSearch(e) {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    setSearchResults([]);
+    try {
+      // Search by username (exact) or name (exact)
+      const q1 = query(collection(db, 'users'), where('username', '==', searchQuery.trim()));
+      const q2 = query(collection(db, 'users'), where('name', '==', searchQuery.trim()));
+      
+      const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+      const combined = [...s1.docs, ...s2.docs].map(d => ({ id: d.id, ...d.data() }));
+      
+      // De-duplicate by ID
+      const unique = Array.from(new Map(combined.map(u => [u.id, u])).values());
+      setSearchResults(unique);
+      if (unique.length === 0) toast('No players found with that name/username', 'info');
+    } catch (err) {
+      toast('Search failed', 'error');
+    } finally {
+      setSearching(false);
+    }
   }
 
   const navLinks = [
@@ -65,9 +97,56 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="navbar-right">
+          {/* Search Icon & Dropdown */}
+          <div className="profile-menu-wrapper">
+            <button className="profile-btn" onClick={() => { setSearchOpen(p => !p); setProfileOpen(false); }} style={{ padding: '6px 12px' }}>
+              <span style={{ fontSize: 16 }}>🔍</span>
+            </button>
+            {searchOpen && (
+              <div className="profile-dropdown" style={{ width: 300, right: 0, padding: 16 }}>
+                <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Username or Name..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    style={{ padding: '8px 12px', fontSize: 14 }}
+                    autoFocus
+                  />
+                  <button type="submit" className="btn btn-primary btn-sm" disabled={searching}>
+                    {searching ? '...' : 'Go'}
+                  </button>
+                </form>
+                <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+                  {searchResults.map(res => (
+                    <Link
+                      key={res.id}
+                      to={`/profile/${res.id}`}
+                      className="dropdown-item"
+                      onClick={() => setSearchOpen(false)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px' }}
+                    >
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                        {res.profilePicture ? <img src={res.profilePicture} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (res.name || 'U').slice(0, 1)}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 'bold', fontSize: 13, lineHeight: '1' }}>{res.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--grey-500)' }}>@{res.username}</div>
+                      </div>
+                    </Link>
+                  ))}
+                  {searchResults.length === 0 && !searching && searchQuery && (
+                    <div style={{ fontSize: 12, color: 'var(--grey-500)', textAlign: 'center', padding: '12px 0' }}>No results</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {user ? (
               <div className="profile-menu-wrapper">
-                <button className="profile-btn" onClick={() => setProfileOpen(p => !p)}>
+                <button className="profile-btn" onClick={() => { setProfileOpen(p => !p); setSearchOpen(false); }}>
                   <div className="profile-avatar">
                     {userProfile?.profilePicture ? (
                       <img src={userProfile.profilePicture} alt="avatar" />

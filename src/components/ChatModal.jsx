@@ -13,9 +13,13 @@ export default function ChatModal({ friend, onClose }) {
 
   useEffect(() => {
     if (!user || !friend) return;
-    const q = query(collection(db, 'chats'), where('chatId', '==', chatId), orderBy('createdAt', 'asc'));
+    const q = query(collection(db, 'chats'), where('chatId', '==', chatId));
     const unsub = onSnapshot(q, (snap) => {
-      setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      msgs.sort((a, b) => (a.createdAt?.toMillis?.() || 0) - (b.createdAt?.toMillis?.() || 0));
+      setMessages(msgs);
+    }, (err) => {
+      console.error("Chat fetch error:", err);
     });
     return () => unsub();
   }, [chatId, user, friend]);

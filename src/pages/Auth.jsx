@@ -8,7 +8,7 @@ export default function Auth() {
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' });
-  const { login, signup, loginWithGoogle, user, loading: authLoading } = useAuth();
+  const { login, signup, loginWithGoogle, resetPassword, user, loading: authLoading } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -64,6 +64,19 @@ export default function Auth() {
       toast(err.message, 'error');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleResetPassword() {
+    if (!form.email) {
+      toast('Please enter your email address first', 'error');
+      return;
+    }
+    try {
+      await resetPassword(form.email);
+      toast('Password reset email sent! Check your inbox.', 'success');
+    } catch (err) {
+      toast(err.message, 'error');
     }
   }
 
@@ -158,6 +171,17 @@ export default function Auth() {
                   onChange={handleChange}
                   required
                 />
+                {mode === 'login' && (
+                  <div style={{ textAlign: 'right', marginTop: 8 }}>
+                    <button 
+                      type="button" 
+                      onClick={handleResetPassword} 
+                      style={{ background: 'none', border: 'none', color: '#00ffff', fontSize: 12, cursor: 'pointer', fontFamily: 'Rajdhani', padding: 0 }}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button

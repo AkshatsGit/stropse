@@ -6,7 +6,8 @@ import {
   onAuthStateChanged,
   updateProfile,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -69,6 +70,10 @@ export function AuthProvider({ children }) {
     return signOut(auth);
   }
 
+  async function resetPassword(email) {
+    return sendPasswordResetEmail(auth, email);
+  }
+
   async function fetchUserProfile(uid) {
     const snap = await getDoc(doc(db, 'users', uid));
     if (snap.exists()) {
@@ -98,6 +103,7 @@ export function AuthProvider({ children }) {
     login,
     loginWithGoogle,
     logout,
+    resetPassword,
     refreshProfile: () => user && fetchUserProfile(user.uid),
   };
 

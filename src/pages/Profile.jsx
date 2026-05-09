@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { doc, updateDoc, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, getDocs, getDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { Link, useParams } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCard';
+import FriendsTab from '../components/FriendsTab';
 import './Profile.css';
 
 export default function Profile() {
   const { id } = useParams(); // URL param for public profile
   const { user, userProfile: ownProfile, refreshProfile } = useAuth();
   const toast = useToast();
+  
+  const [activeTab, setActiveTab] = useState('cards');
   
   // Decide if we are looking at our own profile
   const isOwnProfile = !id || id === user?.uid;
@@ -111,17 +114,22 @@ export default function Profile() {
     }
     setAddingFriend(true);
     try {
-      const currentFriends = ownProfile?.friends || [];
       if (isFriend) {
-        const newFriends = currentFriends.filter(id => id !== targetId);
-        await updateDoc(doc(db, 'users', user.uid), { friends: newFriends });
+        // Option to remove directly or rely on FriendsTab
+        await updateDoc(doc(db, 'users', user.uid), { friends: arrayRemove(targetId) });
+        await updateDoc(doc(db, 'users', targetId), { friends: arrayRemove(user.uid) });
         setIsFriend(false);
         toast('Friend removed', 'info');
       } else {
-        const newFriends = [...currentFriends, targetId];
-        await updateDoc(doc(db, 'users', user.uid), { friends: newFriends });
-        setIsFriend(true);
-        toast('Friend added!', 'success');
+        const targetRef = doc(db, 'users', targetId);
+        const targetSnap = await getDoc(targetRef);
+        if (targetSnap.exists()) {
+          const reqs = targetSnap.data().friendRequests || [];
+          if (!reqs.includes(user.uid)) {
+            await updateDoc(targetRef, { friendRequests: arrayUnion(user.uid) });
+          }
+        }
+        toast('Friend request sent!', 'success');
       }
       refreshProfile();
     } catch (err) {
@@ -175,6 +183,30 @@ export default function Profile() {
           </div>
 
           <div className="profile-main">
+            {isOwnProfile && !editing && (
+              <div style={{ display: 'flex', gap: 12, marginBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 16 }}>
+                <button 
+                  className={`btn ${activeTab === 'cards' ? 'btn-primary' : 'btn-ghost'}`} 
+                  onClick={() => setActiveTab('cards')}
+                  style={{ padding: '8px 24px' }}
+                >
+                  🎮 My Cards
+                </button>
+                <button 
+                  className={`btn ${activeTab === 'friends' ? 'btn-primary' : 'btn-ghost'}`} 
+                  onClick={() => setActiveTab('friends')}
+                  style={{ padding: '8px 24px', position: 'relative' }}
+                >
+                  🤝 Friends
+                  {ownProfile?.friendRequests?.length > 0 && (
+                    <span style={{ position: 'absolute', top: -5, right: -5, background: '#ff3333', color: '#fff', borderRadius: '50%', width: 20, height: 20, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {ownProfile.friendRequests.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
+
             {editing && isOwnProfile ? (
               <div className="card">
                 <h3 style={{ fontFamily: 'Orbitron', fontSize: 16, marginBottom: 24 }}>✏️ Edit Profile</h3>
@@ -188,7 +220,7 @@ export default function Profile() {
                   </div>
                 </form>
               </div>
-            ) : (
+            ) : activeTab === 'cards' || !isOwnProfile ? (
               <div>
                 <div className="card" style={{ marginBottom: 24 }}>
                   <h3 style={{ fontFamily: 'Orbitron', fontSize: 14, marginBottom: 20 }}>Verified Player Cards</h3>
@@ -215,6 +247,8 @@ export default function Profile() {
                   )}
                 </div>
               </div>
+            ) : (
+              <FriendsTab />
             )}
           </div>
         </div>

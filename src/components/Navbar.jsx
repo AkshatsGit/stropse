@@ -148,7 +148,7 @@ export default function Navbar() {
 
           {user ? (
               <div className="profile-menu-wrapper">
-                <button className="profile-btn" onClick={() => { setProfileOpen(p => !p); setSearchOpen(false); }}>
+                <button className="profile-btn" onClick={() => { setProfileOpen(p => !p); setSearchOpen(false); }} style={{ position: 'relative' }}>
                   <div className="profile-avatar">
                     {userProfile?.profilePicture ? (
                       <img src={userProfile.profilePicture} alt="avatar" />
@@ -156,6 +156,11 @@ export default function Navbar() {
                       <span>{(userProfile?.name || user.email)?.[0]?.toUpperCase()}</span>
                     )}
                   </div>
+                  {userProfile?.friendRequests?.length > 0 && (
+                    <span style={{ position: 'absolute', top: -2, right: 8, background: '#ff3333', color: '#fff', borderRadius: '50%', width: 16, height: 16, fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #000' }}>
+                      {userProfile.friendRequests.length}
+                    </span>
+                  )}
                   <span className="profile-name">{userProfile?.username || 'Profile'}</span>
                   <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
                     <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>

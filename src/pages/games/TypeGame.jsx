@@ -80,7 +80,7 @@ export default function TypeGame() {
       const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
       const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
 
-      await setDoc(doc(db, 'typeGames', generatedId), {
+      setDoc(doc(db, 'typeGames', generatedId), {
         textToType: randomText,
         player1: user.uid,
         player1Name: user.displayName || 'Player 1',
@@ -108,7 +108,7 @@ export default function TypeGame() {
       const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
       const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
 
-      await setDoc(doc(db, 'typeGames', generatedId), {
+      setDoc(doc(db, 'typeGames', generatedId), {
         textToType: randomText,
         player1: user.uid,
         player1Name: user.displayName || 'Player 1',
@@ -225,6 +225,15 @@ export default function TypeGame() {
   // ==================
   // GAME UI
   // ==================
+  if (!gameDoc) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <div className="spinner" style={{ marginBottom: 20, width: 40, height: 40, border: '4px solid rgba(255,215,0,0.2)', borderTopColor: '#FFD700', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <p style={{ color: '#FFD700', fontFamily: 'Orbitron', letterSpacing: 2 }}>INITIALIZING ARENA...</p>
+      </div>
+    );
+  }
+
   const isParticipant = gameDoc && user && (gameDoc.player1 === user.uid || gameDoc.player2 === user.uid);
   const targetText = gameDoc?.textToType || "";
 

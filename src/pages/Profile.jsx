@@ -161,7 +161,8 @@ export default function Profile() {
                 <button className="btn btn-outline btn-full" onClick={() => setEditing(!editing)}>
                   {editing ? '✕ Cancel' : '✏️ Edit Profile'}
                 </button>
-              ) : (
+              ) : null}
+              {!isOwnProfile && user && (
                 <button 
                   className={`btn ${isFriend ? 'btn-outline' : 'btn-primary'} btn-full`} 
                   onClick={handleAddFriend}

@@ -98,51 +98,53 @@ export default function Navbar() {
         {/* Right side */}
         <div className="navbar-right">
           {/* Search Icon & Dropdown */}
-          <div className="profile-menu-wrapper">
-            <button className="profile-btn" onClick={() => { setSearchOpen(p => !p); setProfileOpen(false); }} style={{ padding: '6px 12px' }}>
-              <span style={{ fontSize: 16 }}>🔍</span>
-            </button>
-            {searchOpen && (
-              <div className="profile-dropdown" style={{ width: 300, right: 0, padding: 16 }}>
-                <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="Username or Name..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    style={{ padding: '8px 12px', fontSize: 14 }}
-                    autoFocus
-                  />
-                  <button type="submit" className="btn btn-primary btn-sm" disabled={searching}>
-                    {searching ? '...' : 'Go'}
-                  </button>
-                </form>
-                <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-                  {searchResults.map(res => (
-                    <Link
-                      key={res.id}
-                      to={`/profile/${res.id}`}
-                      className="dropdown-item"
-                      onClick={() => setSearchOpen(false)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px' }}
-                    >
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                        {res.profilePicture ? <img src={res.profilePicture} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (res.name || 'U').slice(0, 1)}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 'bold', fontSize: 13, lineHeight: '1' }}>{res.name}</div>
-                        <div style={{ fontSize: 11, color: 'var(--grey-500)' }}>@{res.username}</div>
-                      </div>
-                    </Link>
-                  ))}
-                  {searchResults.length === 0 && !searching && searchQuery && (
-                    <div style={{ fontSize: 12, color: 'var(--grey-500)', textAlign: 'center', padding: '12px 0' }}>No results</div>
-                  )}
+          {user && (
+            <div className="profile-menu-wrapper">
+              <button className="profile-btn" onClick={() => { setSearchOpen(p => !p); setProfileOpen(false); }} style={{ padding: '6px 12px' }}>
+                <span style={{ fontSize: 16 }}>🔍</span>
+              </button>
+              {searchOpen && (
+                <div className="profile-dropdown" style={{ width: 300, right: 0, padding: 16 }}>
+                  <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Username or Name..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      style={{ padding: '8px 12px', fontSize: 14 }}
+                      autoFocus
+                    />
+                    <button type="submit" className="btn btn-primary btn-sm" disabled={searching}>
+                      {searching ? '...' : 'Go'}
+                    </button>
+                  </form>
+                  <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+                    {searchResults.map(res => (
+                      <Link
+                        key={res.id}
+                        to={`/profile/${res.id}`}
+                        className="dropdown-item"
+                        onClick={() => setSearchOpen(false)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px' }}
+                      >
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                          {res.profilePicture ? <img src={res.profilePicture} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (res.name || 'U').slice(0, 1)}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 'bold', fontSize: 13, lineHeight: '1' }}>{res.name}</div>
+                          <div style={{ fontSize: 11, color: 'var(--grey-500)' }}>@{res.username}</div>
+                        </div>
+                      </Link>
+                    ))}
+                    {searchResults.length === 0 && !searching && searchQuery && (
+                      <div style={{ fontSize: 12, color: 'var(--grey-500)', textAlign: 'center', padding: '12px 0' }}>No results</div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {user ? (
               <div className="profile-menu-wrapper">

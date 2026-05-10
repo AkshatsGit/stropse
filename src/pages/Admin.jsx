@@ -91,6 +91,7 @@ export default function Admin() {
             { id: 'typing_tourneys', label: '⌨️ Typing Tourneys' },
             { id: 'sudoku_tourneys', label: '🧩 Sudoku Tourneys' },
             { id: 'analytics', label: '📊 Site Analytics' },
+            { id: 'users', label: '👥 Users' },
           ].map(t => (
             <button
               key={t.id}
@@ -112,6 +113,7 @@ export default function Admin() {
         {activeTab === 'typing_tourneys' && <TypingTournamentManagerTab toast={toast} />}
         {activeTab === 'sudoku_tourneys' && <SudokuTournamentManager toast={toast} />}
         {activeTab === 'analytics' && <AnalyticsPanel toast={toast} />}
+        {activeTab === 'users' && <UsersPanel toast={toast} />}
       </div>
     </div>
   );
@@ -1596,6 +1598,80 @@ function AnalyticsPanel() {
                 <td style={{ padding: 16 }}>{v.page}</td>
               </tr>
             ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================
+   USERS PANEL
+========================================= */
+function UsersPanel({ toast }) {
+  const [usersList, setUsersList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadUsers() {
+      try {
+        const snap = await getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc')));
+        setUsersList(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (err) {
+        console.error("Failed to load users", err);
+        toast('Failed to load users', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadUsers();
+  }, [toast]);
+
+  if (loading) return <div className="spinner"></div>;
+
+  return (
+    <div className="users-panel">
+      <div className="flex-between" style={{ marginBottom: 24 }}>
+        <h2 style={{ fontFamily: 'Orbitron', color: '#00ffff' }}>Registered Users</h2>
+        <div style={{ color: 'var(--grey-500)' }}>Total: {usersList.length}</div>
+      </div>
+
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
+          <thead style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--grey-500)' }}>
+            <tr>
+              <th style={{ padding: 16 }}>User</th>
+              <th style={{ padding: 16 }}>Email</th>
+              <th style={{ padding: 16 }}>Joined Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {usersList.map(u => (
+              <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                <td style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {u.profilePicture ? <img src={u.profilePicture} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#000', fontWeight: 'bold' }}>{(u.name || u.username || '?')[0].toUpperCase()}</span>}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 'bold', color: '#fff' }}>{u.name || 'Unnamed'}</div>
+                      <div style={{ color: 'var(--grey-500)', fontSize: 11 }}>@{u.username || 'unknown'}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style={{ padding: 16, color: '#FFD700' }}>{u.email}</td>
+                <td style={{ padding: 16, color: 'var(--grey-500)' }}>
+                  {u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString() : 'N/A'}
+                </td>
+              </tr>
+            ))}
+            {usersList.length === 0 && (
+              <tr>
+                <td colSpan="3" style={{ padding: 32, textAlign: 'center', color: 'var(--grey-600)' }}>
+                  No users found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

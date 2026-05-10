@@ -73,6 +73,13 @@ export default function TypeGame() {
     }
   }, [gameDoc?.status]);
 
+  useEffect(() => {
+    if (gameDoc?.status === 'completed' && !certDataUrl) {
+      // Logic defined later but relies on state. We can define generateCertificateImage inside or above.
+      // Actually, since generateCertificateImage uses gameDoc, we can just define it above or inside.
+    }
+  }, [gameDoc?.status, certDataUrl]);
+
   async function handleCreateGame() {
     if (!user) { toast('Please log in first', 'error'); return; }
     setCreating(true);
@@ -180,80 +187,16 @@ export default function TypeGame() {
     updateDoc(doc(db, 'typeGames', gameId), updates);
   }
 
-  // ==================
-  // LOBBY
-  // ==================
-  if (!gameId) {
-    return (
-      <div className="chess-page">
-        <div className="container" style={{ maxWidth: 600 }}>
-          <div className="page-header" style={{ textAlign: 'center', marginBottom: 48 }}>
-            <h1 style={{ fontSize: 48 }}>Cyber <span className="text-glow">Typer</span></h1>
-            <p className="section-subtitle">1v1 High-Speed Typing Arena</p>
-          </div>
-
-          <div className="card" style={{ textAlign: 'center', marginBottom: 24, padding: 48 }}>
-            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Start a Race</h2>
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-              <button className="btn btn-primary btn-lg" onClick={handleCreateGame} disabled={creating || !user}>
-                {creating ? 'Creating...' : (user ? 'Create 1v1 Race' : 'Log in to Play')}
-              </button>
-              <button className="btn btn-outline btn-lg" style={{ borderColor: '#00ffff', color: '#00ffff' }} onClick={handleCreateSoloGame} disabled={creating || !user}>
-                {creating ? '...' : 'Solo Speed Test'}
-              </button>
-            </div>
-          </div>
-
-          <div className="card" style={{ textAlign: 'center', padding: 48 }}>
-            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Join via Code</h2>
-            <form onSubmit={handleJoinGame} style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <input
-                className="form-input"
-                placeholder="Enter Race ID"
-                value={joinId}
-                onChange={e => setJoinId(e.target.value)}
-                style={{ maxWidth: 250 }}
-              />
-              <button type="submit" className="btn btn-outline" disabled={!user}>Join Race</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ==================
-  // GAME UI
-  // ==================
-  if (!gameDoc) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <div className="spinner" style={{ marginBottom: 20, width: 40, height: 40, border: '4px solid rgba(255,215,0,0.2)', borderTopColor: '#FFD700', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-        <p style={{ color: '#FFD700', fontFamily: 'Orbitron', letterSpacing: 2 }}>INITIALIZING ARENA...</p>
-      </div>
-    );
-  }
-
-  const isParticipant = gameDoc && user && (gameDoc.player1 === user.uid || gameDoc.player2 === user.uid);
-  const targetText = gameDoc?.textToType || "";
-
-  const p1Prog = gameDoc?.p1Progress || 0;
-  const p2Prog = gameDoc?.p2Progress || 0;
-  const p1Pct = Math.min(100, (p1Prog / targetText.length) * 100);
-  const p2Pct = Math.min(100, (p2Prog / targetText.length) * 100);
-
   // WPM = (characters / 5) / minutes
-  // startedAt is set on FIRST keystroke → endedAt on LAST keystroke = pure net typing time
   let finalWPM = 0;
   if (gameDoc?.status === 'completed' && gameDoc?.startedAt && gameDoc?.endedAt) {
     const elapsedMs = gameDoc.endedAt - gameDoc.startedAt;
     if (elapsedMs > 0) {
       const minutes = elapsedMs / 60000;
-      const words = targetText.length / 5;
+      const words = (gameDoc?.textToType?.length || 0) / 5;
       finalWPM = Math.round(words / minutes);
     }
   }
-
 
   const generateCertificateImage = () => {
     return new Promise((resolve) => {
@@ -414,6 +357,69 @@ export default function TypeGame() {
       generateCertificateImage().then(setCertDataUrl);
     }
   }, [gameDoc?.status, certDataUrl]);
+
+
+  // ==================
+  // LOBBY
+  // ==================
+  if (!gameId) {
+    return (
+      <div className="chess-page">
+        <div className="container" style={{ maxWidth: 600 }}>
+          <div className="page-header" style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h1 style={{ fontSize: 48 }}>Cyber <span className="text-glow">Typer</span></h1>
+            <p className="section-subtitle">1v1 High-Speed Typing Arena</p>
+          </div>
+
+          <div className="card" style={{ textAlign: 'center', marginBottom: 24, padding: 48 }}>
+            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Start a Race</h2>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+              <button className="btn btn-primary btn-lg" onClick={handleCreateGame} disabled={creating || !user}>
+                {creating ? 'Creating...' : (user ? 'Create 1v1 Race' : 'Log in to Play')}
+              </button>
+              <button className="btn btn-outline btn-lg" style={{ borderColor: '#00ffff', color: '#00ffff' }} onClick={handleCreateSoloGame} disabled={creating || !user}>
+                {creating ? '...' : 'Solo Speed Test'}
+              </button>
+            </div>
+          </div>
+
+          <div className="card" style={{ textAlign: 'center', padding: 48 }}>
+            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Join via Code</h2>
+            <form onSubmit={handleJoinGame} style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <input
+                className="form-input"
+                placeholder="Enter Race ID"
+                value={joinId}
+                onChange={e => setJoinId(e.target.value)}
+                style={{ maxWidth: 250 }}
+              />
+              <button type="submit" className="btn btn-outline" disabled={!user}>Join Race</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==================
+  // GAME UI
+  // ==================
+  if (!gameDoc) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <div className="spinner" style={{ marginBottom: 20, width: 40, height: 40, border: '4px solid rgba(255,215,0,0.2)', borderTopColor: '#FFD700', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <p style={{ color: '#FFD700', fontFamily: 'Orbitron', letterSpacing: 2 }}>INITIALIZING ARENA...</p>
+      </div>
+    );
+  }
+
+  const isParticipant = gameDoc && user && (gameDoc.player1 === user.uid || gameDoc.player2 === user.uid);
+  const targetText = gameDoc?.textToType || "";
+
+  const p1Prog = gameDoc?.p1Progress || 0;
+  const p2Prog = gameDoc?.p2Progress || 0;
+  const p1Pct = Math.min(100, (p1Prog / targetText.length) * 100);
+  const p2Pct = Math.min(100, (p2Prog / targetText.length) * 100);
 
   return (
     <div style={{ minHeight: '90vh', paddingTop: 40, paddingBottom: 80, paddingLeft: 20, paddingRight: 20, boxSizing: 'border-box' }}>

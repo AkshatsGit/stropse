@@ -78,7 +78,9 @@ export default function ChessGame() {
 
     }, (error) => {
       console.error(error);
-      toast('Lost connection to game', 'error');
+      if (error.code === 'permission-denied') {
+        toast('Permission denied to game', 'error');
+      }
     });
 
     return () => unsub();

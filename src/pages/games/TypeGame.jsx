@@ -61,7 +61,9 @@ export default function TypeGame() {
 
     }, (error) => {
       console.error(error);
-      toast('Lost connection', 'error');
+      if (error.code === 'permission-denied') {
+        toast('Permission denied. Please check login state.', 'error');
+      }
     });
 
     return () => unsub();

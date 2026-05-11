@@ -260,7 +260,7 @@ export default function Home() {
               Instagram: @stropse.in
             </a>
           </div>
-          <p style={{ color: 'var(--grey-700)', fontSize: '12px', marginTop: '24px', lineHeight: '1.6' }}>
+          <p style={{ color: 'var(--grey-500)', fontSize: '12px', marginTop: '24px', lineHeight: '1.6' }}>
             © {new Date().getFullYear()} STROPSE. All rights reserved.<br/>
             Operated by AKSHAT SRIVASTAVA
           </p>

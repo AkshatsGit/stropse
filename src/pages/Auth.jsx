@@ -33,12 +33,16 @@ export default function Auth() {
       if (mode === 'login') {
         await login(form.email, form.password);
         toast('Welcome back, warrior! ⚡', 'success');
-        navigate('/');
+        const returnTo = sessionStorage.getItem('returnTo') || '/';
+        sessionStorage.removeItem('returnTo');
+        navigate(returnTo);
       } else {
         if (!form.name || !form.username) { toast('All fields required', 'error'); setLoading(false); return; }
         await signup(form.email, form.password, form.name, form.username);
         toast('Account created! Welcome to STROPSE 🎮', 'success');
-        navigate('/');
+        const returnTo = sessionStorage.getItem('returnTo') || '/';
+        sessionStorage.removeItem('returnTo');
+        navigate(returnTo);
       }
     } catch (err) {
       const messages = {
@@ -59,7 +63,9 @@ export default function Auth() {
     try {
       await loginWithGoogle();
       toast('Welcome to STROPSE! ⚡', 'success');
-      navigate('/');
+      const returnTo = sessionStorage.getItem('returnTo') || '/';
+      sessionStorage.removeItem('returnTo');
+      navigate(returnTo);
     } catch (err) {
       toast(err.message, 'error');
     } finally {

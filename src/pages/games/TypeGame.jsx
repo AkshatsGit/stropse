@@ -189,13 +189,14 @@ export default function TypeGame() {
     updateDoc(doc(db, 'typeGames', gameId), updates);
   }
 
-  // WPM = (characters / 5) / minutes
   let finalWPM = 0;
   if (gameDoc?.status === 'completed' && gameDoc?.startedAt && gameDoc?.endedAt) {
     const elapsedMs = gameDoc.endedAt - gameDoc.startedAt;
     if (elapsedMs > 0) {
       const minutes = elapsedMs / 60000;
-      const words = (gameDoc?.textToType?.length || 0) / 5;
+      const isP1 = user?.uid === gameDoc?.player1;
+      const myProgress = isP1 ? (gameDoc?.p1Progress || 0) : (gameDoc?.p2Progress || 0);
+      const words = myProgress / 5;
       finalWPM = Math.round(words / minutes);
     }
   }
@@ -277,7 +278,10 @@ export default function TypeGame() {
         ctx.font = '18px "Orbitron", sans-serif';
         ctx.fillText('THIS CERTIFIES THAT', 600, 390);
 
-        const playerName = gameDoc?.isSolo ? (gameDoc?.player1Name || 'Player') : (gameDoc?.winner === gameDoc?.player1 ? gameDoc?.player1Name : (gameDoc?.player2Name || 'Player 2'));
+        const isP1 = user?.uid === gameDoc?.player1;
+        const playerName = gameDoc?.isSolo 
+          ? (gameDoc?.player1Name || 'Player') 
+          : (isP1 ? gameDoc?.player1Name : (gameDoc?.player2Name || 'Player 2'));
 
         ctx.font = 'bold 64px "Orbitron", sans-serif';
         ctx.fillStyle = '#000000';
@@ -364,6 +368,23 @@ export default function TypeGame() {
   // ==================
   // LOBBY
   // ==================
+  if (!user && gameId) {
+    return (
+      <div className="chess-page">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div className="card" style={{ textAlign: 'center', padding: 48, maxWidth: 400 }}>
+            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Authentication Required</h2>
+            <p style={{ color: '#aaa', marginBottom: 24 }}>You need to be logged in to join this race.</p>
+            <button className="btn btn-primary btn-lg" onClick={() => {
+              sessionStorage.setItem('returnTo', `/games/typing?id=${gameId}`);
+              navigate('/auth');
+            }}>Log In to Continue</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!gameId) {
     return (
       <div className="chess-page">

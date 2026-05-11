@@ -255,6 +255,23 @@ export default function SudokuGame() {
   }) : [];
 
   // ── LOBBY ──
+  if (!user && gameId) {
+    return (
+      <div className="chess-page">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div className="card" style={{ textAlign: 'center', padding: 48, maxWidth: 400 }}>
+            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Authentication Required</h2>
+            <p style={{ color: '#aaa', marginBottom: 24 }}>You need to be logged in to join this match.</p>
+            <button className="btn btn-primary btn-lg" onClick={() => {
+              sessionStorage.setItem('returnTo', `/games/sudoku?id=${gameId}`);
+              navigate('/auth');
+            }}>Log In to Continue</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!gameId && !puzzle) {
     return (
       <div style={{ minHeight: '90vh', padding: '40px 24px 80px' }}>

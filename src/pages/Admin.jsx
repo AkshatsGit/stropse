@@ -1567,7 +1567,7 @@ function AnalyticsPanel() {
       <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 40 }}>
         <div className="card" style={{ padding: 24, textAlign: 'center' }}>
           <div style={{ color: 'var(--grey-500)', fontSize: 12 }}>TOTAL VISITS (RECENT)</div>
-          <div style={{ fontSize: 32, fontFamily: 'Orbitron', color: '#00ffff' }}>{stats.total}</div>
+          <div style={{ fontSize: 32, fontFamily: 'Orbitron', color: '#fff' }}>{stats.total}</div>
         </div>
         <div className="card" style={{ padding: 24, textAlign: 'center' }}>
           <div style={{ color: 'var(--grey-500)', fontSize: 12 }}>UNIQUE VISITORS</div>
@@ -1593,7 +1593,7 @@ function AnalyticsPanel() {
             {visits.map(v => (
               <tr key={v.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
                 <td style={{ padding: 16 }}>{v.timestamp?.toDate().toLocaleTimeString()}</td>
-                <td style={{ padding: 16, color: '#00ffff', fontFamily: 'monospace' }}>{v.ip}</td>
+                <td style={{ padding: 16, color: '#fff', fontFamily: 'monospace' }}>{v.ip}</td>
                 <td style={{ padding: 16 }}>{v.city ? `${v.city}, ${v.country}` : 'Unknown'}</td>
                 <td style={{ padding: 16 }}>{v.page}</td>
               </tr>
@@ -1632,7 +1632,7 @@ function UsersPanel({ toast }) {
   return (
     <div className="users-panel">
       <div className="flex-between" style={{ marginBottom: 24 }}>
-        <h2 style={{ fontFamily: 'Orbitron', color: '#00ffff' }}>Registered Users</h2>
+        <h2 style={{ fontFamily: 'Orbitron', color: '#FFD700' }}>Registered Users</h2>
         <div style={{ color: 'var(--grey-500)' }}>Total: {usersList.length}</div>
       </div>
 

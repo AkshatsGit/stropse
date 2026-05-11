@@ -95,6 +95,23 @@ export default function TypeTournamentLobby() {
     );
   }
 
+  if (!user && tournamentId) {
+    return (
+      <div className="chess-page">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div className="card" style={{ textAlign: 'center', padding: 48, maxWidth: 400 }}>
+            <h2 style={{ fontFamily: 'Orbitron', marginBottom: 16 }}>Authentication Required</h2>
+            <p style={{ color: '#aaa', marginBottom: 24 }}>You need to be logged in to join this tournament.</p>
+            <button className="btn btn-primary btn-lg" onClick={() => {
+              sessionStorage.setItem('returnTo', `/games/tournament-typing?id=${tournamentId}`);
+              navigate('/auth');
+            }}>Log In to Continue</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!tournamentId) {
     return (
       <div className="chess-page container" style={{ textAlign: 'center', paddingTop: 100 }}>

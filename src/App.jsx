@@ -37,6 +37,14 @@ function VisitTracker() {
   return null;
 }
 
+function ThemeLoader() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('stropse-theme') || 'default';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+  return null;
+}
+
 function ScrollObserver() {
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -72,6 +80,7 @@ function ScrollObserver() {
 function AppRoutes() {
   return (
     <>
+      <ThemeLoader />
       <ScrollObserver />
       <VisitTracker />
       <NeonLines />

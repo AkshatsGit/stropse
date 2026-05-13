@@ -37,6 +37,27 @@
   --border-dim: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+[data-theme="red-gold"] {
+  --primary: #ff1a1a;
+  --primary-dim: rgba(255, 26, 26, 0.15);
+  --primary-glow: rgba(255, 26, 26, 0.4);
+  --primary-glow-strong: rgba(255, 26, 26, 0.7);
+  --accent: #FFD700;
+  --border-primary: 1px solid rgba(255, 26, 26, 0.3);
+  --shadow-glow: 0 0 20px rgba(255, 26, 26, 0.3), 0 0 60px rgba(255, 26, 26, 0.1);
+}
+
+[data-theme="orange-black"] {
+  --primary: #FF8C00;
+  --primary-dim: rgba(255, 140, 0, 0.15);
+  --primary-glow: rgba(255, 140, 0, 0.4);
+  --primary-glow-strong: rgba(255, 140, 0, 0.7);
+  --accent: #111111;
+  --border-primary: 1px solid rgba(255, 140, 0, 0.3);
+  --shadow-glow: 0 0 20px rgba(255, 140, 0, 0.3), 0 0 60px rgba(255, 140, 0, 0.1);
+}
+
+
 *, *::before, *::after {
   margin: 0;
   padding: 0;

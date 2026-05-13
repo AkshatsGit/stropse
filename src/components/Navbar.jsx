@@ -97,6 +97,19 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="navbar-right">
+          {/* Theme Switcher */}
+          <div className="profile-menu-wrapper" style={{ marginRight: '8px' }}>
+            <button className="profile-btn" onClick={() => {
+              const themes = ['default', 'red-gold', 'orange-black'];
+              const current = document.documentElement.getAttribute('data-theme') || 'default';
+              const next = themes[(themes.indexOf(current) + 1) % themes.length];
+              document.documentElement.setAttribute('data-theme', next);
+              localStorage.setItem('stropse-theme', next);
+            }} style={{ padding: '6px 10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', borderRadius: '8px' }} title="Toggle Theme">
+              <span style={{ fontSize: 16 }}>🎨</span>
+            </button>
+          </div>
+
           {/* Search Icon & Dropdown */}
           {user && (
             <div className="profile-menu-wrapper">

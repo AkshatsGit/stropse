@@ -1542,21 +1542,44 @@ function SudokuTournamentManager({ toast }) {
 function AnalyticsPanel() {
   const [stats, setStats] = useState({ total: 0, unique: 0, today: 0 });
   const [visits, setVisits] = useState([]);
+  const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadStats() {
       try {
-        const snap = await getDocs(query(collection(db, 'siteVisits'), orderBy('timestamp', 'desc'), limit(50)));
+        // Fetch up to 1000 recent visits for monthly graph
+        const snap = await getDocs(query(collection(db, 'siteVisits'), orderBy('timestamp', 'desc'), limit(1000)));
         const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         const today = new Date().toISOString().split('T')[0];
         
         setStats({
-          total: data.length, // Capped at 50 for live view
+          total: data.length,
           unique: new Set(data.map(v => v.ip)).size,
           today: data.filter(v => v.date === today).length
         });
-        setVisits(data);
+        
+        setVisits(data.slice(0, 50)); // Only show last 50 in the table
+
+        // Group by Date for the chart
+        const dailyCounts = {};
+        data.forEach(v => {
+          let dateStr = 'Unknown';
+          if (v.timestamp?.toDate) {
+            dateStr = v.timestamp.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          } else if (v.date) {
+            dateStr = new Date(v.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          }
+          dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
+        });
+
+        const cData = Object.keys(dailyCounts).map(date => ({
+          date,
+          visits: dailyCounts[date]
+        })).reverse(); // oldest to newest
+
+        setChartData(cData);
+
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     }
@@ -1583,15 +1606,15 @@ function AnalyticsPanel() {
       </div>
 
       <div className="card" style={{ padding: 24, marginBottom: 40 }}>
-        <h3 style={{ fontFamily: 'Orbitron', marginBottom: 24, color: '#fff' }}>Traffic Overview (Recent)</h3>
+        <h3 style={{ fontFamily: 'Orbitron', marginBottom: 24, color: '#fff' }}>Traffic Overview (Past 30 Days)</h3>
         <div style={{ width: '100%', height: 300 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={[...visits].reverse().map(v => ({ time: v.timestamp?.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), ip: v.ip }))}>
+            <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis dataKey="time" stroke="var(--grey-500)" fontSize={12} tickMargin={10} />
+              <XAxis dataKey="date" stroke="var(--grey-500)" fontSize={12} tickMargin={10} />
               <YAxis stroke="var(--grey-500)" fontSize={12} hide />
               <RechartsTooltip contentStyle={{ background: '#111', border: '1px solid #333', borderRadius: 8 }} />
-              <Line type="monotone" dataKey="ip" stroke="#FFD700" strokeWidth={2} dot={{ r: 4, fill: '#FFD700' }} activeDot={{ r: 6 }} />
+              <Line type="monotone" dataKey="visits" stroke="#FFD700" strokeWidth={3} dot={{ r: 4, fill: '#FFD700' }} activeDot={{ r: 6 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

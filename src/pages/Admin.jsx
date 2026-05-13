@@ -5,6 +5,9 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useToast } from '../contexts/ToastContext';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
+} from 'recharts';
 import './Admin.css';
 
 const ADMIN_CREDENTIALS = { username: 'Akshat', password: 'qwerty' };
@@ -1576,6 +1579,21 @@ function AnalyticsPanel() {
         <div className="card" style={{ padding: 24, textAlign: 'center' }}>
           <div style={{ color: 'var(--grey-500)', fontSize: 12 }}>VISITS TODAY</div>
           <div style={{ fontSize: 32, fontFamily: 'Orbitron', color: '#00f260' }}>{stats.today}</div>
+        </div>
+      </div>
+
+      <div className="card" style={{ padding: 24, marginBottom: 40 }}>
+        <h3 style={{ fontFamily: 'Orbitron', marginBottom: 24, color: '#fff' }}>Traffic Overview (Recent)</h3>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={[...visits].reverse().map(v => ({ time: v.timestamp?.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), ip: v.ip }))}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="time" stroke="var(--grey-500)" fontSize={12} tickMargin={10} />
+              <YAxis stroke="var(--grey-500)" fontSize={12} hide />
+              <RechartsTooltip contentStyle={{ background: '#111', border: '1px solid #333', borderRadius: 8 }} />
+              <Line type="monotone" dataKey="ip" stroke="#FFD700" strokeWidth={2} dot={{ r: 4, fill: '#FFD700' }} activeDot={{ r: 6 }} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

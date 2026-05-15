@@ -240,7 +240,7 @@ export default function TypeGame() {
         
         // Watermark Seal
         if (sealImg) {
-          ctx.globalAlpha = 0.03;
+          ctx.globalAlpha = 0.08;
           ctx.drawImage(sealImg, 300, 100, 600, 600);
           ctx.globalAlpha = 1.0;
         }
@@ -357,15 +357,15 @@ export default function TypeGame() {
           ctx.fillText('VERIFY ONLINE', 185, 695);
         }
 
-        // Date & Signature
+        // Date (Moved to Top Right)
         ctx.fillStyle = '#aaaaaa';
         ctx.font = '12px "Inter", sans-serif';
         ctx.letterSpacing = '2px';
         ctx.textAlign = 'right';
-        ctx.fillText('DATE OF ISSUE', 1120, 675);
+        ctx.fillText('DATE OF ISSUE', 1120, 90);
         ctx.fillStyle = '#ffffff';
         ctx.font = '16px "Orbitron", sans-serif';
-        ctx.fillText(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(), 1120, 695);
+        ctx.fillText(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(), 1120, 110);
 
         // Bottom Signature Line
         ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';

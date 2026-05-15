@@ -25,6 +25,7 @@ export default function TypeGame() {
   const [gameDoc, setGameDoc] = useState(null);
   const [inputVal, setInputVal] = useState('');
   const [startTime, setStartTime] = useState(null);
+  const [errors, setErrors] = useState(0);
 
   const [certDataUrl, setCertDataUrl] = useState(null);
   const [viewingCert, setViewingCert] = useState(false);
@@ -163,7 +164,12 @@ export default function TypeGame() {
     const targetText = gameDoc.textToType;
 
     const isCorrectSoFar = targetText.startsWith(val);
-    if (!isCorrectSoFar) return;
+    if (!isCorrectSoFar) {
+      if (val.length > inputVal.length) {
+        setErrors(e => e + 1);
+      }
+      return;
+    }
 
     setInputVal(val);
 
@@ -208,7 +214,15 @@ export default function TypeGame() {
       canvas.height = 800;
       const ctx = canvas.getContext('2d');
 
+      // Aesthetic Dark Background
       ctx.fillStyle = '#050505';
+      ctx.fillRect(0, 0, 1200, 800);
+
+      // Background Gradient
+      const bgGrad = ctx.createRadialGradient(600, 400, 100, 600, 400, 800);
+      bgGrad.addColorStop(0, '#151515');
+      bgGrad.addColorStop(1, '#000000');
+      ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, 1200, 800);
 
       const loadImg = (src, isCors = false) => new Promise(res => {
@@ -223,135 +237,150 @@ export default function TypeGame() {
         loadImg('/stropse-seal.png'),
         loadImg(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/games/typing?id=' + gameId)}&bgcolor=ffffff&color=000000`, true)
       ]).then(([sealImg, qrImg]) => {
+        
+        // Watermark Seal
         if (sealImg) {
-          ctx.globalAlpha = 0.05;
-          ctx.drawImage(sealImg, 300, 150, 600, 600);
+          ctx.globalAlpha = 0.03;
+          ctx.drawImage(sealImg, 300, 100, 600, 600);
           ctx.globalAlpha = 1.0;
         }
 
-        ctx.strokeStyle = '#FFD700';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(80, 40); ctx.lineTo(1120, 40); ctx.lineTo(1160, 80);
-        ctx.lineTo(1160, 720); ctx.lineTo(1120, 760); ctx.lineTo(80, 760);
-        ctx.lineTo(40, 720); ctx.lineTo(40, 80); ctx.closePath();
-        ctx.stroke();
-
-        ctx.strokeStyle = 'rgba(255,215,0,0.4)';
+        // Elegant Border
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(40, 40, 1120, 720);
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.2)';
         ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(90, 55); ctx.lineTo(1110, 55); ctx.lineTo(1145, 90);
-        ctx.lineTo(1145, 710); ctx.lineTo(1110, 745); ctx.lineTo(90, 745);
-        ctx.lineTo(55, 710); ctx.lineTo(55, 90); ctx.closePath();
-        ctx.stroke();
+        ctx.strokeRect(50, 50, 1100, 700);
+
+        // Corner Ornaments
+        ctx.fillStyle = '#FFD700';
+        const drawCorner = (x, y) => { ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill(); };
+        drawCorner(40, 40); drawCorner(1160, 40); drawCorner(1160, 760); drawCorner(40, 760);
+        drawCorner(50, 50); drawCorner(1150, 50); drawCorner(1150, 750); drawCorner(50, 750);
+
+        // Top Logo Area
+        if (sealImg) ctx.drawImage(sealImg, 550, 80, 100, 100);
 
         ctx.fillStyle = '#FFD700';
-        const drawCornerAccent = (x, y) => { ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill(); };
-        drawCornerAccent(80, 40); drawCornerAccent(1120, 40); drawCornerAccent(1160, 80); drawCornerAccent(1160, 720);
-        drawCornerAccent(1120, 760); drawCornerAccent(80, 760); drawCornerAccent(40, 720); drawCornerAccent(40, 80);
-
-        if (sealImg) ctx.drawImage(sealImg, 550, 60, 100, 100);
-
-        ctx.fillStyle = '#FFD700';
-        ctx.font = 'bold 32px "Orbitron", sans-serif';
+        ctx.font = 'bold 24px "Orbitron", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('STROPSE', 600, 190);
+        ctx.letterSpacing = '8px';
+        ctx.fillText('STROPSE ESPORTS', 600, 220);
 
-        ctx.fillStyle = '#aaaaaa';
-        ctx.font = '16px "Rajdhani", sans-serif';
+        // Subtitle
+        ctx.fillStyle = '#888888';
+        ctx.font = '14px "Inter", sans-serif';
         ctx.letterSpacing = '4px';
-        ctx.fillText('OFFICIAL ESPORTS CERTIFICATION', 600, 220);
+        ctx.fillText('OFFICIAL CERTIFICATE OF ACHIEVEMENT', 600, 250);
 
-        ctx.strokeStyle = '#FFD700';
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(250, 290); ctx.lineTo(350, 290); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(850, 290); ctx.lineTo(950, 290); ctx.stroke();
-
+        // Certificate Title
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 56px "Orbitron", sans-serif';
-        ctx.shadowColor = 'rgba(255,255,255,0.5)';
-        ctx.shadowBlur = 15;
-        ctx.fillText('CYBER TYPER', 600, 310);
+        ctx.font = 'bold 50px "Orbitron", sans-serif';
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.3)';
+        ctx.shadowBlur = 20;
+        ctx.fillText('CYBER TYPER', 600, 330);
         ctx.shadowBlur = 0;
 
+        // "Awarded To"
         ctx.fillStyle = '#aaaaaa';
-        ctx.font = '18px "Orbitron", sans-serif';
-        ctx.fillText('THIS CERTIFIES THAT', 600, 390);
+        ctx.font = '16px "Inter", sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('THIS CERTIFIES THAT', 600, 400);
 
+        // Player Name
         const isP1 = user?.uid === gameDoc?.player1;
         const playerName = gameDoc?.isSolo 
           ? (gameDoc?.player1Name || 'Player') 
           : (isP1 ? gameDoc?.player1Name : (gameDoc?.player2Name || 'Player 2'));
 
-        ctx.font = 'bold 64px "Orbitron", sans-serif';
-        ctx.fillStyle = '#000000';
-        ctx.fillText(playerName, 604, 454);
-        ctx.fillStyle = '#333333';
-        ctx.fillText(playerName, 602, 452);
-
-        const gradient = ctx.createLinearGradient(0, 400, 0, 470);
-        gradient.addColorStop(0, '#FFF29E');
-        gradient.addColorStop(0.4, '#FFD700');
-        gradient.addColorStop(0.6, '#B8860B');
-        gradient.addColorStop(1, '#8A6300');
-
+        ctx.font = 'bold 56px "Orbitron", sans-serif';
+        
+        // Name Gradient
+        const gradient = ctx.createLinearGradient(0, 420, 0, 480);
+        gradient.addColorStop(0, '#FFFFFF');
+        gradient.addColorStop(1, '#FFD700');
         ctx.fillStyle = gradient;
-        ctx.shadowColor = 'rgba(255,215,0,0.4)';
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.4)';
         ctx.shadowBlur = 15;
-        ctx.fillText(playerName, 600, 450);
+        ctx.fillText(playerName.toUpperCase(), 600, 460);
         ctx.shadowBlur = 0;
 
         ctx.fillStyle = '#aaaaaa';
-        ctx.font = '18px "Orbitron", sans-serif';
-        ctx.fillText('HAS ACHIEVED A TYPING SPEED OF', 600, 520);
+        ctx.font = '16px "Inter", sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('HAS DEMONSTRATED EXCEPTIONAL TYPING SKILL WITH', 600, 530);
 
-        ctx.strokeStyle = '#FFD700';
-        ctx.lineWidth = 2;
+        // Metrics Box
+        ctx.fillStyle = 'rgba(25, 25, 25, 0.8)';
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(380, 550); ctx.lineTo(820, 550); ctx.lineTo(850, 600);
-        ctx.lineTo(820, 650); ctx.lineTo(380, 650); ctx.lineTo(350, 600);
-        ctx.closePath(); ctx.stroke();
+        ctx.roundRect(350, 570, 500, 100, 10);
+        ctx.fill();
+        ctx.stroke();
 
-        ctx.strokeStyle = 'rgba(255,215,0,0.2)';
-        ctx.beginPath();
-        ctx.moveTo(385, 555); ctx.lineTo(815, 555); ctx.lineTo(842, 600);
-        ctx.lineTo(815, 645); ctx.lineTo(385, 645); ctx.lineTo(358, 600);
-        ctx.closePath(); ctx.stroke();
+        // WPM Metric
+        ctx.fillStyle = '#FFD700';
+        ctx.font = 'bold 48px "Orbitron", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${finalWPM}`, 480, 625);
+        ctx.fillStyle = '#aaaaaa';
+        ctx.font = '14px "Inter", sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('WPM', 480, 650);
 
-        ctx.beginPath(); ctx.moveTo(280, 600); ctx.lineTo(330, 600); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(870, 600); ctx.lineTo(920, 600); ctx.stroke();
+        // Divider
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.moveTo(600, 585); ctx.lineTo(600, 655); ctx.stroke();
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 72px "Orbitron", sans-serif';
-        ctx.shadowColor = 'rgba(255,255,255,0.4)';
-        ctx.shadowBlur = 20;
-        ctx.fillText(`${finalWPM} WPM`, 600, 625);
-        ctx.shadowBlur = 0;
+        // Accuracy Metric
+        const totalChars = gameDoc?.textToType?.length || 1;
+        const acc = Math.max(0, 100 - (errors / totalChars) * 100).toFixed(1);
+        ctx.fillStyle = '#00ff88';
+        ctx.font = 'bold 48px "Orbitron", sans-serif';
+        ctx.fillText(`${acc}%`, 720, 625);
+        ctx.fillStyle = '#aaaaaa';
+        ctx.font = '14px "Inter", sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('ACCURACY', 720, 650);
 
         // QR Code & ID
         if (qrImg) {
           ctx.fillStyle = '#fff';
-          ctx.fillRect(90, 630, 100, 100);
-          ctx.drawImage(qrImg, 95, 635, 90, 90);
+          ctx.fillRect(80, 640, 90, 90);
+          ctx.drawImage(qrImg, 85, 645, 80, 80);
 
           ctx.fillStyle = '#FFD700';
-          ctx.font = 'bold 16px "Orbitron", sans-serif';
+          ctx.font = 'bold 14px "Orbitron", sans-serif';
           ctx.textAlign = 'left';
-          ctx.fillText(`ID: ${gameId}`, 210, 670);
+          ctx.fillText(`ID: ${gameId}`, 185, 675);
           ctx.fillStyle = '#aaaaaa';
-          ctx.font = '12px "Rajdhani", sans-serif';
-          ctx.fillText('VERIFY ONLINE', 210, 690);
+          ctx.font = '12px "Inter", sans-serif';
+          ctx.letterSpacing = '1px';
+          ctx.fillText('VERIFY ONLINE', 185, 695);
         }
 
+        // Date & Signature
         ctx.fillStyle = '#aaaaaa';
-        ctx.font = '14px "Rajdhani", sans-serif';
+        ctx.font = '12px "Inter", sans-serif';
+        ctx.letterSpacing = '2px';
         ctx.textAlign = 'right';
-        ctx.fillText('DATE', 1100, 715);
+        ctx.fillText('DATE OF ISSUE', 1120, 675);
         ctx.fillStyle = '#ffffff';
-        ctx.font = '18px "Orbitron", sans-serif';
-        ctx.fillText(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(), 1100, 735);
+        ctx.font = '16px "Orbitron", sans-serif';
+        ctx.fillText(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(), 1120, 695);
 
-        if (sealImg) ctx.drawImage(sealImg, 560, 680, 80, 80);
+        // Bottom Signature Line
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(970, 715); ctx.lineTo(1120, 715); ctx.stroke();
+        ctx.fillStyle = '#FFD700';
+        ctx.font = '14px "Dancing Script", "Caveat", cursive, sans-serif';
+        ctx.fillText('Stropse Esports', 1080, 710);
+        ctx.fillStyle = '#666666';
+        ctx.font = '10px "Inter", sans-serif';
+        ctx.fillText('AUTHORIZED SIGNATURE', 1120, 730);
 
         resolve(canvas.toDataURL('image/png'));
       });

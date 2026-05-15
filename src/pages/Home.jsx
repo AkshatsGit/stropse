@@ -11,9 +11,9 @@ import './Home.css';
 
 const GAMES = [
   { name: 'BGMI', tag: 'Battle Royale', img: '/bgmi.png', color: '#FFD700', desc: 'India\'s #1 Battle Royale' },
-  { name: 'Free Fire', tag: 'Survival', img: '/freefire.png', color: '#FF6B35', desc: 'Fast-Paced Shooter' },
-  { name: 'Chess', tag: 'Strategy', img: '/chess.png', color: '#A8D8EA', desc: 'Mind Over Matter' },
-  { name: 'Sudoku', tag: 'Puzzle', img: '/sudoku.png', color: '#C7F2A4', desc: 'Speed & Precision' },
+  { name: 'Free Fire', tag: 'Survival', img: '/freefire.png', color: '#FFD700', desc: 'Fast-Paced Shooter' },
+  { name: 'Chess', tag: 'Strategy', img: '/chess.png', color: '#FFD700', desc: 'Mind Over Matter' },
+  { name: 'Sudoku', tag: 'Puzzle', img: '/sudoku.png', color: '#FFD700', desc: 'Speed & Precision' },
 ];
 
 const FEATURES = [

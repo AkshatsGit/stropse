@@ -89,7 +89,7 @@ export default function TypeGame() {
       const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
       const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
 
-      setDoc(doc(db, 'typeGames', generatedId), {
+      await setDoc(doc(db, 'typeGames', generatedId), {
         textToType: randomText,
         player1: user.uid,
         player1Name: user.displayName || 'Player 1',
@@ -117,7 +117,7 @@ export default function TypeGame() {
       const generatedId = Math.random().toString(36).substring(2, 8).toUpperCase();
       const randomText = TEXTS[Math.floor(Math.random() * TEXTS.length)];
 
-      setDoc(doc(db, 'typeGames', generatedId), {
+      await setDoc(doc(db, 'typeGames', generatedId), {
         textToType: randomText,
         player1: user.uid,
         player1Name: user.displayName || 'Player 1',

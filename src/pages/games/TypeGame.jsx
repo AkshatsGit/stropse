@@ -266,7 +266,7 @@ export default function TypeGame() {
         ctx.font = 'bold 24px "Orbitron", sans-serif';
         ctx.textAlign = 'center';
         ctx.letterSpacing = '8px';
-        ctx.fillText('STROPSE ESPORTS', 600, 220);
+        ctx.fillText('STROPSE GLOBAL ESPORTS FEDERATION', 600, 220);
 
         // Subtitle
         ctx.fillStyle = '#888888';
@@ -296,11 +296,7 @@ export default function TypeGame() {
 
         ctx.font = 'bold 56px "Orbitron", sans-serif';
         
-        // Name Gradient
-        const gradient = ctx.createLinearGradient(0, 420, 0, 480);
-        gradient.addColorStop(0, '#FFFFFF');
-        gradient.addColorStop(1, '#FFD700');
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = '#FFD700';
         ctx.shadowColor = 'rgba(255, 215, 0, 0.4)';
         ctx.shadowBlur = 15;
         ctx.fillText(playerName.toUpperCase(), 600, 460);
@@ -374,10 +370,10 @@ export default function TypeGame() {
         // Bottom Signature Line
         ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
         ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(970, 715); ctx.lineTo(1120, 715); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(850, 715); ctx.lineTo(1120, 715); ctx.stroke();
         ctx.fillStyle = '#FFD700';
-        ctx.font = '14px "Dancing Script", "Caveat", cursive, sans-serif';
-        ctx.fillText('Stropse Esports', 1080, 710);
+        ctx.font = '16px "Dancing Script", "Caveat", cursive, sans-serif';
+        ctx.fillText('Stropse Global Esports Federation', 1050, 710);
         ctx.fillStyle = '#666666';
         ctx.font = '10px "Inter", sans-serif';
         ctx.fillText('AUTHORIZED SIGNATURE', 1120, 730);
